@@ -2,8 +2,17 @@ const express = require("express");
 const cors = require("cors");
 const Database = require("better-sqlite3");
 
+const PORT = process.env.PORT || 3000;
+
 const app = express();
-const PORT = 3000;
+app.use(cors());
+app.use(express.json()); // <-- important: BEFORE routes
+
+const authRoutes = require('./routes/auth');
+const userRoutes = require('./routes/users');
+
+app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
 
 
 // Connect to database (creates file if not exists)

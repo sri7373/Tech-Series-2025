@@ -1,133 +1,49 @@
- 
-// backend/routes/users.js
 const express = require('express');
 const router = express.Router();
+const Database = require('better-sqlite3');
 
-// In-memory users (same as in server.js)
-const users = [
-  { id: 1, username: 'john', email: 'john@test.com', password: 'password123' },
-  { id: 2, username: 'jane', email: 'jane@test.com', password: 'password123' }
-];
+const db = new Database('mydb.sqlite');
 
-// GET /api/users - Get all users
+// GET /api/users → get all users
 router.get('/', (req, res) => {
-  // Return users without passwords
-  const safeUsers = users.map(user => ({
-    id: user.id,
-    username: user.username,
-    email: user.email
-  }));
-  
-  res.json({ 
-    success: true, 
-    data: safeUsers 
-  });
+    const users = db.prepare('SELECT * FROM users').all();
+    res.json(users);
 });
 
-// GET /api/users/:id - Get user by ID
+// GET /api/users/:id → get a single user
 router.get('/:id', (req, res) => {
-  const userId = parseInt(req.params.id);
-  const user = users.find(u => u.id === userId);
-  
-  if (!user) {
-    return res.status(404).json({ 
-      success: false, 
-      message: 'User not found' 
-    });
-  }
+    const user = db.prepare('SELECT * FROM users WHERE id = ?').get(req.params.id);
 
-  // Return user without password
-  res.json({ 
-    success: true, 
-    data: {
-      id: user.id,
-      username: user.username,
-      email: user.email
+    if (!user) {
+        return res.status(404).json({ success: false, message: 'User not found' });
     }
-  });
+
+    res.json(user);
 });
 
-// PUT /api/users/:id - Update user profile
+// PUT /api/users/:id → update user info
 router.put('/:id', (req, res) => {
-  const userId = parseInt(req.params.id);
-  const { username, email } = req.body;
-  
-  const userIndex = users.findIndex(u => u.id === userId);
-  
-  if (userIndex === -1) {
-    return res.status(404).json({ 
-      success: false, 
-      message: 'User not found' 
-    });
-  }
+    const { name, email } = req.body;
+    const stmt = db.prepare('UPDATE users SET name = ?, email = ? WHERE id = ?');
+    const result = stmt.run(name, email, req.params.id);
 
-  // Check if username/email already taken by another user
-  const existingUser = users.find(u => 
-    u.id !== userId && (u.username === username || u.email === email)
-  );
-  
-  if (existingUser) {
-    return res.status(409).json({ 
-      success: false, 
-      message: 'Username or email already taken' 
-    });
-  }
+    if (result.changes === 0) {
+        return res.status(404).json({ success: false, message: 'User not found or no changes made' });
+    }
 
-  // Update user
-  if (username) users[userIndex].username = username;
-  if (email) users[userIndex].email = email;
-
-  res.json({ 
-    success: true, 
-    data: {
-      id: users[userIndex].id,
-      username: users[userIndex].username,
-      email: users[userIndex].email
-    },
-    message: 'Profile updated successfully'
-  });
+    res.json({ success: true, message: 'User updated', user: { id: req.params.id, name, email } });
 });
 
-// DELETE /api/users/:id - Delete user
+// DELETE /api/users/:id → delete a user
 router.delete('/:id', (req, res) => {
-  const userId = parseInt(req.params.id);
-  const userIndex = users.findIndex(u => u.id === userId);
-  
-  if (userIndex === -1) {
-    return res.status(404).json({ 
-      success: false, 
-      message: 'User not found' 
-    });
-  }
+    const stmt = db.prepare('DELETE FROM users WHERE id = ?');
+    const result = stmt.run(req.params.id);
 
-  // Remove user
-  users.splice(userIndex, 1);
+    if (result.changes === 0) {
+        return res.status(404).json({ success: false, message: 'User not found' });
+    }
 
-  res.json({ 
-    success: true, 
-    message: 'User deleted successfully' 
-  });
-});
-
-// GET /api/users/:id/posts - Get posts by specific user
-router.get('/:id/posts', (req, res) => {
-  const userId = parseInt(req.params.id);
-  const user = users.find(u => u.id === userId);
-  
-  if (!user) {
-    return res.status(404).json({ 
-      success: false, 
-      message: 'User not found' 
-    });
-  }
-
-  // This would filter posts by user in a real app
-  // For now, just return success (you'd need access to posts array)
-  res.json({ 
-    success: true, 
-    data: [],
-    message: `Posts for ${user.username}` 
-  });
+    res.json({ success: true, message: 'User deleted' });
 });
 
 module.exports = router;
