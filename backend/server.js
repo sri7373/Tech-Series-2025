@@ -9,6 +9,10 @@ const axios = require('axios');
 const app = express();
 app.use(express.json());
 
+const uploadRouter = require('./routes/upload');
+app.use('/api/upload', uploadRouter);
+app.use('/uploads', express.static('uploads'));
+
 // ================== MongoDB Connection ==================
 connectDB();
 
