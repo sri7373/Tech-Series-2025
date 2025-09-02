@@ -1,67 +1,128 @@
-const express = require("express");
-const cors = require("cors");
-const Database = require("better-sqlite3");
-
-const PORT = process.env.PORT || 3000;
+// server.js
+const express = require('express');
+const connectDB = require('./config');   // <-- your MongoDB connection
+const { Product, User } = require('./models'); // <-- your Mongoose models
+const swaggerUi = require('swagger-ui-express');
+const swaggerJsdoc = require('swagger-jsdoc');
 
 const app = express();
-app.use(cors());
-app.use(express.json()); // <-- important: BEFORE routes
+app.use(express.json());
 
-const authRoutes = require('./routes/auth');
-const userRoutes = require('./routes/users');
+// ================== MongoDB Connection ==================
+connectDB();
 
-app.use('/api/auth', authRoutes);
-app.use('/api/users', userRoutes);
+// ================== Swagger Setup ==================
+const swaggerOptions = {
+  definition: {
+    openapi: "3.0.0",
+    info: {
+      title: "Gamified Catalogue API",
+      version: "1.0.0",
+      description: "API docs for products and users",
+    },
+    servers: [{ url: "http://localhost:3000" }],
+  },
+  apis: ["./server.js"], // 👈 very important
+};
 
+const swaggerSpec = swaggerJsdoc(swaggerOptions);
+app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
-// Connect to database (creates file if not exists)
-const db = new Database("mydb.sqlite");
+// ================== Routes ==================
 
-// Create table if not exists
-db.prepare(`
-  CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT,
-    email TEXT
-  )
-`).run();
-
-// Middleware
-app.use(cors());
-app.use(express.json()); // let backend read JSON body
-
-// ROUTES (API endpoints)
-app.get("/", (req, res) => {
-  res.send("Hello from backend!");
+/**
+ * @openapi
+ * /:
+ *   get:
+ *     summary: Health check
+ *     responses:
+ *       200:
+ *         description: API is running
+ */
+app.get('/', (req, res) => {
+  res.send("✅ API is running");
 });
 
-app.get("/users", (req, res) => {
-    const users = db.prepare("SELECT * FROM users").all();  
-    res.json(users);
+/**
+ * @openapi
+ * /api/products:
+ *   get:
+ *     summary: Get all products
+ *     responses:
+ *       200:
+ *         description: List of products
+ */
+app.get('/api/products', async (req, res) => {
+  const products = await Product.find();
+  res.json(products);
 });
 
-// Add a new user
-app.post("/users", (req, res) => {
-  const { name, email } = req.body;
-  const stmt = db.prepare("INSERT INTO users (name, email) VALUES (?, ?)");
-  const result = stmt.run(name, email);
-  res.json({ id: result.lastInsertRowid, name, email });
+/**
+ * @openapi
+ * /api/products:
+ *   post:
+ *     summary: Create a new product
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               carbonEmissions:
+ *                 type: number
+ *               plasticUsage:
+ *                 type: string
+ *               points:
+ *                 type: number
+ *     responses:
+ *       200:
+ *         description: Product created
+ */
+app.post('/api/products', async (req, res) => {
+  const { name, carbonEmissions, plasticUsage, points } = req.body;
+  const product = new Product({ name, carbonEmissions, plasticUsage, points });
+  await product.save();
+  res.json(product);
 });
 
-// Simple login check (fake)
-app.post("/login", (req, res) => {
-  const { email } = req.body;
-  const user = db.prepare("SELECT * FROM users WHERE email = ?").get(email);
+/**
+ * @openapi
+ * /api/products:
+ *   post:
+ *     summary: Create a new product
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               carbonEmissions:
+ *                 type: number
+ *               plasticUsage:
+ *                 type: number
+ *               points:
+ *                 type: number
+ *     responses:
+ *       200:
+ *         description: Product created
+ */
 
-  if (user) {
-    res.json({ success: true, message: "Login successful", user });
-  } else {
-    res.status(401).json({ success: false, message: "User not found" });
-  }
+app.post('/api/users', async (req, res) => {
+  const { username, password } = req.body;
+  const user = new User({ username, passwordHash: password, points: 0 });
+  await user.save();
+  res.json(user);
 });
 
-// Start server
+// ================== Start Server ==================
+const PORT = 3000;
 app.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`);
+  console.log(`🚀 Server running at http://localhost:${PORT}`);
+  console.log(`📖 API Docs at http://localhost:${PORT}/docs`);
 });
