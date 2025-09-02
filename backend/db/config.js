@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 async function connectDB() {
   try {
-    await mongoose.connect('mongodb://127.0.0.1:27017/gamified_catalogue', {
+    await mongoose.connect('mongodb+srv://kaywee:simkaywee@techseries2025.qsbjmzj.mongodb.net/Products', {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
@@ -12,5 +12,5 @@ async function connectDB() {
     process.exit(1);
   }
 }
-
+ 
 module.exports = connectDB;

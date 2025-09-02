@@ -13,7 +13,7 @@ const productSchema = new mongoose.Schema({
     }
 });
   
-const Product = mongoose.model('Product', productSchema);
+const Product = mongoose.model('Product', productSchema, 'SuperMarket');
 
 // User collection
 const userSchema = new mongoose.Schema({
