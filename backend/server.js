@@ -1,15 +1,20 @@
 // server.js
 const express = require('express');
-const connectDB = require('./config');   // <-- your MongoDB connection
-const { Product, User } = require('./models'); // <-- your Mongoose models
+const connectDB = require('./db/config');   // <-- correct path
+const { Product, User } = require('./db/models'); // <-- correct path
+// ...existing code...
 const swaggerUi = require('swagger-ui-express');
 const swaggerJsdoc = require('swagger-jsdoc');
+
 
 const app = express();
 app.use(express.json());
 
 // ================== MongoDB Connection ==================
+
 connectDB();
+
+
 
 // ================== Swagger Setup ==================
 const swaggerOptions = {
@@ -39,86 +44,18 @@ app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
  *       200:
  *         description: API is running
  */
+
+
+//add all your api stuff here
 app.get('/', (req, res) => {
   res.send("✅ API is running");
 });
 
-/**
- * @openapi
- * /api/products:
- *   get:
- *     summary: Get all products
- *     responses:
- *       200:
- *         description: List of products
- */
-app.get('/api/products', async (req, res) => {
-  const products = await Product.find();
-  res.json(products);
-});
+//api/createUser
 
-/**
- * @openapi
- * /api/products:
- *   post:
- *     summary: Create a new product
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               name:
- *                 type: string
- *               carbonEmissions:
- *                 type: number
- *               plasticUsage:
- *                 type: string
- *               points:
- *                 type: number
- *     responses:
- *       200:
- *         description: Product created
- */
-app.post('/api/products', async (req, res) => {
-  const { name, carbonEmissions, plasticUsage, points } = req.body;
-  const product = new Product({ name, carbonEmissions, plasticUsage, points });
-  await product.save();
-  res.json(product);
-});
 
-/**
- * @openapi
- * /api/products:
- *   post:
- *     summary: Create a new product
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               name:
- *                 type: string
- *               carbonEmissions:
- *                 type: number
- *               plasticUsage:
- *                 type: number
- *               points:
- *                 type: number
- *     responses:
- *       200:
- *         description: Product created
- */
-
-app.post('/api/users', async (req, res) => {
-  const { username, password } = req.body;
-  const user = new User({ username, passwordHash: password, points: 0 });
-  await user.save();
-  res.json(user);
-});
+const userRoutes = require('./routes/users');
+app.use('/api/users', userRoutes);
 
 // ================== Start Server ==================
 const PORT = 3000;
