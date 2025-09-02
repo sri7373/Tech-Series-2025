@@ -1,14 +1,365 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Test File Upload</title>
+    <title>Product Upload Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h2 {
+            color: #333;
+            border-bottom: 2px solid #007AFF;
+            padding-bottom: 10px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, button {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #007AFF;
+            color: white;
+            cursor: pointer;
+            border: none;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #0056CC;
+        }
+        .smart-button {
+            background-color: #FF6B35;
+        }
+        .smart-button:hover {
+            background-color: #E55A2B;
+        }
+        .result {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 4px;
+            display: none;
+        }
+        .success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .products-list {
+            margin-top: 20px;
+        }
+        .product-card {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+        .product-image {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-right: 15px;
+        }
+        .no-image {
+            width: 80px;
+            height: 80px;
+            background-color: #e0e0e0;
+            border-radius: 8px;
+            margin-right: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-size: 12px;
+        }
+    </style>
 </head>
 <body>
-    <h2>Test Image Upload</h2>
-    <form action="http://localhost:3000/api/upload" method="post" enctype="multipart/form-data">
-        <input type="file" name="image" accept="image/*" required>
-        <br><br>
-        <button type="submit">Upload Image</button>
-    </form>
+    <h1>Product Upload Test Page</h1>
+
+    <!-- Manual Product Upload -->
+    <div class="container">
+        <h2>📷 Manual Product Upload (with image file)</h2>
+        <form id="manualForm" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="manualImage">Product Image:</label>
+                <input type="file" id="manualImage" name="image" accept="image/*" required>
+            </div>
+            <div class="form-group">
+                <label for="manualName">Product Name:</label>
+                <input type="text" id="manualName" name="name" placeholder="e.g., My Custom Product" required>
+            </div>
+            <div class="form-group">
+                <label for="manualCarbon">Carbon Emissions (kg CO2):</label>
+                <input type="number" id="manualCarbon" name="carbonEmissions" step="0.1" placeholder="e.g., 2.5" required>
+            </div>
+            <div class="form-group">
+                <label for="manualPlastic">Plastic Usage (g):</label>
+                <input type="number" id="manualPlastic" name="plasticUsage" step="0.1" placeholder="e.g., 15" required>
+            </div>
+            <div class="form-group">
+                <label for="manualPoints">Points (optional):</label>
+                <input type="number" id="manualPoints" name="points" placeholder="e.g., 10">
+            </div>
+            <button type="submit">Upload Manual Product</button>
+        </form>
+        <div id="manualResult" class="result"></div>
+    </div>
+
+    <!-- Simple Product Test -->
+    <div class="container">
+        <h2>🔧 Simple Product Test (no image)</h2>
+        <form id="simpleForm">
+            <div class="form-group">
+                <label for="simpleName">Product Name:</label>
+                <input type="text" id="simpleName" name="name" placeholder="Test Product" required>
+            </div>
+            <div class="form-group">
+                <label for="simpleCarbon">Carbon Emissions (kg CO2):</label>
+                <input type="number" id="simpleCarbon" name="carbonEmissions" step="0.1" placeholder="e.g., 2.5" required>
+            </div>
+            <div class="form-group">
+                <label for="simplePlastic">Plastic Usage (g):</label>
+                <input type="number" id="simplePlastic" name="plasticUsage" step="0.1" placeholder="e.g., 15" required>
+            </div>
+            <div class="form-group">
+                <label for="simplePoints">Points (optional):</label>
+                <input type="number" id="simplePoints" name="points" placeholder="e.g., 10">
+            </div>
+            <button type="submit" style="background-color: #28a745;">Create Simple Product</button>
+        </form>
+        <div id="simpleResult" class="result"></div>
+    </div>
+
+    <!-- Smart Product Upload -->
+    <div class="container">
+        <h2>🤖 Smart Product Upload (auto-fetch image)</h2>
+        <form id="smartForm">
+            <div class="form-group">
+                <label for="smartName">Product Name:</label>
+                <input type="text" id="smartName" name="name" placeholder="e.g., Coca Cola, Oreo, Kit Kat" required>
+                <small>Enter a popular product name - we'll try to find the image automatically!</small>
+            </div>
+            <div class="form-group">
+                <label for="smartCarbon">Carbon Emissions (kg CO2):</label>
+                <input type="number" id="smartCarbon" name="carbonEmissions" step="0.1" placeholder="e.g., 2.5" required>
+            </div>
+            <div class="form-group">
+                <label for="smartPlastic">Plastic Usage (g):</label>
+                <input type="number" id="smartPlastic" name="plasticUsage" step="0.1" placeholder="e.g., 15" required>
+            </div>
+            <div class="form-group">
+                <label for="smartPoints">Points (optional):</label>
+                <input type="number" id="smartPoints" name="points" placeholder="e.g., 10">
+            </div>
+            <button type="submit" class="smart-button">Create Smart Product</button>
+        </form>
+        <div id="smartResult" class="result"></div>
+    </div>
+
+    <!-- Products List -->
+    <div class="container">
+        <h2>📦 All Products in Database</h2>
+        <button onclick="loadProducts()">Refresh Products List</button>
+        <div id="productsList" class="products-list"></div>
+    </div>
+
+    <script>
+        // Simple product test
+        document.getElementById('simpleForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData);
+            const resultDiv = document.getElementById('simpleResult');
+            
+            showResult(resultDiv, '⏳ Creating simple product...', 'success');
+            
+            try {
+                console.log('Creating simple product:', data);
+                
+                const response = await fetch('http://localhost:3000/api/upload/product-simple', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                console.log('Response status:', response.status);
+                
+                const result = await response.json();
+                console.log('Response data:', result);
+                
+                if (response.ok) {
+                    showResult(resultDiv, `✅ Simple product "${result.product.name}" created successfully!`, 'success');
+                    this.reset();
+                    loadProducts();
+                } else {
+                    showResult(resultDiv, `❌ Error: ${result.error}`, 'error');
+                }
+            } catch (error) {
+                console.error('Simple creation error:', error);
+                showResult(resultDiv, `❌ Network error: ${error.message}`, 'error');
+            }
+        });
+
+        // Manual product upload
+        document.getElementById('manualForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const resultDiv = document.getElementById('manualResult');
+            
+            // Show loading message
+            showResult(resultDiv, '⏳ Uploading product...', 'success');
+            
+            try {
+                console.log('Uploading to: http://localhost:3000/api/upload/product');
+                
+                const response = await fetch('http://localhost:3000/api/upload/product', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                console.log('Response status:', response.status);
+                
+                const result = await response.json();
+                console.log('Response data:', result);
+                
+                if (response.ok) {
+                    showResult(resultDiv, `✅ Product "${result.product.name}" created successfully!`, 'success');
+                    this.reset();
+                    loadProducts(); // Refresh the products list
+                } else {
+                    showResult(resultDiv, `❌ Error: ${result.error}`, 'error');
+                }
+            } catch (error) {
+                console.error('Upload error:', error);
+                showResult(resultDiv, `❌ Network error: ${error.message}. Make sure your backend is running on port 3000.`, 'error');
+            }
+        });
+
+        // Smart product upload
+        document.getElementById('smartForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData);
+            const resultDiv = document.getElementById('smartResult');
+            
+            // Show loading message
+            showResult(resultDiv, '⏳ Creating smart product (fetching image from Open Food Facts)...', 'success');
+            
+            try {
+                console.log('Creating smart product:', data);
+                
+                const response = await fetch('http://localhost:3000/api/upload/product-auto', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                console.log('Response status:', response.status);
+                
+                const result = await response.json();
+                console.log('Response data:', result);
+                
+                if (response.ok) {
+                    const imageStatus = result.product.hasImage ? 
+                        'with auto-fetched image' : 
+                        'without image (not found in Open Food Facts)';
+                    showResult(resultDiv, `✅ Product "${result.product.name}" created successfully ${imageStatus}!`, 'success');
+                    this.reset();
+                    loadProducts(); // Refresh the products list
+                } else {
+                    showResult(resultDiv, `❌ Error: ${result.error}`, 'error');
+                }
+            } catch (error) {
+                console.error('Smart upload error:', error);
+                showResult(resultDiv, `❌ Network error: ${error.message}. Make sure your backend is running on port 3000.`, 'error');
+            }
+        });
+
+        // Load and display products
+        async function loadProducts() {
+            const productsDiv = document.getElementById('productsList');
+            
+            try {
+                const response = await fetch('http://localhost:3000/api/upload/products');
+                const data = await response.json();
+                
+                if (response.ok) {
+                    if (data.products.length === 0) {
+                        productsDiv.innerHTML = '<p>No products found. Upload some products above!</p>';
+                        return;
+                    }
+                    
+                    productsDiv.innerHTML = data.products.map(product => `
+                        <div class="product-card">
+                            ${product.imageUrl ? 
+                                `<img src="${product.imageUrl}" alt="${product.name}" class="product-image">` :
+                                `<div class="no-image">No Image</div>`
+                            }
+                            <div>
+                                <h3>${product.name}</h3>
+                                <p><strong>CO2:</strong> ${product.carbonEmissions} kg</p>
+                                <p><strong>Plastic:</strong> ${product.plasticUsage} g</p>
+                                <p><strong>Points:</strong> ${product.points}</p>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    productsDiv.innerHTML = `<p>Error loading products: ${data.error}</p>`;
+                }
+            } catch (error) {
+                productsDiv.innerHTML = `<p>Network error: ${error.message}</p>`;
+            }
+        }
+
+        function showResult(element, message, type) {
+            element.textContent = message;
+            element.className = `result ${type}`;
+            element.style.display = 'block';
+            
+            // Hide after 5 seconds
+            setTimeout(() => {
+                element.style.display = 'none';
+            }, 5000);
+        }
+
+        // Load products when page loads
+        window.addEventListener('load', loadProducts);
+    </script>
 </body>
 </html>

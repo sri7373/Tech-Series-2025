@@ -1,5 +1,6 @@
 // server.js
 const express = require('express');
+const cors = require('cors');
 const connectDB = require('./db/config');   // MongoDB connection
 const { Product, User } = require('./db/models'); // Mongoose models
 const swaggerUi = require('swagger-ui-express');
@@ -7,6 +8,9 @@ const swaggerJsdoc = require('swagger-jsdoc');
 const axios = require('axios');
 
 const app = express();
+
+// Enable CORS for all routes
+app.use(cors());
 
 const uploadRouter = require('./routes/upload');
 app.use('/api/upload', uploadRouter);
