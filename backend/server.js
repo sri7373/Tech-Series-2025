@@ -1,37 +1,17 @@
 // server.js
 const express = require('express');
-const connectDB = require('./db/config');   // <-- correct path
-const { Product, User } = require('./db/models'); // <-- correct path
-// ...existing code...
+const connectDB = require('./db/config');   // MongoDB connection
+const { Product, User } = require('./db/models'); // Mongoose models
 const swaggerUi = require('swagger-ui-express');
 const swaggerJsdoc = require('swagger-jsdoc');
-
+const axios = require('axios');
 
 const app = express();
 app.use(express.json());
 
 // ================== MongoDB Connection ==================
-
 connectDB();
 
-
-
-// ================== Swagger Setup ==================
-const swaggerOptions = {
-  definition: {
-    openapi: "3.0.0",
-    info: {
-      title: "Gamified Catalogue API",
-      version: "1.0.0",
-      description: "API docs for products and users",
-    },
-    servers: [{ url: "http://localhost:3000" }],
-  },
-  apis: ["./server.js"], // 👈 very important
-};
-
-const swaggerSpec = swaggerJsdoc(swaggerOptions);
-app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // ================== Routes ==================
 
@@ -44,18 +24,20 @@ app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
  *       200:
  *         description: API is running
  */
-
-
-//add all your api stuff here
 app.get('/', (req, res) => {
   res.send("✅ API is running");
 });
 
-//api/createUser
 
-
+//List of routes to be routed 
 const userRoutes = require('./routes/users');
+const productRoutes = require('./routes/products');
+
 app.use('/api/users', userRoutes);
+app.use('/api/products', productRoutes);
+
+
+
 
 // ================== Start Server ==================
 const PORT = 3000;

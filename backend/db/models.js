@@ -6,10 +6,13 @@ const productSchema = new mongoose.Schema({
     name: { type: String, required: true },
     carbonEmissions: { type: Number, required: true },
     plasticUsage: { type: Number, required: true },
-    points: { type: Number, default: 0 }
+    points: { type: Number, default: 0 },
+    image: { 
+        data: Buffer,   // actual binary data
+        contentType: String // e.g. 'image/png', 'image/jpeg'
+    }
 });
   
-
 const Product = mongoose.model('Product', productSchema);
 
 // User collection
