@@ -1,0 +1,92 @@
+import React, { useState } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+
+export default function LoginScreen({ navigation }) {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  return (
+    <View style={styles.container}>
+      {/* Email Input */}
+      <TextInput
+        style={styles.input}
+        placeholder="Enter your email"
+        keyboardType="email-address"
+        value={email}
+        onChangeText={setEmail}
+      />
+
+      {/* Password Input */}
+      <TextInput
+        style={styles.input}
+        placeholder="Enter your password"
+        secureTextEntry
+        value={password}
+        onChangeText={setPassword}
+      />
+
+      {/* Forgot Password */}
+      <TouchableOpacity onPress={() => Alert.alert('Forgot Password clicked')}>
+        <Text style={styles.linkText}>Forget password?</Text>
+      </TouchableOpacity>
+
+      {/* Login Button */}
+      <TouchableOpacity
+        style={styles.loginButton}
+        onPress={() => navigation.navigate('Home')}
+      >
+        <Text style={styles.loginText}>Login</Text>
+      </TouchableOpacity>
+
+      {/* Sign Up */}
+      <TouchableOpacity onPress={() => Alert.alert('Sign Up clicked')}>
+        <Text style={styles.signupText}>
+          Don’t have an account? <Text style={{ fontWeight: 'bold' }}>Sign up</Text>
+        </Text>
+      </TouchableOpacity>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+    backgroundColor: '#fff',
+  },
+  input: {
+    width: '100%',
+    height: 50,
+    borderWidth: 1,
+    borderColor: '#aaa',
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    marginBottom: 15,
+    fontSize: 16,
+  },
+  linkText: {
+    color: 'blue',
+    alignSelf: 'flex-end',
+    marginBottom: 30,
+  },
+  loginButton: {
+    width: '100%',
+    height: 50,
+    backgroundColor: '#007AFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 8,
+    marginBottom: 20,
+  },
+  loginText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  signupText: {
+    fontSize: 14,
+    color: '#333',
+  },
+});

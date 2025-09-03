@@ -1,4 +1,10 @@
-// server.js
+require('dotenv').config();
+console.log("MINDEE_API_KEY =", process.env.MINDEE_API_KEY);
+if (!process.env.MINDEE_API_KEY) {
+    throw new Error("MINDEE_API_KEY not defined! Check .env and dotenv config.");
+}
+
+
 const express = require('express');
 const cors = require('cors');
 const connectDB = require('./db/config');   // MongoDB connection
