@@ -10,4 +10,8 @@ async function createProduct(productData) {
   return await product.save();
 }
 
-module.exports = { getAllProducts, createProduct };
+async function findOne(query) {
+  return await Product.findOne(query);
+}
+
+module.exports = { getAllProducts, createProduct, findOne };
