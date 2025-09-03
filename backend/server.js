@@ -45,7 +45,9 @@ app.use('/api/users', userRoutes);
 app.use('/api/products', productRoutes);
 app.use("/api/receipts", receiptRoutes);
 
-
+app.set('view engine', 'pug');
+app.set('views', './views');
+app.get('/test-scan', (req, res) => res.render('scan-receipt'));
 
 
 // ================== Start Server ==================

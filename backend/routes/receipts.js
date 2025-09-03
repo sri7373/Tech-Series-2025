@@ -6,12 +6,16 @@ const { matchItemsAndCalculatePoints } = require("../services/matchService");
 // const { Product } = require("../db/models");
 
 // POST /api/receipts/scan
-router.post("/scan", upload.single("file"), async (req, res, next) => {
+router.post("/scan", upload.single("image"), async (req, res, next) => {
   try {
     if (!req.file) return res.status(400).json({ error: "No file uploaded" });
 
     const ocrItems = await extractItems(req.file.path); // mindeeService
+    console.log('the items are ' + ocrItems);
+
     const { matched, totalPoints } = await matchItemsAndCalculatePoints(ocrItems); // matchService
+    console.log(matched)
+    console.log(totalPoints)
 
     res.json({ items: matched, totalPoints });
   } catch (err) {

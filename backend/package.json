@@ -18,10 +18,11 @@
     "express": "^5.1.0",
     "fuse.js": "^7.1.0",
     "jsonwebtoken": "^9.0.2",
-    "mindee": "^4.29.0-rc1",
+    "mindee": "^4.29.0",
     "mongo": "^0.1.0",
     "mongoose": "^8.18.0",
     "multer": "^2.0.2",
+    "pug": "^3.0.3",
     "sqlite3": "^5.1.7",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1"
