@@ -35,12 +35,10 @@ app.use(cors({
 }));
 
 // JWT Private Key Check
-if (!config.get('jwtPrivateKey')) {
+if (!process.env.JWT_PRIVATE_KEY) {
   console.error("FATAL ERROR: jwtPrivateKey is not defined.");
   process.exit(1);
 }
-
-require('dotenv').config();
 
 // ================== MongoDB Connection ==================
 connectDB();
