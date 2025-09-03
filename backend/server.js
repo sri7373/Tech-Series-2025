@@ -10,6 +10,14 @@ const swaggerJsdoc = require('swagger-jsdoc');
 const axios = require('axios');
 
 const app = express();
+
+// Enable CORS for all routes
+app.use(cors());
+
+const uploadRouter = require('./routes/upload');
+app.use('/api/upload', uploadRouter);
+app.use('/uploads', express.static('uploads'));
+
 app.use(express.json());
 app.use(cors({
   origin: true,
