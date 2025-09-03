@@ -1,10 +1,9 @@
 const express = require('express');
+const { User, validateUser } = require('../db/models');
 const router = express.Router();
 const userService = require('../services/userService');
 
 // GET /api/users
-
-//will define what the router is and the logic.
 router.get('/', async (req, res) => {
   try {
     const users = await userService.getAllUsers();
@@ -14,16 +13,37 @@ router.get('/', async (req, res) => {
   }
 });
 
-
-
-
 // POST /api/users
 router.post('/createUser', async (req, res) => {
   try {
+    // Validate request
+    const { error } = validateUser(req.body);
+    if (error) return res.status(400).json({ error: error.details[0].message });
+
+    // Check if user exists
+    let existingUser = await User.findOne({ email: req.body.email });
+    if (existingUser) return res.status(400).json({ error: 'User already registered.' });
+
+    // Create user through service
     const user = await userService.createUser(req.body);
-    res.status(201).json(user);
+
+    // Generate JWT token using schema method
+    const token = user.generateAuthToken();
+
+    // Set the headers
+    res.set({
+      'Access-Control-Expose-Headers': 'x-auth-token, X-Auth-Token',
+      'x-auth-token': token,
+    });
+    
+    return res.status(201).json({ 
+      message: 'User created successfully', 
+      user,
+      token
+    });
+
   } catch (err) {
-    res.status(400).json({ error: 'Failed to create user' });
+    return res.status(400).json({ error: 'Failed to create user', details: err.message });
   }
 });
 
