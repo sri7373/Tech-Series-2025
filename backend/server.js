@@ -41,9 +41,11 @@ app.get('/', (req, res) => {
 //List of routes to be routed 
 const userRoutes = require('./routes/users');
 const productRoutes = require('./routes/products');
+const recommendationRoutes = require('./routes/recommendations');
 
 app.use('/api/users', userRoutes);
 app.use('/api/products', productRoutes);
+app.use('/api/recommendations', recommendationRoutes);
 
 
 
