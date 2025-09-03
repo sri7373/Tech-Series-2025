@@ -58,7 +58,7 @@ router.post('/scan-barcode', upload.single('image'), async (req, res) => {
     const processedBuffer = await preprocessImage(req.file.buffer);
     const tempPath = path.join(os.tmpdir(), `${Date.now()}-${req.file.originalname}`);
     fs.writeFileSync(tempPath, processedBuffer);
-    
+
   try {
     if (!req.file) return res.status(400).json({ error: 'No image uploaded' });
 

@@ -11,15 +11,21 @@ async function createUser(userData) {
   const hashedPassword = await bcrypt.hash(userData.password, salt);
 
   // create new user with hashed password
-  const user = new User({
-    username: userData.username,
-    email: userData.email,
-    password: hashedPassword,
-    isAdmin: userData.isAdmin || false,
-  });
-
+const user = new User({
+  username: userData.username,
+  email: userData.email,
+  password: hashedPassword,
+  isAdmin: userData.isAdmin || false,
+  points: userData.points ?? 0,
+});
   // Save and return the user
   return await user.save();
 }
 
-module.exports = { getAllUsers, createUser };
+
+async function getTopUsers(limit = 10) {
+  return await User.find().sort({ points: -1 }).limit(limit);
+}
+
+
+module.exports = { getAllUsers, createUser, getTopUsers };

@@ -25,7 +25,7 @@ router.get('/me', auth, async (req, res) => {
   } 
 });
 
-// POST /api/users
+// CREATE USER
 router.post('/createUser', async (req, res) => {
   try {
     // Validate request

@@ -23,11 +23,9 @@ const app = express();
 // Enable CORS for all routes
 app.use(cors());
 
-const uploadRouter = require('./routes/upload');
-app.use('/api/upload', uploadRouter);
-app.use('/uploads', express.static('uploads'));
-
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
 app.use(cors({
   origin: true,
   exposedHeaders: ['x-auth-token'],
@@ -64,11 +62,16 @@ app.get('/', (req, res) => {
 const userRoutes = require('./routes/users');
 const productRoutes = require('./routes/products');
 const recommendationRoutes = require('./routes/recommendations');
+const uploadRouter = require('./routes/upload');
 
+app.use('/api/upload', uploadRouter);
+app.use('/uploads', express.static('uploads'));
 app.use('/api/users', userRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/recommendations', recommendationRoutes);
 
+const leaderboardRoutes = require('./routes/leaderboard');
+app.use('/api/leaderboard', leaderboardRoutes);
 
 
 
