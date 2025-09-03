@@ -9,6 +9,8 @@ const axios = require('axios');
 const app = express();
 app.use(express.json());
 
+require('dotenv').config();
+
 // ================== MongoDB Connection ==================
 connectDB();
 
