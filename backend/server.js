@@ -1,5 +1,6 @@
 // server.js
 const express = require('express');
+const cors = require('cors');
 const connectDB = require('./db/config');   // MongoDB connection
 const config = require('config');   // Environmnent variables
 const cors = require('cors');
@@ -9,8 +10,6 @@ const swaggerJsdoc = require('swagger-jsdoc');
 const axios = require('axios');
 
 const app = express();
-
-// Middleware
 app.use(express.json());
 app.use(cors({
   origin: true,
