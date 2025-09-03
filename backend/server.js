@@ -3,11 +3,20 @@ const express = require('express');
 const cors = require('cors');
 const connectDB = require('./db/config');   // MongoDB connection
 const config = require('config');   // Environmnent variables
-const cors = require('cors');
 const { Product, User } = require('./db/models'); // Mongoose models
 const swaggerUi = require('swagger-ui-express');
 const swaggerJsdoc = require('swagger-jsdoc');
 const axios = require('axios');
+
+const dotenv = require('dotenv');
+
+dotenv.config() 
+
+const BUCKET_NAME = process.env.BUCKET_NAME;
+const BUCKET_REGION = process.env.BUCKET_REGION;
+const ACCESS_KEY = process.env.ACCESS_KEY;
+const SECRET_ACCESS_KEY = process.env.SECRET_ACCESS_KEY;
+
 
 const app = express();
 

@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
+const { uploadToS3 } = require('../services/s3Service');
 const productService = require('../services/productService');
 
 const storage = multer.memoryStorage();
@@ -16,20 +17,23 @@ router.get('/', async (req, res) => {
   }
 });
 
-// POST /api/products (with image upload)
+
+
 router.post('/', upload.single('image'), async (req, res) => {
   try {
-    const { name, carbonEmissions, plasticUsage, points } = req.body;
-    const image = req.file
-      ? { data: req.file.buffer, contentType: req.file.mimetype }
-      : undefined;
 
-    const productData = { name, carbonEmissions, plasticUsage, points, image };
+    let imageUrl;
+    if (req.file) {
+      imageUrl = await uploadToS3(req.file.buffer, req.file.originalname, req.file.mimetype);
+    } 
+    const productData = { ...req.body, imageUrl: imageUrl };
     const product = await productService.createProduct(productData);
     res.json(product);
   } catch (err) {
+    console.error(err);
     res.status(400).json({ error: 'Failed to create product' });
   }
 });
 
 module.exports = router;
+
