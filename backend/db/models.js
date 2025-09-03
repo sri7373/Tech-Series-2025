@@ -15,7 +15,7 @@ const productSchema = new mongoose.Schema({
     
 });
   
-const Product = mongoose.model('Product', productSchema, 'SuperMarket');
+const Product = mongoose.model('Product', productSchema);
 
 // User collection
 const userSchema = new mongoose.Schema({
@@ -27,7 +27,6 @@ const userSchema = new mongoose.Schema({
   neighbourhood: { type: String },
 
 });
-
 
 const User = mongoose.model('User', userSchema);
 
