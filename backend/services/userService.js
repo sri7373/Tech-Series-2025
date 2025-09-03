@@ -14,7 +14,8 @@ async function createUser(userData) {
   const user = new User({
     username: userData.username,
     email: userData.email,
-    password: hashedPassword
+    password: hashedPassword,
+    isAdmin: userData.isAdmin || false,
   });
 
   // Save and return the user

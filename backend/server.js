@@ -1,8 +1,8 @@
 // server.js
 const express = require('express');
 const connectDB = require('./db/config');   // MongoDB connection
-const config = require('config');   // Environmnent variables
 const cors = require('cors');
+require('dotenv').config();
 const { Product, User } = require('./db/models'); // Mongoose models
 const swaggerUi = require('swagger-ui-express');
 const swaggerJsdoc = require('swagger-jsdoc');
@@ -19,12 +19,10 @@ app.use(cors({
 }));
 
 // JWT Private Key Check
-if (!config.get('jwtPrivateKey')) {
+if (!process.env.JWT_PRIVATE_KEY) {
   console.error("FATAL ERROR: jwtPrivateKey is not defined.");
   process.exit(1);
 }
-
-require('dotenv').config();
 
 // ================== MongoDB Connection ==================
 connectDB();
