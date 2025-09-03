@@ -8,6 +8,8 @@ import HomeScreen from './screens/HomeScreen';
 import Leaderboard from './screens/LeaderBoard';
 import Upload from './screens/Upload'; // New Upload screen
 import PointsPage from './screens/PointsPage'; // Optional: points page after upload
+// import ProductDetail from './screens/ProductDetail';
+// import LogoutButton from './screens/LogoutButton';
 
 const Stack = createNativeStackNavigator();
 
