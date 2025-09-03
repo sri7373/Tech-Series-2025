@@ -1,49 +1,50 @@
 const express = require('express');
+const { User, validateUser } = require('../db/models');
 const router = express.Router();
-const Database = require('better-sqlite3');
+const userService = require('../services/userService');
 
-const db = new Database('mydb.sqlite');
-
-// GET /api/users → get all users
-router.get('/', (req, res) => {
-    const users = db.prepare('SELECT * FROM users').all();
+// GET /api/users
+router.get('/', async (req, res) => {
+  try {
+    const users = await userService.getAllUsers();
     res.json(users);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch users' });
+  }
 });
 
-// GET /api/users/:id → get a single user
-router.get('/:id', (req, res) => {
-    const user = db.prepare('SELECT * FROM users WHERE id = ?').get(req.params.id);
+// POST /api/users
+router.post('/createUser', async (req, res) => {
+  try {
+    // Validate request
+    const { error } = validateUser(req.body);
+    if (error) return res.status(400).json({ error: error.details[0].message });
 
-    if (!user) {
-        return res.status(404).json({ success: false, message: 'User not found' });
-    }
+    // Check if user exists
+    let existingUser = await User.findOne({ email: req.body.email });
+    if (existingUser) return res.status(400).json({ error: 'User already registered.' });
 
-    res.json(user);
-});
+    // Create user through service
+    const user = await userService.createUser(req.body);
 
-// PUT /api/users/:id → update user info
-router.put('/:id', (req, res) => {
-    const { name, email } = req.body;
-    const stmt = db.prepare('UPDATE users SET name = ?, email = ? WHERE id = ?');
-    const result = stmt.run(name, email, req.params.id);
+    // Generate JWT token using schema method
+    const token = user.generateAuthToken();
 
-    if (result.changes === 0) {
-        return res.status(404).json({ success: false, message: 'User not found or no changes made' });
-    }
+    // Set the headers
+    res.set({
+      'Access-Control-Expose-Headers': 'x-auth-token, X-Auth-Token',
+      'x-auth-token': token,
+    });
+    
+    return res.status(201).json({ 
+      message: 'User created successfully', 
+      user,
+      token
+    });
 
-    res.json({ success: true, message: 'User updated', user: { id: req.params.id, name, email } });
-});
-
-// DELETE /api/users/:id → delete a user
-router.delete('/:id', (req, res) => {
-    const stmt = db.prepare('DELETE FROM users WHERE id = ?');
-    const result = stmt.run(req.params.id);
-
-    if (result.changes === 0) {
-        return res.status(404).json({ success: false, message: 'User not found' });
-    }
-
-    res.json({ success: true, message: 'User deleted' });
+  } catch (err) {
+    return res.status(400).json({ error: 'Failed to create user', details: err.message });
+  }
 });
 
 module.exports = router;
