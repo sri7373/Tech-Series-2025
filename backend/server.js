@@ -3,7 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const connectDB = require('./db/config');   // MongoDB connection
 const config = require('config');   // Environmnent variables
-const cors = require('cors');
+// const cors = require('cors');
 const { Product, User } = require('./db/models'); // Mongoose models
 const swaggerUi = require('swagger-ui-express');
 const swaggerJsdoc = require('swagger-jsdoc');
@@ -57,10 +57,14 @@ app.get('/', (req, res) => {
 const userRoutes = require('./routes/users');
 const productRoutes = require('./routes/products');
 const recommendationRoutes = require('./routes/recommendations');
+const authRoutes = require('./routes/auth'); 
+
 
 app.use('/api/users', userRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/recommendations', recommendationRoutes);
+app.use('/api/auth', authRoutes);       
+
 
 
 

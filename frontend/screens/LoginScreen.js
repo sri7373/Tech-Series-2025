@@ -5,6 +5,25 @@ export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
+const handleLogin = async () => {
+  try {
+    const response = await fetch('http://localhost:3000/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
+    const data = await response.json();
+    console.log('Login response:', response.status, data); // Add this line
+    if (response.ok) {
+      navigation.navigate('Home');
+    } else {
+      Alert.alert('Login Failed', data.error || 'Invalid credentials');
+    }
+  } catch (err) {
+    Alert.alert('Error', 'Could not connect to server');
+  }
+};
+
   return (
     <View style={styles.container}>
       {/* Email Input */}
@@ -33,7 +52,7 @@ export default function LoginScreen({ navigation }) {
       {/* Login Button */}
       <TouchableOpacity
         style={styles.loginButton}
-        onPress={() => navigation.navigate('Home')}
+        onPress={handleLogin}
       >
         <Text style={styles.loginText}>Login</Text>
       </TouchableOpacity>

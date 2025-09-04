@@ -16,7 +16,7 @@ export default function HomeScreen({ navigation }) {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await fetch('https://sri2025backend.loca.lt/api/upload/products');
+        const response = await fetch('http://localhost:3000/api/routes/products');
         if (!response.ok) {
           const errorText = await response.text();
           console.error('API error:', response.status, errorText);

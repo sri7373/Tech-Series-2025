@@ -20,7 +20,7 @@ router.post('/login', async (req, res) => {
     if (!validPassword) return res.status(400).json({ error: 'Invalid email or password.' });
 
     // Generate JWT token using schema method
-    const token = user.generateAuthToken();
+    const token = existingUser.generateAuthToken();
 
     return res.status(200).json({ 
       message: 'Login successful',
