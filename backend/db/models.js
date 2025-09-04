@@ -72,7 +72,8 @@ function validateUser(user) {
     username: Joi.string().min(5).max(50).required(),
     email: Joi.string().min(5).max(255).required().email(),
     password: Joi.string().min(5).max(255).required(),
-    points: Joi.number().default(0)
+    points: Joi.number().default(0),
+    neighbourhood: Joi.string().allow('').optional()
   });
 
   return schema.validate(user);
