@@ -9,7 +9,6 @@ const express = require('express');
 const cors = require('cors');
 const connectDB = require('./db/config');   // MongoDB connection
 const config = require('config');   // Environmnent variables
-// const cors = require('cors');
 const { Product, User } = require('./db/models'); // Mongoose models
 const swaggerUi = require('swagger-ui-express');
 const swaggerJsdoc = require('swagger-jsdoc');
@@ -69,20 +68,30 @@ app.get('/', (req, res) => {
 const userRoutes = require('./routes/users');
 const productRoutes = require('./routes/products');
 const recommendationRoutes = require('./routes/recommendations');
-const authRoutes = require('./routes/auth'); 
+const receiptRoutes = require('./routes/receipts');
 const uploadRouter = require('./routes/upload');
+const authRoutes = require('./routes/auth');
+const leaderboardRoutes = require('./routes/leaderboard');
 
 
+app.use('/api/auth', authRoutes);
 app.use('/api/upload', uploadRouter);
 app.use('/uploads', express.static('uploads'));
 app.use('/api/users', userRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/recommendations', recommendationRoutes);
-app.use('/api/auth', authRoutes);       
+app.use('/api/receipts', receiptRoutes);
+app.use('/api/leaderboard', leaderboardRoutes);
 
 
 
+// ================== Setup Pug ==================
+app.set('view engine', 'pug');
+app.set('views', './views');
 
+app.get('/scan-receipt', (req, res) => {
+  res.render('scan-receipt');
+});
 
 // ================== Start Server ==================
 const PORT = 3000;
