@@ -56,6 +56,19 @@ userSchema.methods.generateAuthToken = function() {
 
 const User = mongoose.model('User', userSchema, 'Users');
 
+const blacklistedTokenSchema = new mongoose.Schema({
+  token: { 
+    type: String, 
+    required: true 
+  },
+  createdAt: { 
+    type: Date, 
+    default: Date.now,
+    expires: 86400 // Automatically remove after 24h
+  }});
+
+const BlacklistedToken = mongoose.model('BlacklistedToken', blacklistedTokenSchema, 'BlacklistedTokens');
+
 function validateUser(user) {
   const schema = Joi.object({
     username: Joi.string().min(5).max(50).required(),
@@ -67,4 +80,12 @@ function validateUser(user) {
   return schema.validate(user);
 }
 
-module.exports = { Product, User, validateUser };
+function validateUserUpdate(user) {
+  const schema = Joi.object({
+    username: Joi.string().min(5).max(50).required(),
+    email: Joi.string().min(5).max(255).required().email()
+  });
+  return schema.validate(user);
+}
+
+module.exports = { Product, User, BlacklistedToken, validateUser, validateUserUpdate };
