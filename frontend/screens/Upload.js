@@ -34,9 +34,14 @@ export default function Upload({ navigation }) {
       });
       const result = await response.json();
       if (result && result.product) {
-        alert(
-          `Product Found\nName: ${result.product.name}\nCO2: ${result.product.carbonEmissions}\nPlastic: ${result.product.plasticUsage}\nPoints: ${result.product.points}`
-        );
+        const productInfo = `Product Found\nName: ${result.product.name}\nCO2: ${result.product.carbonEmissions}\nPlastic: ${result.product.plasticUsage}\nPoints: ${result.product.points}`;
+        
+        if (window.confirm(`${productInfo}\n\nWould you like to see sustainable alternatives?`)) {
+          // Navigate to recommendations screen
+          if (navigation) {
+            navigation.navigate('Recommendations', { product: result.product });
+          }
+        }
       } else {
         alert(result.error || 'Scan failed. No barcode detected or product not found.');
       }

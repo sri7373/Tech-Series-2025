@@ -12,6 +12,7 @@ import PointsPage from './screens/PointsPage'; // Optional: points page after up
 // import LogoutButton from './screens/LogoutButton';
 import ProfileScreen from './screens/ProfileScreen';
 import AutoProductScreen from './screens/AutoProductScreen';
+import RecommendationsScreen from './screens/RecommendationsScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -53,6 +54,11 @@ export default function App() {
           options={{ title: 'Smart Products' }}
         />
         <Stack.Screen name="Profile" component={ProfileScreen} />
+        <Stack.Screen
+          name="Recommendations"
+          component={RecommendationsScreen}
+          options={{ headerShown: false }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );
