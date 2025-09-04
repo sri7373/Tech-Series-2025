@@ -3,6 +3,7 @@ const Joi = require('joi');
 const bcrypt = require('bcrypt');
 const { User } = require('../db/models');
 const router = express.Router();
+const auth = require('../middleware/auth');
 
 // POST /api/auth/login
 router.post('/login', async (req, res) => {
@@ -12,7 +13,7 @@ router.post('/login', async (req, res) => {
     if (error) return res.status(400).json({ error: error.details[0].message });
 
     // Check if user exists
-    let existingUser = await User.findOne({ email: req.body.email });
+    const existingUser = await User.findOne({ email: req.body.email });
     if (!existingUser) return res.status(400).json({ error: 'Invalid email or password.' });
 
     // Validate password
@@ -24,7 +25,7 @@ router.post('/login', async (req, res) => {
 
     return res.status(200).json({ 
       message: 'Login successful',
-      token: token 
+      token
     });
 
   } catch (err) {

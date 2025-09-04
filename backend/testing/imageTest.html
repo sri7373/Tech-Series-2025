@@ -1,0 +1,40 @@
+<form id="productForm" enctype="multipart/form-data" action="http://localhost:3000/api/products" method="POST">
+  <!-- form fields -->
+  <label>
+    Name:
+    <input type="text" name="name" value="Meiji Milk" required>
+  </label><br>
+  <label>
+    Carbon Emissions:
+    <input type="number" name="carbonEmissions" value="1200" required>
+  </label><br>
+  <label>
+    Plastic Usage:
+    <input type="number" name="plasticUsage" value="60" required>
+  </label><br>
+  <label>
+    Points:
+    <input type="number" name="points" value="72">
+  </label><br>
+  <label>
+    Price:
+    <input type="number" name="price" value="5" required>
+  </label><br>
+  <label>
+    Category:
+    <input type="text" name="category" value="Dairy" required>
+  </label><br>
+  <label>
+    Sustainability Score:
+    <input type="number" name="sustainabilityScore" value="80" required>
+  </label><br>
+  <label>
+    Barcode:
+    <input type="text" name="barcode" value="1234567890">
+  </label><br>
+  <label>
+    Image:
+    <input type="file" name="image" accept="image/*">
+  </label><br><br>
+  <button type="submit">Create Product</button>
+</form>

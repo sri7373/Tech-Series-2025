@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const { Product } = require('./db/models');
+const { Product } = require('../db/models');
 
 // Connect to MongoDB
 mongoose.connect('mongodb://localhost:27017/techseries2025', {

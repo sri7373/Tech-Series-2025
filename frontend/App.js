@@ -10,12 +10,15 @@ import Upload from './screens/Upload'; // New Upload screen
 import PointsPage from './screens/PointsPage'; // Optional: points page after upload
 // import ProductDetail from './screens/ProductDetail';
 // import LogoutButton from './screens/LogoutButton';
+import ProfileScreen from './screens/ProfileScreen';
+import AutoProductScreen from './screens/AutoProductScreen';
 
 const Stack = createNativeStackNavigator();
 
 export default function App() {
   return (
     <NavigationContainer>
+<<<<<<<<< Temporary merge branch 1
       <Stack.Navigator initialRouteName="Login">
         {/* Login Screen */}
         <Stack.Screen 
@@ -54,6 +57,20 @@ export default function App() {
           component={PointsPage}
           options={{ headerShown: false }}
         />
+=========
+      <Stack.Navigator initialRouteName="Home">
+        <Stack.Screen 
+          name="Home" 
+          component={HomeScreen} 
+          options={{ title: 'Manual Products' }}
+        />
+        <Stack.Screen 
+          name="Auto" 
+          component={AutoProductScreen} 
+          options={{ title: 'Smart Products' }}
+        />
+        <Stack.Screen name="Profile" component={ProfileScreen} />
+>>>>>>>>> Temporary merge branch 2
       </Stack.Navigator>
     </NavigationContainer>
   );

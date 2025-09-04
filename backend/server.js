@@ -1,4 +1,10 @@
-// server.js
+require('dotenv').config();
+console.log("MINDEE_API_KEY =", process.env.MINDEE_API_KEY);
+if (!process.env.MINDEE_API_KEY) {
+    throw new Error("MINDEE_API_KEY not defined! Check .env and dotenv config.");
+}
+
+
 const express = require('express');
 const cors = require('cors');
 const connectDB = require('./db/config');   // MongoDB connection
@@ -9,16 +15,24 @@ const swaggerUi = require('swagger-ui-express');
 const swaggerJsdoc = require('swagger-jsdoc');
 const axios = require('axios');
 
+const dotenv = require('dotenv');
+
+dotenv.config() 
+
+const BUCKET_NAME = process.env.BUCKET_NAME;
+const BUCKET_REGION = process.env.BUCKET_REGION;
+const ACCESS_KEY = process.env.ACCESS_KEY;
+const SECRET_ACCESS_KEY = process.env.SECRET_ACCESS_KEY;
+
+
 const app = express();
 
 // Enable CORS for all routes
 app.use(cors());
 
-const uploadRouter = require('./routes/upload');
-app.use('/api/upload', uploadRouter);
-app.use('/uploads', express.static('uploads'));
-
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
 app.use(cors({
   origin: true,
   exposedHeaders: ['x-auth-token'],
@@ -26,12 +40,10 @@ app.use(cors({
 }));
 
 // JWT Private Key Check
-if (!config.get('jwtPrivateKey')) {
+if (!process.env.JWT_PRIVATE_KEY) {
   console.error("FATAL ERROR: jwtPrivateKey is not defined.");
   process.exit(1);
 }
-
-require('dotenv').config();
 
 // ================== MongoDB Connection ==================
 connectDB();
@@ -57,9 +69,13 @@ app.get('/', (req, res) => {
 const userRoutes = require('./routes/users');
 const productRoutes = require('./routes/products');
 const recommendationRoutes = require('./routes/recommendations');
+const receiptRoutes = require('./routes/receipts');
+const uploadRouter = require('./routes/upload');
 const authRoutes = require('./routes/auth'); 
 
 
+app.use('/api/upload', uploadRouter);
+app.use('/uploads', express.static('uploads'));
 app.use('/api/users', userRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/recommendations', recommendationRoutes);
@@ -68,6 +84,20 @@ app.use('/api/auth', authRoutes);
 
 
 
+app.use('/api/receipts', receiptRoutes);
+
+const leaderboardRoutes = require('./routes/leaderboard');
+app.use('/api/leaderboard', leaderboardRoutes);
+
+
+
+// ================== Setup Pug ==================
+app.set('view engine', 'pug');
+app.set('views', './views');
+
+app.get('/scan-receipt', (req, res) => {
+  res.render('scan-receipt');
+});
 
 // ================== Start Server ==================
 const PORT = 3000;

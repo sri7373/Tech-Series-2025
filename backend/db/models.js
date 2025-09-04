@@ -2,7 +2,6 @@
 const mongoose = require('mongoose');
 const Joi = require('joi');
 const jwt = require('jsonwebtoken');
-const config = require('config');
 
 // Product collection
 const productSchema = new mongoose.Schema({
@@ -42,10 +41,8 @@ const userSchema = new mongoose.Schema({
     minlength: 5,
     maxlength: 1024,
   },
-  points: { 
-    type: Number, 
-    default: 0 
-  },
+  isAdmin: { type: Boolean, default: false },
+  points: { type: Number, default: 0 },
   monthlyRank: { type: Number, default: 0 },
   neighbourhoodRank: { type: Number, default: 0 },
   neighbourhood: { type: String },
@@ -53,7 +50,7 @@ const userSchema = new mongoose.Schema({
 });
 
 userSchema.methods.generateAuthToken = function() {
-  const token = jwt.sign({ _id: this._id }, config.get('jwtPrivateKey'));
+  const token = jwt.sign({ _id: this._id, isAdmin: this.isAdmin }, process.env.JWT_PRIVATE_KEY);
   return token;
 }
 
@@ -63,7 +60,8 @@ function validateUser(user) {
   const schema = Joi.object({
     username: Joi.string().min(5).max(50).required(),
     email: Joi.string().min(5).max(255).required().email(),
-    password: Joi.string().min(5).max(255).required()
+    password: Joi.string().min(5).max(255).required(),
+    points: Joi.number().default(0)
   });
 
   return schema.validate(user);

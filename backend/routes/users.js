@@ -2,9 +2,11 @@ const express = require('express');
 const { User, validateUser } = require('../db/models');
 const router = express.Router();
 const userService = require('../services/userService');
+const auth = require('../middleware/auth');
+const admin = require('../middleware/admin');
 
 // GET /api/users
-router.get('/', async (req, res) => {
+router.get('/', [auth, admin], async (req, res) => {
   try {
     const users = await userService.getAllUsers();
     res.json(users);
@@ -13,7 +15,17 @@ router.get('/', async (req, res) => {
   }
 });
 
-// POST /api/users
+router.get('/me', auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id).select('-password');
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch user' });
+  } 
+});
+
+// CREATE USER
 router.post('/createUser', async (req, res) => {
   try {
     // Validate request
@@ -39,7 +51,7 @@ router.post('/createUser', async (req, res) => {
     return res.status(201).json({ 
       message: 'User created successfully', 
       user,
-      token
+      token: token
     });
 
   } catch (err) {
