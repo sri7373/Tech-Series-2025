@@ -18,59 +18,41 @@ const Stack = createNativeStackNavigator();
 export default function App() {
   return (
     <NavigationContainer>
-<<<<<<<<< Temporary merge branch 1
       <Stack.Navigator initialRouteName="Login">
-        {/* Login Screen */}
-        <Stack.Screen 
-          name="Login" 
-          component={LoginScreen} 
-          options={{ headerShown: false }} 
+        <Stack.Screen
+          name="Login"
+          component={LoginScreen}
+          options={{ headerShown: false }}
         />
-
-        {/* Home Screen */}
-        <Stack.Screen 
-          name="Home" 
-          component={HomeScreen} 
-          options={{ 
-          title: 'Home',
-          headerLeft: () => null, // This removes the back button
-        }} 
+        <Stack.Screen
+          name="Home"
+          component={HomeScreen}
+          options={{
+            title: 'Home',
+            headerLeft: () => null,
+          }}
         />
-
-        {/* Leaderboard Screen */}
         <Stack.Screen
           name="Leaderboard"
           component={Leaderboard}
           options={{ title: 'Leaderboard' }}
         />
-
-        {/* Upload Screen */}
         <Stack.Screen
           name="Upload"
           component={Upload}
-          options={{ title: 'Upload Image', headerShown: false }} // Hide header for a cleaner blur look
+          options={{ title: 'Upload Image', headerShown: false }}
         />
-
-        {/* Points Page (Optional) */}
         <Stack.Screen
           name="Points"
           component={PointsPage}
           options={{ headerShown: false }}
         />
-=========
-      <Stack.Navigator initialRouteName="Home">
-        <Stack.Screen 
-          name="Home" 
-          component={HomeScreen} 
-          options={{ title: 'Manual Products' }}
-        />
-        <Stack.Screen 
-          name="Auto" 
-          component={AutoProductScreen} 
+        <Stack.Screen
+          name="Auto"
+          component={AutoProductScreen}
           options={{ title: 'Smart Products' }}
         />
         <Stack.Screen name="Profile" component={ProfileScreen} />
->>>>>>>>> Temporary merge branch 2
       </Stack.Navigator>
     </NavigationContainer>
   );
