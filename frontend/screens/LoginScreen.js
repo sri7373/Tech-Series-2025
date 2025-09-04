@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
@@ -15,6 +17,9 @@ const handleLogin = async () => {
     const data = await response.json();
     console.log('Login response:', response.status, data); // Add this line
     if (response.ok) {
+      // 🔑 Save the token for later use
+      await AsyncStorage.setItem('userToken', data.token);
+
       navigation.navigate('Home');
     } else {
       Alert.alert('Login Failed', data.error || 'Invalid credentials');

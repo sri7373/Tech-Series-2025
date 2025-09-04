@@ -109,7 +109,7 @@ export default function HomeScreen({ navigation }) {
   return (
     <View style={styles.container}>
       {/* Sidebar */}
-       <View style={styles.sidebar}>
+      <View style={styles.sidebar}>
         <TouchableOpacity
           style={styles.navItem}
           onPress={() => navigation.navigate('Home')}
@@ -135,10 +135,21 @@ export default function HomeScreen({ navigation }) {
           <Text style={styles.navText}>Upload</Text>
         </TouchableOpacity>
 
+        {/* Push logout & profile to bottom */}
         <View style={{ flex: 1 }} />
+
+        {/* Profile Icon */}
+        <TouchableOpacity
+          style={styles.navItem}
+          onPress={() => navigation.navigate('Profile')}
+        >
+          <Ionicons name="person-circle" size={28} color="#007AFF" />
+          <Text style={styles.navText}>Profile</Text>
+        </TouchableOpacity>
+        
         <LogoutButton navigation={navigation} />
       </View>
-      
+
       {/* Main Content */}
       <View style={styles.mainContent}>
         {/* Title & Subtitle */}
