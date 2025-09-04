@@ -30,11 +30,11 @@ export default function HomeScreen({ navigation }) {
 
   const fetchProducts = async () => {
     try {
-      const response = await fetch('http://localhost:3000/api/upload/products');
+      const response = await fetch('http://localhost:3000/api/products');
       const data = await response.json();
       
       if (response.ok) {
-        setProducts(data.products);
+        setProducts(data);
       } else {
         console.error('Failed to fetch products:', data.error);
       }
@@ -216,7 +216,7 @@ export default function HomeScreen({ navigation }) {
       <FlatList
         data={products}
         renderItem={renderProduct}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item._id}
         style={styles.productsList}
         showsVerticalScrollIndicator={false}
       />
