@@ -72,6 +72,7 @@ const recommendationRoutes = require('./routes/recommendations');
 const receiptRoutes = require('./routes/receipts');
 const uploadRouter = require('./routes/upload');
 const authRoutes = require('./routes/auth'); 
+const leaderboardRoutes = require('./routes/leaderboard');
 
 
 app.use('/api/auth', authRoutes);
@@ -80,8 +81,6 @@ app.use('/uploads', express.static('uploads'));
 app.use('/api/users', userRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/recommendations', recommendationRoutes);
-app.use('/api/auth', authRoutes);       
-
 
 
 

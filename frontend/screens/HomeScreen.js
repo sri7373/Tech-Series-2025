@@ -26,10 +26,10 @@ export default function HomeScreen({ navigation }) {
   const fetchProducts = async () => {
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:3000/api/upload/products');
+      const response = await fetch('http://localhost:3000/api/products');
       const data = await response.json();
       if (response.ok) {
-        setProducts(data.products || []);
+        setProducts(data);
         setFilteredProducts(data.products || []);
       } else {
         Alert.alert('Error', data.error || 'Failed to load products');

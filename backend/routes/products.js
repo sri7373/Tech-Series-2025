@@ -14,8 +14,6 @@ const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
 
-
-
 // GET /api/products
 router.get('/', async (req, res) => {
   try {
@@ -52,6 +50,9 @@ const preprocessImage = async (imageBuffer) => {
     .sharpen()
     .toBuffer();
 };
+
+
+
 
 router.post('/scan-barcode', upload.single('image'), async (req, res) => {
 
