@@ -32,8 +32,17 @@ export default function Upload({ navigation }) {
     navigation.navigate('Points'); // Navigate to PointsPage
   };
 
+
   return (
     <View style={styles.container}>
+      {/* Return Button */}
+      <TouchableOpacity
+        style={styles.returnButton}
+        onPress={() => navigation.navigate('Home')}
+      >
+        <Text style={styles.returnButtonText}>← Home</Text>
+      </TouchableOpacity>
+
       {/* Blur Background */}
       <BlurView intensity={70} tint="dark" style={StyleSheet.absoluteFill} />
 
@@ -67,7 +76,7 @@ const styles = StyleSheet.create({
   uploadBox: {
     width: 250,
     height: 250,
-    backgroundColor: '#fff',
+    backgroundColor: '#ffffffff',
     borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
@@ -95,5 +104,21 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 18,
     fontWeight: '600',
+  },
+  returnButton: {
+    position: 'absolute',
+    top: 40,
+    left: 20,
+    zIndex: 2,
+    backgroundColor: '#fff',
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 8,
+    elevation: 2,
+  },
+  returnButtonText: {
+    color: '#007AFF',
+    fontWeight: 'bold',
+    fontSize: 16,
   },
 });
