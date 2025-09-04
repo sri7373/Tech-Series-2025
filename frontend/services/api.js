@@ -72,6 +72,8 @@ export const scanBarcode = async (formData) => {
   });
   return await response.json();
 };
+
+
 // Recommendations
 // Get product recommendations for a specific user
 export const getRecommendations = async (userId) => {

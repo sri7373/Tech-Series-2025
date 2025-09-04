@@ -52,26 +52,41 @@ const preprocessImage = async (imageBuffer) => {
 };
 
 
+// ...existing code...
 
-
+// Add Multer middleware to scan-barcode route
 router.post('/scan-barcode', upload.single('image'), async (req, res) => {
+  let imageBuffer;
+  let tempPath; 
+  let filename = `barcode_${Date.now()}.jpg`;
 
-    const processedBuffer = await preprocessImage(req.file.buffer);
-    const tempPath = path.join(os.tmpdir(), `${Date.now()}-${req.file.originalname}`);
-    fs.writeFileSync(tempPath, processedBuffer);
+  // Check if Multer file upload (mobile)
+  if (req.file && req.file.buffer) {
+    imageBuffer = await preprocessImage(req.file.buffer);
+    tempPath = path.join(os.tmpdir(), `${Date.now()}-${req.file.originalname}`);
+    fs.writeFileSync(tempPath, imageBuffer);
+  } else if (req.body.image && req.body.image.startsWith('data:image')) {
+    // Handle base64 upload (web)
+    const matches = req.body.image.match(/^data:(.+);base64,(.+)$/);
+    if (!matches) {
+      return res.status(400).json({ error: 'Invalid base64 string' });
+    }
+    const base64Data = matches[2];
+    imageBuffer = Buffer.from(base64Data, 'base64');
+    imageBuffer = await preprocessImage(imageBuffer);
+    tempPath = path.join(os.tmpdir(), filename);
+    fs.writeFileSync(tempPath, imageBuffer);
+  } else {
+    return res.status(400).json({ error: 'No image uploaded' });
+  }
 
   try {
-    if (!req.file) return res.status(400).json({ error: 'No image uploaded' });
-
-    // Use Quagga to decode barcode from image buffer 
     Quagga.decodeSingle({
       src: tempPath,
       numOfWorkers: 0,
-      inputStream: {
-        size: 800  // restrict input-size for faster processing
-      },
+      inputStream: { size: 800 },
       decoder: {
-        readers: ['ean_reader', 'ean_8_reader', 'upc_reader', 'upc_e_reader'] // add more if needed
+        readers: ['ean_reader', 'ean_8_reader', 'upc_reader', 'upc_e_reader']
       }
     }, async (result) => {
       fs.unlinkSync(tempPath); // Clean up temp file
@@ -80,17 +95,15 @@ router.post('/scan-barcode', upload.single('image'), async (req, res) => {
         return res.status(404).json({ error: 'Barcode not found in image' });
       }
       const barcode = result.codeResult.code;
-      console.log('Detected barcode:', barcode); // <-- Add this line      
+      console.log('Detected barcode:', barcode);
 
-      // Find product by barcode
       const product = await productService.findOne({ barcode });
-      
       if (!product) {
         return res.status(404).json({ error: 'Product not found' });
       }
 
       res.json({
-      barcode,
+        barcode,
         product: {
           name: product.name,
           carbonEmissions: product.carbonEmissions,
@@ -101,7 +114,6 @@ router.post('/scan-barcode', upload.single('image'), async (req, res) => {
           sustainabilityScore: product.sustainabilityScore,
           barcode: product.barcode,
           imageUrl: product.imageUrl
-
         }
       });
     });
@@ -111,5 +123,6 @@ router.post('/scan-barcode', upload.single('image'), async (req, res) => {
   }
 });
 
+// ...existing code...
 module.exports = router;
 
