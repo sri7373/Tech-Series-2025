@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 export default function Upload({ navigation }) {
   const [image, setImage] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [uploadType, setUploadType] = useState(null); // 'barcode' or 'receipt'
 
   // Handle file input and convert to base64
   const handleFileChange = (event) => {
@@ -52,6 +53,44 @@ export default function Upload({ navigation }) {
     }
   };
 
+  // Scan receipt by uploading base64 image as JSON
+  const scanReceipt = async () => {
+    if (!image) {
+      alert('No image. Please select an image first.');
+      return;
+    }
+
+    // console.log('Uploading receipt image for scanning...');
+    // console.log(image.uri);
+
+    setLoading(true);
+    try {
+      const response = await fetch('http://localhost:3000/api/receipts/scan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image: image.uri }),
+      });
+
+      const result = await response.json();
+      if (result && result.items) {
+        // Navigate to ReceiptsPoints screen with items and totalPoints
+        
+        if (navigation) {
+          navigation.navigate('ReceiptsPoints', {
+            items: result.items,
+            totalPoints: result.totalPoints
+          });
+        }
+      } else {
+        alert(result.error || 'Scan failed. No items detected.');
+      }
+    } catch (err) {
+      alert('Error: Failed to scan receipt. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div style={styles.container}>
       {/* Return Button */}
@@ -62,25 +101,50 @@ export default function Upload({ navigation }) {
         ← Home
       </button>
 
+      {/* Choose Upload Type */}
+      {!uploadType && (
+        <div style={{ display: 'flex', gap: 20, marginTop: 40 }}>
+          <button style={styles.confirmButton} onClick={() => setUploadType('barcode')}>Upload Barcode</button>
+          <button style={styles.confirmButton} onClick={() => setUploadType('receipt')}>Upload Receipt</button>
+        </div>
+      )}
+
       {/* Upload Box / Preview */}
-      <div style={styles.uploadBox}>
-        <input
-          type="file"
-          accept="image/*"
-          onChange={handleFileChange}
-          style={{ width: '100%', height: '100%', opacity: 0, position: 'absolute', left: 0, top: 0, cursor: 'pointer' }}
-        />
-        {!image ? (
-          <span style={styles.uploadText}>📷 Upload Barcode Image</span>
-        ) : (
-          <img src={image.uri} alt="preview" style={styles.preview} />
-        )}
-      </div>
+      {uploadType && (
+        <div style={styles.uploadBox}>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleFileChange}
+            style={{ width: '100%', height: '100%', opacity: 0, position: 'absolute', left: 0, top: 0, cursor: 'pointer' }}
+          />
+          {!image ? (
+            <span style={styles.uploadText}>
+              {uploadType === 'barcode' ? '📷 Upload Barcode Image' : '🧾 Upload Receipt Image'}
+            </span>
+          ) : (
+            <img src={image.uri} alt="preview" style={styles.preview} />
+          )}
+        </div>
+      )}
 
       {/* Confirm Button */}
-      {image && (
-        <button style={styles.confirmButton} onClick={scanProductBarcode} disabled={loading}>
-          {loading ? 'Scanning...' : '✅ Scan Barcode'}
+      {uploadType && image && (
+        <button
+          style={styles.confirmButton}
+          onClick={uploadType === 'barcode' ? scanProductBarcode : scanReceipt}
+          disabled={loading}
+        >
+          {loading
+            ? (uploadType === 'barcode' ? 'Scanning Barcode...' : 'Scanning Receipt...')
+            : (uploadType === 'barcode' ? '✅ Scan Barcode' : '✅ Scan Receipt')}
+        </button>
+      )}
+
+      {/* Back to type selection */}
+      {uploadType && (
+        <button style={{ ...styles.returnButton, top: 90, left: 20 }} onClick={() => { setUploadType(null); setImage(null); }}>
+          ← Back
         </button>
       )}
     </div>

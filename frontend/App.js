@@ -13,6 +13,7 @@ import PointsPage from './screens/PointsPage'; // Optional: points page after up
 import ProfileScreen from './screens/ProfileScreen';
 import AutoProductScreen from './screens/AutoProductScreen';
 import RecommendationsScreen from './screens/RecommendationsScreen';
+import ReceiptsPoints from './screens/ReceiptsPoints';
 
 const Stack = createNativeStackNavigator();
 
@@ -58,6 +59,11 @@ export default function App() {
           name="Recommendations"
           component={RecommendationsScreen}
           options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="ReceiptsPoints"
+          component={ReceiptsPoints}
+          options={{ title: 'Receipt Points', headerShown: false }}
         />
       </Stack.Navigator>
     </NavigationContainer>

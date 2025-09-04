@@ -68,4 +68,25 @@ router.post('/', async (req, res) => {
   }
 });
 
+// PUT /api/users/:id/points
+router.put('/:id/points', auth, async (req, res) => {
+  try {
+    const requestedUserId = req.params.id;
+    const authenticatedUserId = req.user._id.toString();
+    // Only allow updating own points or admin
+    if (requestedUserId !== authenticatedUserId && !req.user.isAdmin) {
+      return res.status(403).json({ error: 'Access denied' });
+    }
+    const { points } = req.body;
+    if (typeof points !== 'number' || points < 0) {
+      return res.status(400).json({ error: 'Points must be a non-negative number' });
+    }
+    const user = await User.findByIdAndUpdate(requestedUserId, { points }, { new: true }).select('-password');
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    res.json({ message: 'Points updated', user });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to update points' });
+  }
+});
+
 module.exports = router;
