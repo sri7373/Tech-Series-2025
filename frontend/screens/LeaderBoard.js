@@ -1,43 +1,59 @@
-// screens/Leaderboard.js
-import React from 'react';
-import { View, Text, FlatList, StyleSheet } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, FlatList, StyleSheet, ActivityIndicator, Alert } from 'react-native';
 
-const personalData = [
-  { id: '1', name: 'You', score: 85 },
-  { id: '2', name: 'Alice', score: 90 },
-  { id: '3', name: 'Bob', score: 80 },
-];
-
-const neighbourhoodData = [
-  { id: '1', name: 'Charlie', score: 95 },
-  { id: '2', name: 'You', score: 85 },
-  { id: '3', name: 'Eve', score: 80 },
-];
+// Replace this with your actual user ID or username from context/auth
+const CURRENT_USER_ID = 'your_current_user_id'; // e.g., from AsyncStorage or context
 
 export default function Leaderboard() {
-  const renderItem = (item, index, highlightName = 'You') => (
-    <View style={[styles.row, item.name === highlightName && styles.highlightRow]}>
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchLeaderboard();
+  }, []);
+
+  const fetchLeaderboard = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch('http://localhost:3000/api/leaderboard');
+      const data = await response.json();
+      if (response.ok) {
+        setUsers(data);
+      } else {
+        Alert.alert('Error', data.error || 'Failed to fetch leaderboard');
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Network error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const renderItem = ({ item, index }) => (
+    <View
+      style={[
+        styles.row,
+        (item._id === CURRENT_USER_ID || item.username === 'YourUsername') && styles.highlightRow,
+      ]}
+    >
       <Text style={styles.rank}>{index + 1}</Text>
-      <Text style={styles.name}>{item.name}</Text>
-      <Text style={styles.score}>{item.score}</Text>
+      <Text style={styles.name}>{item.username || item.name}</Text>
+      <Text style={styles.score}>{item.points}</Text>
     </View>
   );
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Personal Leaderboard</Text>
-      <FlatList
-        data={personalData.sort((a,b) => b.score - a.score)}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item, index }) => renderItem(item, index)}
-      />
-
-      <Text style={[styles.title, { marginTop: 30 }]}>Neighbourhood Leaderboard</Text>
-      <FlatList
-        data={neighbourhoodData.sort((a,b) => b.score - a.score)}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item, index }) => renderItem(item, index)}
-      />
+      <Text style={styles.title}>Leaderboard</Text>
+      {loading ? (
+        <ActivityIndicator size="large" color="#007AFF" />
+      ) : (
+        <FlatList
+          data={users.sort((a, b) => b.points - a.points)}
+          keyExtractor={(item) => item._id || item.id || Math.random().toString()}
+          renderItem={renderItem}
+        />
+      )}
     </View>
   );
 }
