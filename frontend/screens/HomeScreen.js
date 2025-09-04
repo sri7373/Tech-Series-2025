@@ -4,19 +4,12 @@ import { Ionicons } from '@expo/vector-icons';
 import LogoutButton from './LogoutButton';
 
 export default function HomeScreen({ navigation }) {
-  // Product form state for adding auto products
-  const [productData, setProductData] = useState({
-    name: '',
-    carbonEmissions: '',
-    plasticUsage: '',
-    points: ''
-  });
+  // ...existing code...
   const [products, setProducts] = useState([]); // All products (auto-fetched)
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [searchText, setSearchText] = useState('');
   const [loading, setLoading] = useState(true);
-  const [showForm, setShowForm] = useState(false);
-  const [creating, setCreating] = useState(false);
+  // ...existing code...
 
   // Fetch auto products from API
   useEffect(() => {
@@ -50,53 +43,7 @@ export default function HomeScreen({ navigation }) {
     setFilteredProducts(filtered);
   }, [searchText, products]);
 
-  // Create auto product
-  const createAutoProduct = async () => {
-    if (!productData.name || !productData.carbonEmissions || !productData.plasticUsage) {
-      Alert.alert("Missing fields", "Please fill in all required fields!");
-      return;
-    }
-    setCreating(true);
-    try {
-      const response = await fetch('http://localhost:3000/api/upload/product-auto', {
-        method: 'POST',
-        body: JSON.stringify({
-          name: productData.name,
-          carbonEmissions: productData.carbonEmissions,
-          plasticUsage: productData.plasticUsage,
-          points: productData.points || '0'
-        }),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      const result = await response.json();
-      if (response.ok) {
-        const imageStatus = result.product.hasImage ?
-          "with auto-fetched image" :
-          "without image (not found in database)";
-        Alert.alert(
-          "Success",
-          `Product "${result.product.name}" created successfully ${imageStatus}!`
-        );
-        setProductData({
-          name: '',
-          carbonEmissions: '',
-          plasticUsage: '',
-          points: ''
-        });
-        setShowForm(false);
-        fetchProducts();
-      } else {
-        Alert.alert("Error", result.error || "Product creation failed");
-      }
-    } catch (error) {
-      console.error('Creation error:', error);
-      Alert.alert("Error", "Network error occurred");
-    } finally {
-      setCreating(false);
-    }
-  };
+  // ...existing code...
 
   if (loading) {
     return (
@@ -153,8 +100,7 @@ export default function HomeScreen({ navigation }) {
       {/* Main Content */}
       <View style={styles.mainContent}>
         {/* Title & Subtitle */}
-        <Text style={styles.title}>Smart Products</Text>
-        <Text style={styles.subtitle}>Images auto-fetched from Open Food Facts</Text>
+  <Text style={styles.title}>Products</Text>
 
         {/* Search Bar */}
         <View style={styles.topBar}>
@@ -172,69 +118,7 @@ export default function HomeScreen({ navigation }) {
           </TouchableOpacity>
         </View>
 
-        {/* Add Smart Product Button */}
-        <TouchableOpacity
-          style={styles.addButton}
-          onPress={() => setShowForm(!showForm)}
-        >
-          <Text style={styles.buttonText}>
-            {showForm ? 'Cancel' : 'Add Smart Product'}
-          </Text>
-        </TouchableOpacity>
-
-        {/* Smart Product Form */}
-        {showForm && (
-          <ScrollView style={styles.formContainer}>
-            <Text style={styles.formTitle}>Create Smart Product</Text>
-            <Text style={styles.formSubtitle}>
-              Enter product name - we'll try to find the image automatically!
-            </Text>
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Product Name *</Text>
-              <TextInput
-                style={styles.input}
-                value={productData.name}
-                onChangeText={(text) => setProductData({ ...productData, name: text })}
-                placeholder="e.g., Coca Cola, Oreo Cookies, etc."
-              />
-              <Text style={styles.label}>Carbon Emissions (kg CO2) *</Text>
-              <TextInput
-                style={styles.input}
-                value={productData.carbonEmissions}
-                onChangeText={(text) => setProductData({ ...productData, carbonEmissions: text })}
-                placeholder="e.g., 2.5"
-                keyboardType="numeric"
-              />
-              <Text style={styles.label}>Plastic Usage (g) *</Text>
-              <TextInput
-                style={styles.input}
-                value={productData.plasticUsage}
-                onChangeText={(text) => setProductData({ ...productData, plasticUsage: text })}
-                placeholder="e.g., 15"
-                keyboardType="numeric"
-              />
-              <Text style={styles.label}>Points (optional)</Text>
-              <TextInput
-                style={styles.input}
-                value={productData.points}
-                onChangeText={(text) => setProductData({ ...productData, points: text })}
-                placeholder="e.g., 10"
-                keyboardType="numeric"
-              />
-            </View>
-            <TouchableOpacity
-              style={[styles.uploadButton, creating && styles.disabledButton]}
-              onPress={createAutoProduct}
-              disabled={creating}
-            >
-              {creating ? (
-                <ActivityIndicator color="white" />
-              ) : (
-                <Text style={styles.buttonText}>Create Smart Product</Text>
-              )}
-            </TouchableOpacity>
-          </ScrollView>
-        )}
+  {/* ...existing code... */}
 
         {/* Product List */}
         <FlatList
