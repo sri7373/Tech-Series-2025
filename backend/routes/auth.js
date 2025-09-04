@@ -35,13 +35,17 @@ router.post('/login', async (req, res) => {
           username: existingUser.username,
           email: existingUser.email,
           points: existingUser.points,
-          monthlyRank: existingUser.monthlyRank,
-          neighbourhoodRank: existingUser.neighbourhoodRank,
           neighbourhood: existingUser.neighbourhood
         }
       });
 
   } catch (err) {
+    console.error('Login error details:', {
+      message: err.message,
+      stack: err.stack,
+      body: req.body
+    });
+
     res.status(400).json({ error: 'Login failed', details: err.message });
   }
 });

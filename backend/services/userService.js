@@ -17,6 +17,7 @@ const user = new User({
   password: hashedPassword,
   isAdmin: userData.isAdmin || false,
   points: userData.points ?? 0,
+  neighbourhood: userData.neighbourhood || ''
 });
   // Save and return the user
   return await user.save();

@@ -43,9 +43,7 @@ const userSchema = new mongoose.Schema({
   },
   isAdmin: { type: Boolean, default: false },
   points: { type: Number, default: 0 },
-  monthlyRank: { type: Number, default: 0 },
-  neighbourhoodRank: { type: Number, default: 0 },
-  neighbourhood: { type: String },
+  neighbourhood: { type: String, defaut: "" }
 
 });
 

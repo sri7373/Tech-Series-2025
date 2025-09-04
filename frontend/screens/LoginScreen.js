@@ -20,7 +20,9 @@ export default function LoginScreen({ navigation }) {
         await AsyncStorage.setItem('userToken', data.token);
         await AsyncStorage.setItem('userId', data.user._id);
         await AsyncStorage.setItem('userPoints', data.user.points.toString());
-        await AsyncStorage.setItem('userRank', data.user.monthlyRank.toString());
+        await AsyncStorage.setItem('username', data.user.username || '');
+        await AsyncStorage.setItem('email', data.user.email || '');
+        await AsyncStorage.setItem('neighbourhood', data.user.neighbourhood || '');
 
         navigation.replace('Home'); // Using replace to prevent going back
       } else {
