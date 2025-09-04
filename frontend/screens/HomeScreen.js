@@ -132,8 +132,10 @@ export default function HomeScreen({ navigation }) {
               )}
               <View style={styles.productInfo}>
                 <Text style={styles.productName}>{item.name}</Text>
+                <Text style={styles.productDetail}>${item.price} </Text>
                 <Text style={styles.productDetail}>CO2: {item.carbonEmissions} g</Text>
                 <Text style={styles.productDetail}>Plastic: {item.plasticUsage} g</Text>
+                <Text style={styles.productDetail}>EcoScore: {item.sustainabilityScore}</Text>
                 <Text style={styles.productDetail}>Points: {item.points}</Text>
               </View>
             </View>

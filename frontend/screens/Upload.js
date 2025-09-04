@@ -16,10 +16,6 @@ export default function Upload({ navigation }) {
     reader.readAsDataURL(file);
   };
 
-  //formData
-
-
-  
   // Scan barcode by uploading base64 image as JSON
   const scanProductBarcode = async () => {
     if (!image) {
