@@ -102,13 +102,13 @@ export default function RecommendationsScreen({ route, navigation }) {
             style={[
               styles.sustainabilityFill, 
               { 
-                width: `${Math.min(100, product.points)}%`,
+                width: `${Math.min(100, product.sustainabilityScore)}%`,
                 backgroundColor: isOriginal ? '#FF9800' : '#4CAF50'
               }
             ]} 
           />
           <Text style={styles.sustainabilityText}>
-            Sustainability: {product.points}/100
+            Sustainability: {product.sustainabilityScore}/100
           </Text>
         </View>
       </View>

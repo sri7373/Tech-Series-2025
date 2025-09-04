@@ -4,7 +4,7 @@ const { Product } = require('../db/models');
 // Calculate sustainability score (higher = better)
 const calculateSustainabilityScore = (product) => {
   // Simply use the points field as the sustainability score
-  return product.points || 0;
+  return product.sustainabilityScore || 0;
 };
 
 // Extract product category from name using keywords
