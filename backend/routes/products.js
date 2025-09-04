@@ -26,7 +26,7 @@ router.get('/', async (req, res) => {
 });
 
 
-//create product
+// create product
 router.post('/', upload.single('image'), async (req, res) => {
   try {
 
@@ -51,9 +51,6 @@ const preprocessImage = async (imageBuffer) => {
     .sharpen()
     .toBuffer();
 };
-
-
-// ...existing code...
 
 // Add Multer middleware to scan-barcode route
 router.post('/scan-barcode', upload.single('image'), async (req, res) => {
