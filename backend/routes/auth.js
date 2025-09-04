@@ -23,10 +23,22 @@ router.post('/login', async (req, res) => {
     // Generate JWT token using schema method
     const token = existingUser.generateAuthToken();
 
-    return res.status(200).json({ 
-      message: 'Login successful',
-      token
-    });
+    // Send more user information in response
+    return res.status(200)
+      .header('x-auth-token', token)
+      .json({
+        message: 'Login successful',
+        token,
+        user: {
+          _id: existingUser._id,
+          username: existingUser.username,
+          email: existingUser.email,
+          points: existingUser.points,
+          monthlyRank: existingUser.monthlyRank,
+          neighbourhoodRank: existingUser.neighbourhoodRank,
+          neighbourhood: existingUser.neighbourhood
+        }
+      });
 
   } catch (err) {
     res.status(400).json({ error: 'Login failed', details: err.message });

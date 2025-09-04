@@ -14,9 +14,15 @@ export default function LoginScreen({ navigation }) {
         body: JSON.stringify({ email, password }),
       });
       const data = await response.json();
+
       if (response.ok) {
+        // Store all user data
         await AsyncStorage.setItem('userToken', data.token);
-        navigation.navigate('Home');
+        await AsyncStorage.setItem('userId', data.user._id);
+        await AsyncStorage.setItem('userPoints', data.user.points.toString());
+        await AsyncStorage.setItem('userRank', data.user.monthlyRank.toString());
+
+        navigation.replace('Home'); // Using replace to prevent going back
       } else {
         Alert.alert('Login Failed', data.error || 'Invalid credentials');
       }

@@ -15,9 +15,18 @@ router.get('/', [auth, admin], async (req, res) => {
   }
 });
 
-router.get('/me', auth, async (req, res) => {
+// GET /api/users/:id
+router.get('/:id', auth, async (req, res) => {
   try {
-    const user = await User.findById(req.user._id).select('-password');
+    const requestedUserId = req.params.id;
+    const authenticatedUserId = req.user._id.toString();
+    
+    // Allow access if: requesting own data OR user is admin
+    if (requestedUserId !== authenticatedUserId && !req.user.isAdmin) {
+      return res.status(403).json({ error: 'Access denied' });
+    }
+
+    const user = await User.findById(requestedUserId).select('-password');
     if (!user) return res.status(404).json({ error: 'User not found' });
     res.json(user);
   } catch (err) {
@@ -25,8 +34,8 @@ router.get('/me', auth, async (req, res) => {
   } 
 });
 
-// CREATE USER
-router.post('/createUser', async (req, res) => {
+// POST /api/users
+router.post('/', async (req, res) => {
   try {
     // Validate request
     const { error } = validateUser(req.body);
