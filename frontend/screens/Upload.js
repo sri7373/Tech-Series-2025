@@ -74,11 +74,11 @@ export default function Upload({ navigation }) {
       const result = await response.json();
       if (result && result.items) {
         // Navigate to ReceiptsPoints screen with items and totalPoints
-        
+
         if (navigation) {
           navigation.navigate('ReceiptsPoints', {
             items: result.items,
-            totalPoints: result.totalPoints
+            totalPoints: result.totalPoints,
           });
         }
       } else {

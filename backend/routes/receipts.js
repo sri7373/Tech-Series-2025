@@ -49,16 +49,17 @@ router.post("/scan", async (req, res, next) => {
       ? matched.filter(item => item && item.matchedProduct && item.productPoints !== undefined && item.productPoints !== null)
       : [];
 
-        // Map to frontend format
-    const itemsForFrontend = filteredItems.map(item => ({
-      name: item.matchedProduct,
-      points: item.productPoints,
-      qty: item.qty,
-      description: item.description,
-      pointsEarned: item.pointsEarned
-    }));
+        // Map to frontend format, include imageUrl
+        const itemsForFrontend = filteredItems.map(item => ({
+          name: item.matchedProduct,
+          points: item.productPoints,
+          qty: item.qty,
+          description: item.description,
+          pointsEarned: item.pointsEarned,
+          imageUrl: item.product && item.product.imageUrl ? item.product.imageUrl : null
+        }));
 
-  res.json({ items: itemsForFrontend, totalPoints });
+        res.json({ items: itemsForFrontend, totalPoints });
   } catch (err) {
     console.error("Receipt processing error:", err);
     res.status(500).json({ error: "Failed to process receipt" });

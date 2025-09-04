@@ -58,6 +58,7 @@ async function matchItemsAndCalculatePoints(ocrItems) {
         matchedProduct: bestMatch.name,  // return original DB product name
         productPoints: bestMatch.points,
         pointsEarned,
+        product: bestMatch, // include full product object
       });
     } else {
       matched.push({
@@ -65,6 +66,7 @@ async function matchItemsAndCalculatePoints(ocrItems) {
         qty: item.quantity || 1,
         matchedProduct: null,
         pointsEarned: 0,
+        product: null,
       });
     }
   }

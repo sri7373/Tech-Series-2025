@@ -83,6 +83,11 @@ export default function ReceiptsPoints({ route, navigation }) {
         ) : (
           items.map((item, idx) => (
             <div key={idx} style={styles.itemRow}>
+              {item.imageUrl ? (
+                <img src={item.imageUrl} alt={item.name} style={styles.itemImage} />
+              ) : (
+                <span style={styles.noImage}>No Image</span>
+              )}
               <span style={styles.itemName}>{item.name}</span>
               <span style={styles.itemQty}>Qty: {item.qty}</span>
               <span style={styles.itemPoints}>Points: {item.pointsEarned ?? item.points}</span>
@@ -158,6 +163,26 @@ const styles = {
     alignItems: 'center',
     padding: '10px 0',
     borderBottom: '1px solid #eee',
+    gap: 16,
+  },
+  itemImage: {
+    width: 48,
+    height: 48,
+    objectFit: 'cover',
+    borderRadius: 8,
+    marginRight: 8,
+  },
+  noImage: {
+    width: 48,
+    height: 48,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    background: '#eee',
+    color: '#888',
+    borderRadius: 8,
+    fontSize: 12,
+    marginRight: 8,
   },
   itemName: {
     fontWeight: 'bold',
