@@ -1,11 +1,10 @@
 module.exports = function (api) {
-    api.cache(true);
-    return {
-      presets: ['babel-preset-expo'], // if using Expo
-      // remove the Reanimated / worklets plugin for now
-      plugins: [
-        // "react-native-worklets/plugin", // ❌ comment this out for now
-      ],
-    };
+  api.cache(true);
+  return {
+    presets: ['babel-preset-expo'],
+    plugins: [
+      // Remove the old react-native-reanimated/plugin if it exists
+      // The new version doesn't need the plugin for basic functionality
+    ],
   };
-  
+};

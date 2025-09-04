@@ -1,5 +1,7 @@
 // models.js
 const mongoose = require('mongoose');
+const Joi = require('joi');
+const jwt = require('jsonwebtoken');
 
 // Product collection
 const productSchema = new mongoose.Schema({
@@ -19,8 +21,27 @@ const Product = mongoose.model('Product', productSchema, 'SuperMarket');
 
 // User collection
 const userSchema = new mongoose.Schema({
-  username: { type: String, required: true, unique: true },
-  passwordHash: { type: String, required: true },
+  username: { 
+    type: String, 
+    required: true,
+    minlength: 5,
+    maxlength: 50, 
+    unique: true 
+  },
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+    minlength: 5,
+    maxlength: 255
+  },
+  password: { 
+    type: String, 
+    required: true,
+    minlength: 5,
+    maxlength: 1024,
+  },
+  isAdmin: { type: Boolean, default: false },
   points: { type: Number, default: 0 },
   monthlyRank: { type: Number, default: 0 },
   neighbourhoodRank: { type: Number, default: 0 },
@@ -28,7 +49,22 @@ const userSchema = new mongoose.Schema({
 
 });
 
-const User = mongoose.model('User', userSchema);
+userSchema.methods.generateAuthToken = function() {
+  const token = jwt.sign({ _id: this._id, isAdmin: this.isAdmin }, process.env.JWT_PRIVATE_KEY);
+  return token;
+}
 
-module.exports = { Product, User };
+const User = mongoose.model('User', userSchema, 'Users');
 
+function validateUser(user) {
+  const schema = Joi.object({
+    username: Joi.string().min(5).max(50).required(),
+    email: Joi.string().min(5).max(255).required().email(),
+    password: Joi.string().min(5).max(255).required(),
+    points: Joi.number().default(0)
+  });
+
+  return schema.validate(user);
+}
+
+module.exports = { Product, User, validateUser };
