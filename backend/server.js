@@ -70,6 +70,7 @@ const userRoutes = require('./routes/users');
 const productRoutes = require('./routes/products');
 const recommendationRoutes = require('./routes/recommendations');
 const authRoutes = require('./routes/auth'); 
+const uploadRouter = require('./routes/upload');
 
 
 app.use('/api/upload', uploadRouter);
