@@ -81,6 +81,14 @@ export const getSustainableAlternatives = async (productId, limit = 3) => {
   return response.data;
 };
 
+// Get sustainable alternatives for a product object (from barcode scanning)
+export const getSustainableAlternativesForProduct = async (productData, limit = 5) => {
+  const response = await axios.post(`${API_BASE_URL}/products/sustainable-alternatives`, {
+    product: productData
+  });
+  return response.data;
+};
+
 // Get personalized recommendations
 export const getPersonalizedRecommendations = async (limit = 5, userId = null) => {
   const url = userId 

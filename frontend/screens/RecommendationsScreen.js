@@ -9,7 +9,7 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
-import { getSustainableAlternatives } from '../services/api';
+import { getSustainableAlternativesForProduct } from '../services/api';
 
 export default function RecommendationsScreen({ route, navigation }) {
   const { product } = route.params; // The scanned product passed from barcode scan
@@ -26,7 +26,7 @@ export default function RecommendationsScreen({ route, navigation }) {
       setLoading(true);
       console.log('Loading recommendations for product:', product);
       
-      const response = await getSustainableAlternatives(product._id || product.id, 5);
+      const response = await getSustainableAlternativesForProduct(product, 5);
       console.log('Recommendations response:', response);
       
       if (response.success) {

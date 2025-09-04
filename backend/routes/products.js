@@ -3,6 +3,7 @@ const router = express.Router();
 const multer = require('multer');
 const { uploadToS3 } = require('../services/s3Service');
 const productService = require('../services/productService');
+const { getSustainableAlternatives } = require('../services/recommendationService');
 const Quagga = require('@ericblade/quagga2');
 const sharp = require('sharp');
 
@@ -120,6 +121,36 @@ router.post('/scan-barcode', upload.single('image'), async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Failed to process image' });
+  }
+});
+
+// GET /api/products/sustainable-alternatives
+router.post('/sustainable-alternatives', async (req, res) => {
+  try {
+    const { product } = req.body;
+    
+    if (!product) {
+      return res.status(400).json({ error: 'Product data is required' });
+    }
+    
+    console.log('Getting sustainable alternatives for product:', product.name);
+    
+    const alternatives = await getSustainableAlternatives(product, 5);
+    
+    res.json({
+      success: true,
+      original: alternatives.originalProduct,
+      alternatives: alternatives.alternatives,
+      category: alternatives.category,
+      totalAlternatives: alternatives.totalAlternatives
+    });
+    
+  } catch (error) {
+    console.error('Error getting sustainable alternatives:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
   }
 });
 
