@@ -1,4 +1,3 @@
-// services/matchService.js
 const Fuse = require("fuse.js");
 const { Product } = require("../db/models");
 
@@ -24,16 +23,14 @@ async function matchItemsAndCalculatePoints(ocrItems) {
   // Load all products from DB
   const products = await Product.find({});
 
-  // Create normalized dataset for Fuse
   const normalizedProducts = products.map(p => ({
     ...p.toObject(),
     normalizedName: normalize(p.name)
   }));
 
-  // Fuse.js config: fuzzy match on normalizedName
   const fuse = new Fuse(normalizedProducts, {
     keys: ["normalizedName"],
-    threshold: 0.45, // fuzziness
+    threshold: 0.4, // fuzziness
     distance: 100,
     isCaseSensitive: false,
     ignoreLocation: true,
@@ -47,7 +44,7 @@ async function matchItemsAndCalculatePoints(ocrItems) {
     const result = fuse.search(query);
 
     if (result.length > 0) {
-      const bestMatch = result[0].item; // this still has original fields
+      const bestMatch = result[0].item;
       const qty = item.quantity || 1;
       const pointsEarned = bestMatch.points * qty;
       totalPoints += pointsEarned;
