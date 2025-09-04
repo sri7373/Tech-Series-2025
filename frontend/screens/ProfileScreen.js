@@ -5,13 +5,14 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function ProfilePage() {
   const [user, setUser] = useState(null);
+  const [userRank, setUserRank] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadProfile = async () => {
       setLoading(true);
       try {
-        // 🔑 Get the token saved during login
+        // Get the token saved during login
         const token = await AsyncStorage.getItem('userToken');
         const userId = await AsyncStorage.getItem('userId');
 
@@ -21,8 +22,8 @@ export default function ProfilePage() {
           return;
         }
 
-        // 🔑 Use token in Authorization header
-        const response = await fetch(`http://localhost:3000/api/users/${userId}`, {
+        // Fetch user data
+        const userResponse = await fetch(`http://localhost:3000/api/users/${userId}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -30,11 +31,21 @@ export default function ProfilePage() {
           },
         });
 
-        const data = await response.json();
-        if (response.ok) {
-          setUser(data);
+        const userData = await userResponse.json();
+        if (userResponse.ok) {
+          setUser(userData);
+          
+          // Fetch leaderboard to calculate rank
+          const leaderboardResponse = await fetch('http://localhost:3000/api/leaderboard');
+          const leaderboardData = await leaderboardResponse.json();
+          
+          if (leaderboardResponse.ok) {
+            // Find user's rank in leaderboard
+            const userRankIndex = leaderboardData.findIndex(u => u._id === userData._id);
+            setUserRank(userRankIndex !== -1 ? userRankIndex + 1 : null);
+          }
         } else {
-          Alert.alert('Error', data.error || 'Failed to fetch user profile');
+          Alert.alert('Error', userData.error || 'Failed to fetch user profile');
         }
       } catch (error) {
         Alert.alert('Error', 'Network error');
@@ -80,6 +91,14 @@ export default function ProfilePage() {
         <Ionicons name="star" size={24} color="#FFD700" />
         <Text style={styles.pointsText}>{user.points} Points</Text>
       </View>
+      
+      {/* Rank */}
+      {userRank && (
+        <View style={styles.rankContainer}>
+          <Ionicons name="trophy" size={24} color="#FFA500" />
+          <Text style={styles.rankText}>Rank #{userRank}</Text>
+        </View>
+      )}
     </View>
   );
 }
@@ -92,4 +111,6 @@ const styles = StyleSheet.create({
   email: { fontSize: 16, color: '#555', marginBottom: 16 },
   pointsContainer: { flexDirection: 'row', alignItems: 'center', marginTop: 10 },
   pointsText: { fontSize: 18, color: '#333', marginLeft: 8, fontWeight: 'bold' },
+  rankContainer: { flexDirection: 'row', alignItems: 'center', marginTop: 10 },
+  rankText: { fontSize: 18, color: '#333', marginLeft: 8, fontWeight: 'bold' },
 });
