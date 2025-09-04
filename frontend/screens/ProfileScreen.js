@@ -13,18 +13,20 @@ export default function ProfilePage() {
       try {
         // 🔑 Get the token saved during login
         const token = await AsyncStorage.getItem('userToken');
-        if (!token) {
+        const userId = await AsyncStorage.getItem('userId');
+
+        if (!token || !userId) {
           Alert.alert("Not logged in", "Please log in first.");
           setLoading(false);
           return;
         }
 
         // 🔑 Use token in Authorization header
-        const response = await fetch('http://localhost:3000/api/users/me', {
+        const response = await fetch(`http://localhost:3000/api/users/${userId}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
+            'x-auth-token': token,
           },
         });
 
@@ -36,7 +38,6 @@ export default function ProfilePage() {
         }
       } catch (error) {
         Alert.alert('Error', 'Network error');
-        console.error(error);
       } finally {
         setLoading(false);
       }
