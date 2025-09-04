@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, FlatList, StyleSheet, ActivityIndicator, Alert, TouchableOpacity } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function Leaderboard() {
   const [users, setUsers] = useState([]);
   const [currentUserId, setCurrentUserId] = useState(null);
+  const [currentUserNeighborhood, setCurrentUserNeighborhood] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [rankingType, setRankingType] = useState('nation'); // "nation" or "neighbourhood"
 
   useEffect(() => {
     fetchLeaderboard();
@@ -18,12 +20,15 @@ export default function Leaderboard() {
       const userId = await AsyncStorage.getItem('userId');
       setCurrentUserId(userId);
 
-      // Fetch leaderboard (now includes ranks from backend)
+      // Fetch leaderboard (full list)
       const response = await fetch('http://localhost:3000/api/leaderboard');
       const data = await response.json();
       
       if (response.ok) {
-        setUsers(data); // Data already sorted by points with ranks
+        setUsers(data);
+        // find current user's neighbourhood
+        const currentUser = data.find(u => u._id === userId);
+        if (currentUser) setCurrentUserNeighborhood(currentUser.neighbourhood);
       } else {
         Alert.alert('Error', data.error || 'Failed to fetch leaderboard');
       }
@@ -35,18 +40,23 @@ export default function Leaderboard() {
     }
   };
 
-  // Check if current user is in top 10
-  const currentUserInTop10 = currentUserId ? users.slice(0, 10).some(user => user._id === currentUserId) : false;
-  console.log('currentUserId from storage:', currentUserId);
-  console.log('user ids from backend:', users.map(u => u._id));
+  // Filtered users based on ranking type
+  const filteredUsers = rankingType === 'neighbourhood'
+    ? users.filter(u => u.neighbourhood === currentUserNeighborhood)
+    : users;
 
-  
-  // Find current user's data for bottom row
-  const currentUserData = currentUserId ? users.find(user => user._id === currentUserId) : null;
+  // Sort by points descending
+  filteredUsers.sort((a, b) => b.points - a.points);
+
+  // Add rank
+  const usersWithRank = filteredUsers.map((user, index) => ({ ...user, rank: index + 1 }));
+
+  // Is current user in top 10?
+  const currentUserInTop10 = currentUserId ? usersWithRank.slice(0, 10).some(u => u._id === currentUserId) : false;
+  const currentUserData = currentUserId ? usersWithRank.find(u => u._id === currentUserId) : null;
 
   const renderItem = ({ item }) => {
     const isCurrentUser = currentUserId && item._id === currentUserId;
-    
     return (
       <View style={[styles.row, isCurrentUser && styles.highlightRow]}>
         <Text style={styles.rank}>{item.rank}</Text>
@@ -58,7 +68,6 @@ export default function Leaderboard() {
 
   const renderCurrentUserRow = () => {
     if (!currentUserData || currentUserInTop10) return null;
-
     return (
       <View style={[styles.row, styles.highlightRow, styles.bottomRow]}>
         <Text style={styles.rank}>{currentUserData.rank}</Text>
@@ -68,15 +77,34 @@ export default function Leaderboard() {
     );
   };
 
+  const toggleRanking = (type) => setRankingType(type);
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Leaderboard</Text>
+
+      {/* Toggle buttons */}
+      <View style={styles.toggleContainer}>
+        <TouchableOpacity
+          style={[styles.toggleButton, rankingType === 'nation' && styles.activeToggle]}
+          onPress={() => toggleRanking('nation')}
+        >
+          <Text style={styles.toggleText}>Nation Rankings</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.toggleButton, rankingType === 'neighbourhood' && styles.activeToggle]}
+          onPress={() => toggleRanking('neighbourhood')}
+        >
+          <Text style={styles.toggleText}>Neighbourhood Rankings</Text>
+        </TouchableOpacity>
+      </View>
+
       {loading ? (
         <ActivityIndicator size="large" color="#007AFF" />
       ) : (
         <>
           <FlatList
-            data={users.slice(0, 10)} // Show only top 10
+            data={usersWithRank.slice(0, 10)}
             keyExtractor={(item) => item._id || item.id || Math.random().toString()}
             renderItem={renderItem}
           />
@@ -89,7 +117,11 @@ export default function Leaderboard() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 20, backgroundColor: '#fff' },
-  title: { fontSize: 22, fontWeight: 'bold', marginBottom: 10 },
+  title: { fontSize: 22, fontWeight: 'bold', marginBottom: 10, textAlign: 'center' },
+  toggleContainer: { flexDirection: 'row', justifyContent: 'center', marginBottom: 15 },
+  toggleButton: { padding: 10, marginHorizontal: 5, borderRadius: 5, backgroundColor: '#eee' },
+  activeToggle: { backgroundColor: '#007AFF' },
+  toggleText: { color: '#000', fontWeight: 'bold' },
   row: { flexDirection: 'row', justifyContent: 'space-between', padding: 15, borderBottomWidth: 1, borderColor: '#eee' },
   highlightRow: { backgroundColor: '#d0f0ff', borderRadius: 5 },
   bottomRow: { marginTop: 10, borderTopWidth: 2, borderTopColor: '#007AFF' },
