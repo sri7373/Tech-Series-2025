@@ -75,7 +75,22 @@ export const scanBarcode = async (formData) => {
 
 
 // Recommendations
-// Get product recommendations for a specific user
+// Get sustainable alternatives for a specific product
+export const getSustainableAlternatives = async (productId, limit = 3) => {
+  const response = await axios.get(`${API_BASE_URL}/recommendations/alternatives/${productId}?limit=${limit}`);
+  return response.data;
+};
+
+// Get personalized recommendations
+export const getPersonalizedRecommendations = async (limit = 5, userId = null) => {
+  const url = userId 
+    ? `${API_BASE_URL}/recommendations/personalized?limit=${limit}&userId=${userId}`
+    : `${API_BASE_URL}/recommendations/personalized?limit=${limit}`;
+  const response = await axios.get(url);
+  return response.data;
+};
+
+// Get product recommendations for a specific user (keeping your existing one)
 export const getRecommendations = async (userId) => {
   const response = await axios.get(`${API_BASE_URL}/recommendations/${userId}`);
   return response.data;
