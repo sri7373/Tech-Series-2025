@@ -25,7 +25,7 @@ async function extractItems(filePath) {
     resp?.rawHttp?.inference?.result?.fields?.line_items?.items || [];
 
   const items = lineItems.map(item => ({
-    description: item.fields?.description?.value || "",
+    description: (item.fields?.description?.value || "").replace(/\n/g, " "),
     quantity: item.fields?.quantity?.value || 1,
     unitPrice: item.fields?.unit_price?.value || 0,
     totalPrice: item.fields?.total_price?.value || 0
