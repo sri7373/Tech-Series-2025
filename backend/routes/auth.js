@@ -1,11 +1,12 @@
 const express = require('express');
 const Joi = require('joi');
 const bcrypt = require('bcrypt');
-const { User } = require('../db/models');
+const { User, BlacklistedToken } = require('../db/models');
 const router = express.Router();
 const auth = require('../middleware/auth');
 
 // POST /api/auth/login
+// User login
 router.post('/login', async (req, res) => {
   try {
     // Validate request
@@ -45,13 +46,45 @@ router.post('/login', async (req, res) => {
   }
 });
 
-function validateUser(req) {
+// POST /api/auth/logout
+// User logout
+router.post('/logout', auth, async (req, res) => {
+  try {
+    // Token blacklisting
+    const token = req.header('x-auth-token');
+    
+    if (!token) {
+      return res.status(400).json({ error: 'No token provided' });
+    }
+
+    // Check if token is already blacklisted
+    const existingToken = await BlacklistedToken.findOne({ token });
+    if (existingToken) {
+      return res.status(200).json({ message: 'Already logged out' });
+    }
+
+    // Add token to blacklist
+    await BlacklistedToken.create({ token });
+    
+    return res.status(200).json({ 
+      message: 'Logged out successfully' 
+    });
+  } catch (err) {
+    console.error('Logout error:', err);
+    res.status(500).json({ 
+      error: 'Logout failed', 
+      details: process.env.NODE_ENV === 'development' ? err.message : undefined 
+    });
+  }
+});
+
+function validateUser(user) {
   const schema = Joi.object({
     email: Joi.string().min(5).max(255).required().email(),
-    password: Joi.string().min(5).max(255).required()
+    password: Joi.string().min(5).max(255).required(),
   });
 
-  return schema.validate(req);
+  return schema.validate(user);
 }
 
 module.exports = router;
