@@ -15,46 +15,40 @@ export default function VoucherPage({ navigation }) {
       setLoading(true);
       try {
         const token = await AsyncStorage.getItem('userToken');
-        const userId = await AsyncStorage.getItem('userId');
+        console.log('User token:', token);
 
-        if (!token || !userId) {
+        if (!token) {
           Alert.alert('Error', 'Please log in first.');
           setLoading(false);
           return;
         }
 
-        // 1. Fetch user info (points)
-        const userRes = await fetch(`http://localhost:3000/api/users/${userId}`, {
-          headers: { 'x-auth-token': token }
-        });
-        const userData = await userRes.json();
-        if (!userRes.ok) {
-          Alert.alert('Error', userData.error || 'Failed to fetch user data');
-          setLoading(false);
-          return;
-        }
-        setUser(userData);
-
-        // 2. Fetch voucher claim eligibility
+        // Check voucher eligibility
         const checkRes = await fetch('http://localhost:3000/api/vouchers/check', {
           headers: { 'x-auth-token': token }
         });
-        const checkData = await checkRes.json();
+
         if (checkRes.ok) {
+          const checkData = await checkRes.json();
+          console.log('Voucher eligibility:', checkData);
           setCanClaim(checkData.canClaim);
           setRequiredPoints(checkData.requiredPoints);
+          setUser({ points: checkData.currentPoints });
         }
 
-        // 3. Fetch user's claimed vouchers
-        const myVouchersRes = await fetch('http://localhost:3000/api/vouchers/my-vouchers', {
+        // Fetch user's vouchers
+        const vouchersRes = await fetch('http://localhost:3000/api/vouchers/my-vouchers', {
           headers: { 'x-auth-token': token }
         });
-        const myVouchersData = await myVouchersRes.json();
-        if (myVouchersRes.ok) setMyVouchers(myVouchersData);
+
+        if (vouchersRes.ok) {
+          const vouchersData = await vouchersRes.json();
+          setMyVouchers(vouchersData);
+        }
 
       } catch (err) {
         console.error(err);
-        Alert.alert('Error', 'Network error');
+        Alert.alert('Error', 'Failed to load data');
       } finally {
         setLoading(false);
       }
@@ -64,26 +58,35 @@ export default function VoucherPage({ navigation }) {
   }, []);
 
   const handleClaimVoucher = async () => {
+    if (!canClaim) {
+      Alert.alert('Not Enough Points', `You need ${requiredPoints} points to claim a voucher. You currently have ${user?.points || 0} points.`);
+      return;
+    }
+
     try {
       const token = await AsyncStorage.getItem('userToken');
 
       const res = await fetch('http://localhost:3000/api/vouchers/claim', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-auth-token': token },
+        headers: { 
+          'Content-Type': 'application/json', 
+          'x-auth-token': token },
       });
       const data = await res.json();
 
-      if (res.ok && data.success) {
+      if (res.ok) {
+        // Update local state
+        setUser(prev => ({ ...prev, points: data.remainingPoints }));
+        setMyVouchers(prev => [...prev, data.voucher]);
+        setCanClaim(data.remainingPoints >= requiredPoints);
         Alert.alert('Success', `Voucher claimed! Code: ${data.voucher.code}`);
-        setUser({ ...user, points: data.remainingPoints });
-        setMyVouchers([...myVouchers, data.voucher]);
-        setCanClaim(false);
+        
       } else {
         Alert.alert('Error', data.error || 'Failed to claim voucher');
       }
     } catch (err) {
       console.error(err);
-      Alert.alert('Error', 'Network error');
+      Alert.alert('Error', 'Failed to claim voucher');
     }
   };
 

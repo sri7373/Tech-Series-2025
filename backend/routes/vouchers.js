@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { User } = require('../db/models');
 const auth = require('../middleware/auth');
+const crypto = require('crypto');
 
 // Points needed for a voucher
 const POINTS_REQUIRED = 100;
@@ -9,86 +10,66 @@ const POINTS_REQUIRED = 100;
 // Check if user can claim a voucher
 router.get('/check', auth, async (req, res) => {
   try {
-    const requestedUserId = req.params.id;
-    const authenticatedUserId = req.user._id.toString();
-    
-    // Allow access if: requesting own data OR user is admin
-    if (requestedUserId !== authenticatedUserId && !req.user.isAdmin) {
-      return res.status(403).json({ error: 'Access denied' });
-    }
+    const user = await User.findById(req.user._id);
+    if (!user) return res.status(404).json({ error: 'User not found' });
 
-    const user = await User.findById(req.requestedUserId._id);
-    const canClaim = user.points >= POINTS_REQUIRED;
-    
     res.json({
-      canClaim,
+      canClaim: user.points >= POINTS_REQUIRED,
       currentPoints: user.points,
       requiredPoints: POINTS_REQUIRED
     });
-  } catch (error) {
-    res.status(500).json({ error: 'Server error' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to check voucher eligibility' });
   }
 });
 
 // Claim a voucher
 router.post('/claim', auth, async (req, res) => {
   try {
-    const requestedUserId = req.params.id;
-    const authenticatedUserId = req.user._id.toString();
-    
-    // Allow access if: requesting own data OR user is admin
-    if (requestedUserId !== authenticatedUserId && !req.user.isAdmin) {
-      return res.status(403).json({ error: 'Access denied' });
+    const user = await User.findById(req.user._id);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    if (user.points < POINTS_REQUIRED) {
+      return res.status(400).json({ 
+        error: `Not enough points. You have ${user.points}, need ${POINTS_REQUIRED}` 
+      });
     }
 
-    const user = await User.findById(req.user._id);
-    
-    if (user.points < POINTS_REQUIRED) {
-      return res.status(400).json({ error: 'Not enough points' });
-    }
-    
-    // Generate a simple voucher code
-    const voucherCode = 'VOUCHER-' + Math.random().toString(36).substr(2, 8).toUpperCase();
-    
-    // Create voucher (10% discount, expires in 30 days)
+    // Generate voucher code
+    const voucherCode = crypto.randomBytes(4).toString('hex').toUpperCase();
     const newVoucher = {
       code: voucherCode,
-      discount: 10,
-      expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
+      discount: 10, // 10% discount
+      expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
       used: false
     };
-    
+
     // Add voucher to user and deduct points
     user.vouchers.push(newVoucher);
     user.points -= POINTS_REQUIRED;
-    
     await user.save();
-    
+
     res.json({
       success: true,
       voucher: newVoucher,
-      remainingPoints: user.points
+      remainingPoints: user.points,
+      message: 'Voucher claimed successfully!'
     });
-  } catch (error) {
-    res.status(500).json({ error: 'Server error' });
+  } catch (err) {
+    console.error('Voucher claim error:', err);
+    res.status(500).json({ error: 'Failed to claim voucher' });
   }
 });
 
 // Get user's vouchers
 router.get('/my-vouchers', auth, async (req, res) => {
   try {
-    const requestedUserId = req.params.id;
-    const authenticatedUserId = req.user._id.toString();
-    
-    // Allow access if: requesting own data OR user is admin
-    if (requestedUserId !== authenticatedUserId && !req.user.isAdmin) {
-      return res.status(403).json({ error: 'Access denied' });
-    }
+    const user = await User.findById(req.user._id).select('vouchers');
+    if (!user) return res.status(404).json({ error: 'User not found' });
 
-    const user = await User.findById(req.user._id);
     res.json(user.vouchers);
-  } catch (error) {
-    res.status(500).json({ error: 'Server error' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch vouchers' });
   }
 });
 
