@@ -7,12 +7,13 @@ import { colours, spacing, typography } from '../theme';
 import NavigationBar from './NavigationBar';
 import ProductCard from './ProductCard';
 
+
 export default function HomeScreen({ navigation }) {
   // Helper to normalize category names (lowercase, remove trailing s, replace underscores)
   function normalizeCategory(str) {
     return str ? str.toLowerCase().replace(/_/g, ' ').replace(/s$/, '') : '';
   }
-  
+
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [searchText, setSearchText] = useState('');
@@ -32,11 +33,11 @@ export default function HomeScreen({ navigation }) {
     const sidebarWidth = 80;
     const contentWidth = windowWidth - sidebarWidth;
     const padding = spacing.lg * 2;
-    
+
     // Calculate how many 160px cards can fit with spacing
     const availableWidth = contentWidth - padding;
     const columns = Math.floor(availableWidth / (320 + spacing.sm));
-    
+
     return Math.max(1, columns); // Ensure at least 1 column
   }
 
@@ -56,10 +57,10 @@ export default function HomeScreen({ navigation }) {
     const updateLayout = () => {
       setNumColumns(calculateColumns());
     };
-    
+
     const subscription = Dimensions.addEventListener('change', updateLayout);
     updateLayout();
-    
+
     return () => subscription?.remove();
   }, []);
 
@@ -141,7 +142,13 @@ export default function HomeScreen({ navigation }) {
 
   // Render product item using the new ProductCard component
   const renderProductItem = ({ item }) => (
-    <ProductCard item={item} width={itemWidth} animation={bounceAnim} />
+    
+    <TouchableOpacity
+      onPress={() => navigation.navigate('Recommendations', { product: item })}
+      activeOpacity={0.8} // optional: for touch feedback
+    >
+      <ProductCard item={item} width={itemWidth} animation={bounceAnim} />
+    </TouchableOpacity>
   );
 
   return (
@@ -166,7 +173,7 @@ export default function HomeScreen({ navigation }) {
                 </View>
                 <Text style={styles.pointsLabel}>Eco Points</Text>
               </View>
-              
+
               <View style={styles.searchContainer}>
                 <Ionicons name="search" size={20} color={colours.mediumGray} style={styles.searchIcon} />
                 <TextInput
@@ -225,7 +232,7 @@ export default function HomeScreen({ navigation }) {
                 {selectedCategory !== 'All' ? ` in ${selectedCategory.replace('_', ' ')}` : ' in Popular'}
                 {searchText ? ` for "${searchText}"` : ''}
               </Text>
-              
+
               <TouchableOpacity style={styles.filterButton}>
                 <Ionicons name="filter" size={16} color={colours.primary} />
                 <Text style={styles.filterText}>Filters</Text>
@@ -272,9 +279,9 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'rgba(255, 255, 255, 0.85)',
   },
-  container: { 
-    flex: 1, 
-    flexDirection: 'row', 
+  container: {
+    flex: 1,
+    flexDirection: 'row',
   },
   loadingContainer: {
     backgroundColor: 'transparent',
@@ -284,9 +291,9 @@ const styles = StyleSheet.create({
     backgroundColor: colours.surface,
   },
   loadingContent: {
-    flex: 1, 
-    justifyContent: 'center', 
-    alignItems: 'center', 
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
     backgroundColor: 'transparent'
   },
   loadingText: {
@@ -294,8 +301,8 @@ const styles = StyleSheet.create({
     color: colours.textSecondary,
     fontSize: typography.sizes.base,
   },
-  mainContent: { 
-    flex: 1, 
+  mainContent: {
+    flex: 1,
     padding: spacing.md,
   },
   header: {
@@ -350,7 +357,7 @@ const styles = StyleSheet.create({
   searchIcon: {
     marginRight: spacing.xs,
   },
-  searchInput: { 
+  searchInput: {
     flex: 1,
     height: 45,
     color: colours.textPrimary,
