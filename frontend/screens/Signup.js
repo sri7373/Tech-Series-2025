@@ -6,9 +6,10 @@ export default function SignupScreen({ navigation }) {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [neighbourhood, setNeighbourhood] = useState('');
 
   const handleSignup = async () => {
-    if (!username || !email || !password) {
+    if (!username || !email || !password || !neighbourhood) {
       Alert.alert('Validation Error', 'Please fill in all fields.');
       return;
     }
@@ -17,7 +18,7 @@ export default function SignupScreen({ navigation }) {
       const response = await fetch('http://localhost:3000/api/users', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, email, password }),
+        body: JSON.stringify({ username, email, password, neighbourhood }),
       });
 
       const data = await response.json();
@@ -53,6 +54,13 @@ export default function SignupScreen({ navigation }) {
 
           <TextInput
             style={styles.input}
+            placeholder="Enter your neighbourhood"
+            value={neighbourhood}
+            onChangeText={setNeighbourhood}
+          />
+
+          <TextInput
+            style={styles.input}
             placeholder="Enter your email"
             keyboardType="email-address"
             value={email}
@@ -81,6 +89,8 @@ export default function SignupScreen({ navigation }) {
     </ImageBackground>
   );
 }
+
+
 
 const styles = StyleSheet.create({
   background: { flex: 1, width: '100%', height: '100%' },
