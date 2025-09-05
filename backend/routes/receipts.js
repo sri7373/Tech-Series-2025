@@ -1,6 +1,5 @@
 const express = require("express");
 const router = express.Router();
-const auth = require("../middleware/auth");
 const upload = require("../middleware/upload"); // multer config
 const { extractItems } = require("../services/mindeeService");
 const { matchItemsAndCalculatePoints } = require("../services/matchService");
@@ -12,7 +11,7 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 
-router.post("/scan", auth, async (req, res, next) => {
+router.post("/scan", async (req, res, next) => {
   try {
     let imagePath;
     let tempPath;
@@ -79,7 +78,7 @@ router.post("/scan", auth, async (req, res, next) => {
 const { Receipt } = require('../db/models');
 
 // POST /api/receipts
-router.post('/', auth, async (req, res) => {
+router.post('/', async (req, res) => {
   console.log('Receipt payload:', req.body);
 
   try {
@@ -108,7 +107,7 @@ router.post('/', auth, async (req, res) => {
 });
 
 // GET /api/receipts/history/:userId
-router.get('/history/:userId', auth, async (req, res) => {
+router.get('/history/:userId', async (req, res) => {
   const receipts = await Receipt.find({ user: req.params.userId }).sort({ uploadedAt: 1 });
   res.send(receipts);
 });
