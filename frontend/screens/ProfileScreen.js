@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, Alert, ScrollView, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, Alert, ScrollView, Dimensions, ImageBackground } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LineChart } from 'react-native-chart-kit';
 import { ScrollView as RNScrollView } from 'react-native'; // alias for horizontal scroll
 import { processColor } from 'react-native';
+import { colours, spacing, typography } from '../theme';
 
 export default function ProfileScreen() {
   const [user, setUser] = useState(null);
@@ -139,146 +140,181 @@ export default function ProfileScreen() {
 
   if (loading) {
     return (
-      <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#007AFF" />
-      </View>
+      <ImageBackground
+        source={require('../assets/leafy.jpg')}
+        style={styles.background}
+        resizeMode="cover"
+      >
+        <View style={styles.centeredOverlay}>
+          <ActivityIndicator size="large" color={colours.primary} />
+        </View>
+      </ImageBackground>
     );
   }
 
   if (!user) {
     return (
-      <View style={styles.centered}>
-        <Text style={{ color: '#333' }}>No user data found.</Text>
-      </View>
+      <ImageBackground
+        source={require('../assets/leafy.jpg')}
+        style={styles.background}
+        resizeMode="cover"
+      >
+        <View style={styles.centeredOverlay}>
+          <Text style={{ color: colours.text }}>No user data found.</Text>
+        </View>
+      </ImageBackground>
     );
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      {/* Profile Picture */}
-      <View style={styles.avatarContainer}>
-        <Ionicons name="person-circle" size={100} color="#007AFF" />
-      </View>
-      
-      {/* Username */}
-      <Text style={styles.username}>{user.username}</Text>
-      
-      {/* Email */}
-      <Text style={styles.email}>{user.email}</Text>
-      
-      {/* Neighbourhood */}
-      {user.neighbourhood && (
-        <Text style={styles.neighbourhood}>{user.neighbourhood}</Text>
-      )}
-      
-      {/* Points */}
-      <View style={styles.pointsContainer}>
-        <Ionicons name="star" size={24} color="#FFD700" />
-        <Text style={styles.pointsText}>{user.points} Points</Text>
-      </View>
-      
-      {/* Eco Journey Dashboard */}
-      <View style={styles.dashboardSection}>
-        <Text style={styles.sectionTitle}>Eco Journey Dashboard</Text>
-        {todayTrend !== null && (
-          <Text style={styles.trendText}>
-            {todayTrend >= 0
-              ? `Up ${todayTrend}% in points today compared to yesterday!`
-              : `Down ${Math.abs(todayTrend)}% in points today compared to yesterday.`}
-          </Text>
-        )}
-
-        {/* Full width Eco Points Line Chart */}
-        {sortedStats.length > 0 && (
-          <RNScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ alignItems: 'center', justifyContent: 'center' }}
-            style={{ width: '100%' }}
-          >
-            <View style={{ position: 'relative' }}>
-              <LineChart
-                data={pointsChartData}
-                width={chartWidth}
-                height={220}
-                yAxisLabel=""
-                yAxisSuffix=" pts"
-                chartConfig={{
-                  backgroundColor: "#fff",
-                  backgroundGradientFrom: "#fff",
-                  backgroundGradientTo: "#fff",
-                  decimalPlaces: 0,
-                  color: (opacity = 1) => `rgba(81, 160, 71, ${opacity})`, // green
-                  labelColor: (opacity = 1) => `rgba(51,51,51,${opacity})`,
-                  propsForDots: {
-                    r: "5",
-                    strokeWidth: "2",
-                    stroke: "#43a047"
-                  },
-                  propsForBackgroundLines: {
-                    strokeDasharray: "",
-                  },
-                }}
-                style={{
-                  marginVertical: 4,
-                  borderRadius: 12,
-                  alignSelf: 'center'
-                }}
-                fromZero
-                bezier
-                renderDotContent={({ index, x, y, indexData }) => (
-                  index === todayIdx ? (
-                    <View
-                      key={index}
-                      style={{
-                        position: 'absolute',
-                        left: x - 6,
-                        top: y - 6,
-                        width: 12,
-                        height: 12,
-                        borderRadius: 6,
-                        backgroundColor: '#d32f2f',
-                        borderWidth: 2,
-                        borderColor: '#fff',
-                        zIndex: 10,
-                      }}
-                    />
-                  ) : null
-                )}
-              />
-            </View>
-          </RNScrollView>
-        )}
-      </View>
-
-      {/* Ranks */}
-      <View style={styles.rankSection}>
-        <Text style={styles.sectionTitle}>Your Rankings</Text>
-        
-        {/* National Rank */}
-        <View style={styles.rankContainer}>
-          <Ionicons name="trophy" size={24} color="#FFA500" />
-          <View style={styles.rankTextContainer}>
-            <Text style={styles.rankText}>National Rank: #{nationalRank || 'N/A'}</Text>
-          </View>
+    <ImageBackground
+      source={require('../assets/leafy.jpg')}
+      style={styles.background}
+      resizeMode="cover"
+    >
+      <ScrollView contentContainerStyle={styles.overlay}>
+        {/* Profile Picture */}
+        <View style={styles.avatarContainer}>
+          <Ionicons name="person-circle" size={100} color="#007AFF" />
         </View>
         
-        {/* Neighbourhood Rank */}
+        {/* Username */}
+        <Text style={styles.username}>{user.username}</Text>
+        
+        {/* Email */}
+        <Text style={styles.email}>{user.email}</Text>
+        
+        {/* Neighbourhood */}
         {user.neighbourhood && (
+          <Text style={styles.neighbourhood}>{user.neighbourhood}</Text>
+        )}
+        
+        {/* Points */}
+        <View style={styles.pointsContainer}>
+          <Ionicons name="star" size={24} color="#FFD700" />
+          <Text style={styles.pointsText}>{user.points} Points</Text>
+        </View>
+        
+        {/* Eco Journey Dashboard */}
+        <View style={styles.dashboardSection}>
+          <Text style={styles.sectionTitle}>Eco Journey Dashboard</Text>
+          {todayTrend !== null && (
+            <Text style={styles.trendText}>
+              {todayTrend >= 0
+                ? `Up ${todayTrend}% in points today compared to yesterday!`
+                : `Down ${Math.abs(todayTrend)}% in points today compared to yesterday.`}
+            </Text>
+          )}
+
+          {/* Full width Eco Points Line Chart */}
+          {sortedStats.length > 0 && (
+            <RNScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{ alignItems: 'center', justifyContent: 'center' }}
+              style={{ width: '100%' }}
+            >
+              <View style={{ position: 'relative' }}>
+                <LineChart
+                  data={pointsChartData}
+                  width={chartWidth}
+                  height={220}
+                  yAxisLabel=""
+                  yAxisSuffix=" pts"
+                  chartConfig={{
+                    backgroundColor: "#fff",
+                    backgroundGradientFrom: "#fff",
+                    backgroundGradientTo: "#fff",
+                    decimalPlaces: 0,
+                    color: (opacity = 1) => `rgba(81, 160, 71, ${opacity})`, // green
+                    labelColor: (opacity = 1) => `rgba(51,51,51,${opacity})`,
+                    propsForDots: {
+                      r: "5",
+                      strokeWidth: "2",
+                      stroke: "#43a047"
+                    },
+                    propsForBackgroundLines: {
+                      strokeDasharray: "",
+                    },
+                  }}
+                  style={{
+                    marginVertical: 4,
+                    borderRadius: 12,
+                    alignSelf: 'center'
+                  }}
+                  fromZero
+                  bezier
+                  renderDotContent={({ index, x, y, indexData }) => (
+                    index === todayIdx ? (
+                      <View
+                        key={index}
+                        style={{
+                          position: 'absolute',
+                          left: x - 6,
+                          top: y - 6,
+                          width: 12,
+                          height: 12,
+                          borderRadius: 6,
+                          backgroundColor: '#d32f2f',
+                          borderWidth: 2,
+                          borderColor: '#fff',
+                          zIndex: 10,
+                        }}
+                      />
+                    ) : null
+                  )}
+                />
+              </View>
+            </RNScrollView>
+          )}
+        </View>
+
+        {/* Ranks */}
+        <View style={styles.rankSection}>
+          <Text style={styles.sectionTitle}>Your Rankings</Text>
+          
+          {/* National Rank */}
           <View style={styles.rankContainer}>
-            <Ionicons name="location" size={24} color="#4CAF50" />
+            <Ionicons name="trophy" size={24} color="#FFA500" />
             <View style={styles.rankTextContainer}>
-              <Text style={styles.rankText}>Neighbourhood Rank: #{neighbourhoodRank || 'N/A'}</Text>
-              <Text style={styles.rankSubtext}>In {user.neighbourhood}</Text>
+              <Text style={styles.rankText}>National Rank: #{nationalRank || 'N/A'}</Text>
             </View>
           </View>
-        )}
-      </View>
-    </ScrollView>
+          
+          {/* Neighbourhood Rank */}
+          {user.neighbourhood && (
+            <View style={styles.rankContainer}>
+              <Ionicons name="location" size={24} color="#4CAF50" />
+              <View style={styles.rankTextContainer}>
+                <Text style={styles.rankText}>Neighbourhood Rank: #{neighbourhoodRank || 'N/A'}</Text>
+                <Text style={styles.rankSubtext}>In {user.neighbourhood}</Text>
+              </View>
+            </View>
+          )}
+        </View>
+      </ScrollView>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
+  background: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
+  },
+  overlay: {
+    flexGrow: 1,
+    padding: 20,
+    backgroundColor: 'rgba(232,245,233,0.5)', // less opaque overlay
+    alignItems: 'center',
+  },
+  centeredOverlay: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(232,245,233,0.5)',
+  },
   container: { 
     flexGrow: 1, 
     padding: 20, 

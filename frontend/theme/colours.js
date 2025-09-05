@@ -14,4 +14,6 @@ export const colours = {
   success: "#388E3C",      // success green
   inputBackground: "#F1F8E9", // input field background
   shadow: "#A5D6A7",       // greenish shadow
+  shadowDark: "#1B5E20",   // darker green shadow for depth
+  shadowLight: "#C8E6C9",  // lighter green shadow for soft effect
 };

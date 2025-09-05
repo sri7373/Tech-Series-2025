@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet, ActivityIndicator, Alert, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, StyleSheet, ActivityIndicator, Alert, TouchableOpacity, ImageBackground } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colours, spacing, typography } from '../theme';
 
@@ -59,7 +59,11 @@ export default function Leaderboard() {
   const renderItem = ({ item }) => {
     const isCurrentUser = currentUserId && item._id === currentUserId;
     return (
-      <View style={[styles.row, isCurrentUser && styles.highlightRow]}>
+      <View style={[
+        styles.row,
+        isCurrentUser && styles.highlightRow,
+        isCurrentUser && styles.currentUserRow // add green highlight for current user
+      ]}>
         <Text style={styles.rank}>{item.rank}</Text>
         <View style={styles.nameContainer}>
           <Text style={styles.name}>{item.username || item.name}</Text>
@@ -91,48 +95,65 @@ export default function Leaderboard() {
   const toggleRanking = (type) => setRankingType(type);
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Leaderboard</Text>
+    <ImageBackground
+      source={require('../assets/leafy.jpg')}
+      style={styles.background}
+      resizeMode="cover"
+    >
+      <View style={styles.overlay}>
+        <View style={styles.container}>
+          <Text style={styles.title}>Leaderboard</Text>
 
-      {/* Toggle buttons */}
-      <View style={styles.toggleContainer}>
-        <TouchableOpacity
-          style={[styles.toggleButton, rankingType === 'nation' && styles.activeToggle]}
-          onPress={() => toggleRanking('nation')}
-        >
-          <Text style={styles.toggleText}>Nation Rankings</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.toggleButton, rankingType === 'neighbourhood' && styles.activeToggle]}
-          onPress={() => toggleRanking('neighbourhood')}
-        >
-          <Text style={styles.toggleText}>Neighbourhood Rankings</Text>
-        </TouchableOpacity>
-      </View>
+          {/* Toggle buttons */}
+          <View style={styles.toggleContainer}>
+            <TouchableOpacity
+              style={[styles.toggleButton, rankingType === 'nation' && styles.activeToggle]}
+              onPress={() => toggleRanking('nation')}
+            >
+              <Text style={styles.toggleText}>Nation Rankings</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.toggleButton, rankingType === 'neighbourhood' && styles.activeToggle]}
+              onPress={() => toggleRanking('neighbourhood')}
+            >
+              <Text style={styles.toggleText}>Neighbourhood Rankings</Text>
+            </TouchableOpacity>
+          </View>
 
-      {loading ? (
-        <ActivityIndicator size="large" color="#007AFF" />
-      ) : (
-        <>
-          {rankingType === 'neighbourhood' && currentUserNeighborhood && (
-            <Text style={styles.neighbourhoodHeader}>
-              {currentUserNeighborhood} Rankings
-            </Text>
+          {loading ? (
+            <ActivityIndicator size="large" color="#007AFF" />
+          ) : (
+            <>
+              {rankingType === 'neighbourhood' && currentUserNeighborhood && (
+                <Text style={styles.neighbourhoodHeader}>
+                  {currentUserNeighborhood} Rankings
+                </Text>
+              )}
+              <FlatList
+                data={usersWithRank.slice(0, 10)}
+                keyExtractor={(item) => item._id || item.id || Math.random().toString()}
+                renderItem={renderItem}
+              />
+              {renderCurrentUserRow()}
+            </>
           )}
-          <FlatList
-            data={usersWithRank.slice(0, 10)}
-            keyExtractor={(item) => item._id || item.id || Math.random().toString()}
-            renderItem={renderItem}
-          />
-          {renderCurrentUserRow()}
-        </>
-      )}
-    </View>
+        </View>
+      </View>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: spacing.lg, backgroundColor: colours.background },
+  background: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
+  },
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(232,245,233,0.5)', // semi-transparent overlay
+  },
+  container: { flex: 1, padding: spacing.lg },
   title: { fontSize: typography.title, fontWeight: 'bold', marginBottom: spacing.sm, textAlign: 'center', color: colours.primary },
   toggleContainer: { flexDirection: 'row', justifyContent: 'center', marginBottom: spacing.md },
   toggleButton: { padding: spacing.sm, marginHorizontal: spacing.xs, borderRadius: spacing.sm, backgroundColor: colours.muted },
@@ -148,8 +169,24 @@ const styles = StyleSheet.create({
     padding: spacing.sm,
     borderRadius: spacing.md
   },
-  row: { flexDirection: 'row', justifyContent: 'space-between', padding: spacing.md, borderBottomWidth: 1, borderColor: colours.border },
-  highlightRow: { backgroundColor: colours.muted, borderRadius: spacing.sm },
+  row: { 
+    flexDirection: 'row', 
+    justifyContent: 'space-between', 
+    padding: spacing.md, 
+    borderBottomWidth: 1, 
+    borderColor: colours.border,
+    backgroundColor: '#f5f5f5', // light gray for others
+    borderRadius: spacing.sm,
+  },
+  highlightRow: { 
+    backgroundColor: colours.surface, // current user white
+    borderRadius: spacing.sm 
+  },
+  currentUserRow: {
+    backgroundColor: colours.muted, // green highlight for current user
+    borderWidth: 2,
+    borderColor: colours.primary,
+  },
   bottomRow: { marginTop: spacing.sm, borderTopWidth: 2, borderTopColor: colours.primary },
   rank: { fontWeight: 'bold', width: 30, color: colours.text },
   nameContainer: { flex: 1 },

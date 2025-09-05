@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { categories, categoryImages } from './categories';
-import { View, Text, FlatList, TextInput, TouchableOpacity, StyleSheet, Alert, ScrollView, ActivityIndicator, Image } from 'react-native';
+import { View, Text, FlatList, TextInput, TouchableOpacity, StyleSheet, Alert, ScrollView, ActivityIndicator, Image, ImageBackground } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import LogoutButton from './LogoutButton';
 import { colours, spacing, typography } from '../theme';
@@ -21,6 +21,7 @@ export default function HomeScreen({ navigation }) {
   const PAGE_SIZE = 10;
   const [page, setPage] = useState(1);
   const [displayedProducts, setDisplayedProducts] = useState([]);
+  const [hoveredNav, setHoveredNav] = useState(null);
 
   // Fetch auto products from API
   useEffect(() => {
@@ -76,9 +77,15 @@ export default function HomeScreen({ navigation }) {
 
   if (loading) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" color="#007AFF" />
-      </View>
+      <ImageBackground
+        source={require('../assets/leafy.jpg')}
+        style={styles.background}
+        resizeMode="cover"
+      >
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(232,245,233,0.5)' }}>
+          <ActivityIndicator size="large" color={colours.primary} />
+        </View>
+      </ImageBackground>
     );
   }
 
@@ -90,150 +97,211 @@ export default function HomeScreen({ navigation }) {
   });
 
   return (
-    <View style={styles.container}>
-      {/* Sidebar */}
-      <View style={styles.sidebar}>
-        <TouchableOpacity
-          style={styles.navItem}
-          onPress={() => navigation.navigate('Home')}
-        >
-          <Ionicons name="home" size={28} color="#007AFF" />
-          <Text style={styles.navTextActive}>Home</Text>
-        </TouchableOpacity>
+    <ImageBackground
+      source={require('../assets/leafy.jpg')}
+      style={styles.background}
+      resizeMode="cover"
+    >
+      <View style={styles.overlay}>
+        <View style={styles.container}>
+          {/* Sidebar */}
+          <View style={styles.sidebar}>
+            <TouchableOpacity
+              style={[
+                styles.navItem,
+                hoveredNav === 'home' && styles.navItemHover
+              ]}
+              onPress={() => navigation.navigate('Home')}
+              onMouseEnter={() => setHoveredNav('home')}
+              onMouseLeave={() => setHoveredNav(null)}
+            >
+              <Ionicons name="home" size={28} color="#007AFF" />
+              <Text style={styles.navTextActive}>ECOmmerce</Text>
+            </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.navItem}
-          onPress={() => navigation.navigate('Leaderboard')}
-        >
-          <Ionicons name="trophy" size={28} color="#555" />
-          <Text style={styles.navText}>Leaderboard</Text>
-        </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.navItem,
+                hoveredNav === 'leaderboard' && styles.navItemHover
+              ]}
+              onPress={() => navigation.navigate('Leaderboard')}
+              onMouseEnter={() => setHoveredNav('leaderboard')}
+              onMouseLeave={() => setHoveredNav(null)}
+            >
+              <Ionicons name="trophy" size={28} color="#555" />
+              <Text style={styles.navText}>Leaderboard</Text>
+            </TouchableOpacity>
 
-        {/* Upload Button */}
-        <TouchableOpacity
-          style={styles.navItem}
-          onPress={() => navigation.navigate('Upload')}
-        >
-          <Ionicons name="cloud-upload-outline" size={28} color="#555" />
-          <Text style={styles.navText}>Upload</Text>
-        </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.navItem,
+                hoveredNav === 'upload' && styles.navItemHover
+              ]}
+              onPress={() => navigation.navigate('Upload')}
+              onMouseEnter={() => setHoveredNav('upload')}
+              onMouseLeave={() => setHoveredNav(null)}
+            >
+              <Ionicons name="cloud-upload-outline" size={28} color="#555" />
+              <Text style={styles.navText}>Upload</Text>
+            </TouchableOpacity>
 
-        {/* Voucher Button aligned with other navItems */}
-        <TouchableOpacity
-          style={styles.navItem}
-          onPress={() => navigation.navigate('VoucherScreen')}
-        >
-          <Ionicons name="gift-outline" size={28} color={colours.primary} />
-          <Text style={styles.navText}>Vouchers</Text>
-        </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.navItem,
+                hoveredNav === 'voucher' && styles.navItemHover
+              ]}
+              onPress={() => navigation.navigate('VoucherScreen')}
+              onMouseEnter={() => setHoveredNav('voucher')}
+              onMouseLeave={() => setHoveredNav(null)}
+            >
+              <Ionicons name="gift-outline" size={28} color={colours.primary} />
+              <Text style={styles.navText}>Vouchers</Text>
+            </TouchableOpacity>
 
-        {/* Push logout & profile to bottom */}
-        <View style={{ flex: 1 }} />
+            <View style={{ flex: 1 }} />
 
-        {/* Profile Icon */}
-        <TouchableOpacity
-          style={styles.navItem}
-          onPress={() => navigation.navigate('Profile')}
-        >
-          <Ionicons name="person-circle" size={28} color="#007AFF" />
-          <Text style={styles.navText}>Profile</Text>
-        </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.navItem,
+                hoveredNav === 'profile' && styles.navItemHover
+              ]}
+              onPress={() => navigation.navigate('Profile')}
+              onMouseEnter={() => setHoveredNav('profile')}
+              onMouseLeave={() => setHoveredNav(null)}
+            >
+              <Ionicons name="person-circle" size={28} color="#007AFF" />
+              <Text style={styles.navText}>Profile</Text>
+            </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.navItem}
-          onPress={() => navigation.navigate('Logout')}
-        >
-          <Ionicons name="log-out-outline" size={28} color="#FF3B30" />
-          <Text style={styles.navText}>Logout</Text>
-        </TouchableOpacity>
-      </View>
+            <TouchableOpacity
+              style={[
+                styles.navItem,
+                hoveredNav === 'logout' && styles.navItemHover
+              ]}
+              onPress={() => navigation.navigate('Logout')}
+              onMouseEnter={() => setHoveredNav('logout')}
+              onMouseLeave={() => setHoveredNav(null)}
+            >
+              <Ionicons name="log-out-outline" size={28} color="#FF3B30" />
+              <Text style={styles.navText}>Logout</Text>
+            </TouchableOpacity>
+          </View>
 
-      {/* Main Content */}
-      <View style={styles.mainContent}>
-        {/* Title & Subtitle */}
-        <Text style={styles.title}>Products</Text>
+          {/* Main Content */}
+          <View style={styles.mainContent}>
+            {/* Title & Subtitle */}
 
-        {/* Search Bar */}
-        <View style={styles.topBar}>
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Search products..."
-            value={searchText}
-            onChangeText={setSearchText}
-          />
-        </View>
+            {/* Search Bar */}
+            <View style={styles.topBar}>
+              <TextInput
+                style={styles.searchInput}
+                placeholder="Search products..."
+                value={searchText}
+                onChangeText={setSearchText}
+              />
+            </View>
 
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoryBar} contentContainerStyle={styles.categoryBarContent}>
-            {['All', ...categories].map((cat, idx) => (
-              <TouchableOpacity
-                key={cat}
-                style={{
-                  ...styles.categoryButton,
-                  borderColor: selectedCategory === cat ? '#FF6B35' : '#eee',
-                  borderWidth: selectedCategory === cat ? 2 : 1,
-                  backgroundColor: '#fff',
-                  marginRight: 16,
-                  height: 110,
-                  justifyContent: 'center',
-                  alignItems: 'center', 
-                }}
-                onPress={() => setSelectedCategory(cat)}
+            <View style={{ width: '100%', alignItems: 'center', justifyContent: 'center' }}>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                style={styles.categoryBar}
+                contentContainerStyle={[styles.categoryBarContent, { justifyContent: 'center', alignItems: 'center' }]}
               >
-                <View style={styles.iconBox}>
-                  <Image
-                    source={{ uri: cat === 'All' ? 'https://cdn-icons-png.flaticon.com/512/1046/1046783.png' : categoryImages[cat] }}
-                    style={styles.categoryIcon}
-                    resizeMode="contain"
-                  />
-                </View>
-                <Text style={{
-                  ...styles.categoryText,
-                  color: selectedCategory === cat ? '#FF6B35' : '#333',
-                  fontWeight: selectedCategory === cat ? 'bold' : 'normal',
-                  textTransform: 'capitalize',
-                }}>{cat.replace('_', ' ')}</Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
+                {['All', ...categories].map((cat, idx) => (
+                  <TouchableOpacity
+                    key={cat}
+                    style={{
+                      ...styles.categoryButton,
+                      borderColor: selectedCategory === cat ? colours.shadowDark : colours.border, // use shadowDark for selected
+                      borderWidth: selectedCategory === cat ? 2 : 1,
+                      backgroundColor: selectedCategory === cat ? colours.muted : colours.surface, // highlight selected
+                      marginRight: 16,
+                      height: 110,
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      // Add shadow to navigator/category button
+                      shadowColor: colours.shadowDark,
+                      shadowOffset: { width: 0, height: 2 },
+                      shadowOpacity: selectedCategory === cat ? 0.25 : 0.12,
+                      shadowRadius: selectedCategory === cat ? 6 : 3,
+                      elevation: selectedCategory === cat ? 6 : 2,
+                    }}
+                    onPress={() => setSelectedCategory(cat)}
+                  >
+                    <View style={styles.iconBox}>
+                      <Image
+                        source={{ uri: cat === 'All' ? 'https://cdn-icons-png.flaticon.com/512/1046/1046783.png' : categoryImages[cat] }}
+                        style={styles.categoryIcon}
+                        resizeMode="contain"
+                      />
+                    </View>
+                    <Text style={{
+                      ...styles.categoryText,
+                      color: selectedCategory === cat ? colours.primary : colours.text,
+                      fontWeight: selectedCategory === cat ? 'bold' : 'normal',
+                      textTransform: 'capitalize',
+                    }}>
+                      {cat.replace('_', ' ')}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </View>
 
-        {/* Product List */}
-      <View style={{ flex: 1, marginTop: 0 }}>
-          <FlatList
-            data={displayedProducts}
-            keyExtractor={(item) => item.id || item._id || Math.random().toString()}
-            contentContainerStyle={{ paddingBottom: 20 }}
-            numColumns={2}
-            renderItem={({ item }) => (
-              <View style={styles.productCard}>
-                {item.imageUrl ? (
-                  <Image source={{ uri: item.imageUrl }} style={styles.productImage} />
-                ) : (
-                  <View style={styles.noImagePlaceholder}>
-                    <Text style={styles.noImageText}>No Image</Text>
+            {/* Product List */}
+          <View style={{ flex: 1, marginTop: 0 }}>
+              <FlatList
+                data={displayedProducts}
+                keyExtractor={(item) => item.id || item._id || Math.random().toString()}
+                contentContainerStyle={{ paddingBottom: 20 }}
+                numColumns={4}
+                renderItem={({ item }) => (
+                  <View style={styles.productCard}>
+                    {item.imageUrl ? (
+                      <Image source={{ uri: item.imageUrl }} style={styles.productImage} />
+                    ) : (
+                      <View style={styles.noImagePlaceholder}>
+                        <Text style={styles.noImageText}>No Image</Text>
+                      </View>
+                    )}
+                    <View style={styles.productInfo}>
+                      <Text style={styles.productName}>{item.name}</Text>
+                      <Text style={styles.productDetail}>${item.price} </Text>
+                      <Text style={styles.productDetail}>CO2: {item.carbonEmissions} g</Text>
+                      <Text style={styles.productDetail}>Plastic: {item.plasticUsage} g</Text>
+                      <Text style={styles.productDetail}>EcoScore: {item.sustainabilityScore}</Text>
+                      <Text style={styles.productDetail}>Points: {item.points}</Text>
+                      <Text style={styles.productDetail}>Category: {item.category}</Text>
+                    </View>
                   </View>
                 )}
-                <View style={styles.productInfo}>
-                  <Text style={styles.productName}>{item.name}</Text>
-                  <Text style={styles.productDetail}>${item.price} </Text>
-                  <Text style={styles.productDetail}>CO2: {item.carbonEmissions} g</Text>
-                  <Text style={styles.productDetail}>Plastic: {item.plasticUsage} g</Text>
-                  <Text style={styles.productDetail}>EcoScore: {item.sustainabilityScore}</Text>
-                  <Text style={styles.productDetail}>Points: {item.points}</Text>
-                  <Text style={styles.productDetail}>Category: {item.category}</Text>
-                </View>
-              </View>
-            )}
-            onEndReached={handleLoadMore}
-            onEndReachedThreshold={0.5}
-          />
+                onEndReached={handleLoadMore}
+                onEndReachedThreshold={0.5}
+              />
+            </View>
+          </View>
         </View>
       </View>
-    </View>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, flexDirection: 'row', backgroundColor: colours.background },
+  background: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
+  },
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(232,245,233,0.5)', // less opaque overlay
+  },
+  container: { 
+    flex: 1, 
+    flexDirection: 'row', 
+    backgroundColor: 'transparent' 
+  },
   sidebar: {
     width: 80,
     backgroundColor: colours.surface,
@@ -244,6 +312,12 @@ const styles = StyleSheet.create({
   navItem: {
     marginBottom: spacing.lg,
     alignItems: 'center',
+    borderRadius: spacing.md,
+    transition: 'background-color 0.2s',
+  },
+  navItemHover: {
+    backgroundColor: colours.muted,
+    boxShadow: `0 2px 8px ${colours.shadowDark}`,
   },
   navText: {
     color: colours.textSecondary,
@@ -271,17 +345,24 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: spacing.md,
   },
-  topBar: { flexDirection: 'row', marginBottom: spacing.lg, alignItems: 'center' },
+  topBar: { 
+    flexDirection: 'row', 
+    marginBottom: spacing.lg, 
+    alignItems: 'center',
+    marginTop: spacing.md, // move down a bit
+    justifyContent: 'center',
+  },
   searchInput: { 
-    flex: 1, 
-    height: spacing.xl, // was spacing.lg, now larger
+    width: '80%', // make it smaller and not flush to sides
+    height: spacing.xl,
     borderWidth: 1, 
     borderColor: colours.border, 
     borderRadius: spacing.md, 
     paddingHorizontal: spacing.md,
     backgroundColor: colours.inputBackground,
     color: colours.text,
-    fontSize: typography.body, // ensure readable font size
+    fontSize: typography.body,
+    alignSelf: 'center',
   },
   categoryBar: {
     marginBottom: spacing.md,
@@ -304,6 +385,7 @@ const styles = StyleSheet.create({
     backgroundColor: colours.surface,
     marginBottom: 4,
     marginRight: 0,
+    borderColor: colours.border, // changed from '#eee' to theme green border
   },
   iconBox: {
     width: 48,
@@ -343,6 +425,8 @@ const styles = StyleSheet.create({
     borderRadius: spacing.md,
     marginBottom: spacing.lg,
     maxHeight: 400,
+    borderColor: colours.border, // green border for forms
+    borderWidth: 1,
   },
   formTitle: {
     fontSize: typography.body,
@@ -369,7 +453,7 @@ const styles = StyleSheet.create({
   },
   input: {
     borderWidth: 1,
-    borderColor: colours.border,
+    borderColor: colours.border, // changed from '#ddd' to theme green border
     borderRadius: spacing.md,
     padding: spacing.sm,
     fontSize: typography.body,
@@ -383,6 +467,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: spacing.md,
   },
+  uploadBox: {
+    border: `1.5px solid ${colours.border}`, // ensure green border for upload box
+    borderRadius: spacing.md,
+    padding: spacing.md,
+    marginBottom: spacing.lg,
+    backgroundColor: colours.surface,
+  },
   disabledButton: {
     backgroundColor: colours.muted,
   },
@@ -394,27 +485,32 @@ const styles = StyleSheet.create({
     padding: spacing.sm,
     alignItems: 'center',
     flexDirection: 'column',
-    shadowColor: colours.shadow,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-    elevation: 4,
+    borderColor: colours.border,
+    borderWidth: 1,
+    // Add shadow for product card
+    shadowColor: colours.shadowDark,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.18,
+    shadowRadius: 8,
+    elevation: 8,
   },
   productImage: {
-    width: 100,
-    height: 100,
-    borderRadius: spacing.sm,
+    width: 160, // increased from 100
+    height: 160, // increased from 100
+    borderRadius: spacing.md,
     marginBottom: spacing.sm,
     resizeMode: 'cover',
   },
   noImagePlaceholder: {
-    width: 100,
-    height: 100,
-    borderRadius: spacing.sm,
+    width: 160, // match productImage size
+    height: 160,
+    borderRadius: spacing.md,
     marginBottom: spacing.sm,
     backgroundColor: colours.muted,
     justifyContent: 'center',
     alignItems: 'center',
+    borderColor: colours.border,
+    borderWidth: 1,
   },
   noImageText: {
     fontSize: typography.caption,

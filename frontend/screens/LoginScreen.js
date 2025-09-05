@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ImageBackground } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colours, spacing, typography } from '../theme';
 
@@ -37,50 +37,61 @@ export default function LoginScreen({ navigation }) {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.card}>
-        <Text style={styles.title}>CyberMonkeys</Text>
+    <ImageBackground
+      source={require('../assets/leafy.jpg')}
+      style={styles.background}
+      resizeMode="cover"
+    >
+      <View style={styles.container}>
+        <View style={styles.card}>
+          <Text style={styles.title}>ECOmmerce</Text>
 
-        <TextInput
-          style={styles.input}
-          placeholder="Enter your email"
-          keyboardType="email-address"
-          value={email}
-          onChangeText={setEmail}
-        />
+          <TextInput
+            style={styles.input}
+            placeholder="Enter your email"
+            keyboardType="email-address"
+            value={email}
+            onChangeText={setEmail}
+          />
 
-        <TextInput
-          style={styles.input}
-          placeholder="Enter your password"
-          secureTextEntry
-          value={password}
-          onChangeText={setPassword}
-        />
+          <TextInput
+            style={styles.input}
+            placeholder="Enter your password"
+            secureTextEntry
+            value={password}
+            onChangeText={setPassword}
+          />
 
-        <TouchableOpacity onPress={() => Alert.alert('Forgot Password clicked')}>
-          <Text style={styles.linkText}>Forgot password?</Text>
-        </TouchableOpacity>
+          <TouchableOpacity onPress={() => Alert.alert('Forgot Password clicked')}>
+            <Text style={styles.linkText}>Forgot password?</Text>
+          </TouchableOpacity>
 
-        <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
-          <Text style={styles.loginText}>Login</Text>
-        </TouchableOpacity>
+          <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
+            <Text style={styles.loginText}>Login</Text>
+          </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => Alert.alert('Sign Up clicked')}>
-          <Text style={styles.signupText}>
-            Don’t have an account? <Text style={{ fontWeight: 'bold' }}>Sign up</Text>
-          </Text>
-        </TouchableOpacity>
+          <TouchableOpacity onPress={() => Alert.alert('Sign Up clicked')}>
+            <Text style={styles.signupText}>
+              Don’t have an account? <Text style={{ fontWeight: 'bold' }}>Sign up</Text>
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
-    </View>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
+  background: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
+  },
   container: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: colours.background,
+    backgroundColor: 'rgba(232,245,233,0.5)', // less opaque overlay
     padding: spacing.lg,
   },
   card: {
