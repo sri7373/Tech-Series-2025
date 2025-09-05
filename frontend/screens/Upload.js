@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage'; // add if not present
+import { colours, spacing, typography } from '../theme';
 
 export default function Upload({ navigation }) {
   const [image, setImage] = useState(null);
@@ -124,32 +125,53 @@ export default function Upload({ navigation }) {
         ← Home
       </button>
 
-      {/* Choose Upload Type */}
-      {!uploadType && (
-        <div style={{ display: 'flex', gap: 20, marginTop: 40 }}>
-          <button style={styles.confirmButton} onClick={() => setUploadType('barcode')}>Upload Barcode</button>
-          <button style={styles.confirmButton} onClick={() => setUploadType('receipt')}>Upload Receipt</button>
-        </div>
-      )}
+      {/* Upload Type Selection */}
+      <div style={{ display: 'flex', gap: 20, marginTop: 40 }}>
+        <button
+          style={{
+            ...styles.confirmButton,
+            background: uploadType === 'barcode' ? colours.secondary : colours.primary,
+            color: uploadType === 'barcode' ? colours.surface : colours.surface,
+            border: uploadType === 'barcode' ? `2px solid ${colours.secondary}` : 'none'
+          }}
+          onClick={() => { setUploadType('barcode'); setImage(null); }}
+        >
+          Upload Barcode
+        </button>
+        <button
+          style={{
+            ...styles.confirmButton,
+            background: uploadType === 'receipt' ? colours.secondary : colours.primary,
+            color: uploadType === 'receipt' ? colours.surface : colours.surface,
+            border: uploadType === 'receipt' ? `2px solid ${colours.secondary}` : 'none'
+          }}
+          onClick={() => { setUploadType('receipt'); setImage(null); }}
+        >
+          Upload Receipt
+        </button>
+      </div>
 
-      {/* Upload Box / Preview */}
-      {uploadType && (
-        <div style={styles.uploadBox}>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleFileChange}
-            style={{ width: '100%', height: '100%', opacity: 0, position: 'absolute', left: 0, top: 0, cursor: 'pointer' }}
-          />
-          {!image ? (
-            <span style={styles.uploadText}>
-              {uploadType === 'barcode' ? '📷 Upload Barcode Image' : '🧾 Upload Receipt Image'}
-            </span>
-          ) : (
-            <img src={image.uri} alt="preview" style={styles.preview} />
-          )}
-        </div>
-      )}
+      {/* Upload Box / Preview (always visible) */}
+      <div style={styles.uploadBox}>
+        <input
+          type="file"
+          accept="image/*"
+          onChange={handleFileChange}
+          style={{ width: '100%', height: '100%', opacity: 0, position: 'absolute', left: 0, top: 0, cursor: 'pointer' }}
+          disabled={!uploadType}
+        />
+        {!image ? (
+          <span style={styles.uploadText}>
+            {uploadType === 'barcode'
+              ? '📷 Upload Barcode Image'
+              : uploadType === 'receipt'
+                ? '🧾 Upload Receipt Image'
+                : 'Select upload type'}
+          </span>
+        ) : (
+          <img src={image.uri} alt="preview" style={styles.preview} />
+        )}
+      </div>
 
       {/* Confirm Button */}
       {uploadType && image && (
@@ -163,18 +185,11 @@ export default function Upload({ navigation }) {
             : (uploadType === 'barcode' ? '✅ Scan Barcode' : '✅ Scan Receipt')}
         </button>
       )}
-
-      {/* Back to type selection */}
-      {uploadType && (
-        <button style={{ ...styles.returnButton, top: 90, left: 20 }} onClick={() => { setUploadType(null); setImage(null); }}>
-          ← Back
-        </button>
-      )}
     </div>
   );
 }
 
-// ...styles unchanged, but converted to JS objects for web...
+// ...existing styles...
 const styles = {
   container: {
     minHeight: '100vh',
@@ -182,56 +197,56 @@ const styles = {
     flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'center',
-    background: '#000',
+    background: colours.background, // was '#000'
     position: 'relative',
   },
   uploadBox: {
     width: 250,
     height: 250,
-    background: '#fff',
-    borderRadius: 20,
+    background: colours.surface,
+    borderRadius: spacing.lg,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 80,
+    marginTop: spacing.xl,
     display: 'flex',
     position: 'relative',
     overflow: 'hidden',
   },
   uploadText: {
-    fontSize: 18,
+    fontSize: typography.body,
     fontWeight: 'bold',
     textAlign: 'center',
-    color: '#007AFF',
+    color: colours.primary,
     zIndex: 1,
   },
   preview: {
     width: 220,
     height: 220,
-    borderRadius: 15,
+    borderRadius: spacing.md,
     objectFit: 'cover',
     zIndex: 1,
   },
   confirmButton: {
-    marginTop: 30,
-    background: '#28a745',
-    padding: '12px 30px',
-    borderRadius: 10,
-    color: '#fff',
-    fontSize: 18,
+    marginTop: spacing.lg,
+    background: colours.primary,
+    padding: `${spacing.md}px 30px`,
+    borderRadius: spacing.md,
+    color: colours.surface,
+    fontSize: typography.button,
     fontWeight: 600,
     border: 'none',
     cursor: 'pointer',
   },
   returnButton: {
     position: 'absolute',
-    top: 40,
-    left: 20,
-    background: '#fff',
-    padding: '6px 14px',
-    borderRadius: 8,
+    top: spacing.xl,
+    left: spacing.md,
+    background: colours.surface,
+    padding: `${spacing.xs}px 14px`,
+    borderRadius: spacing.md,
     fontWeight: 'bold',
-    fontSize: 16,
-    color: '#007AFF',
+    fontSize: typography.button,
+    color: colours.primary,
     border: 'none',
     cursor: 'pointer',
     zIndex: 2,
