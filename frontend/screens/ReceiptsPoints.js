@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import Confetti from 'react-confetti';
 
 export default function ReceiptsPoints({ route, navigation }) {
   // Expect route.params.items (array) and route.params.totalPoints (number)
@@ -6,6 +7,8 @@ export default function ReceiptsPoints({ route, navigation }) {
   const [prevPoints, setPrevPoints] = useState(null);
   const [updatedPoints, setUpdatedPoints] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showConfetti, setShowConfetti] = useState(true);
+  const [windowSize, setWindowSize] = useState({ width: window.innerWidth, height: window.innerHeight });
 
   useEffect(() => {
     const updateUserPoints = async () => {
@@ -56,7 +59,18 @@ export default function ReceiptsPoints({ route, navigation }) {
       }
     };
     updateUserPoints();
+
+    const handleResize = () => setWindowSize({ width: window.innerWidth, height: window.innerHeight });
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, [totalPoints]);
+
+
+    // Stop confetti after 5 seconds
+  useEffect(() => {
+    const timer = setTimeout(() => setShowConfetti(false), 5000);
+    return () => clearTimeout(timer);
+  }, []);
 
   if (loading) {
     return (
@@ -66,17 +80,27 @@ export default function ReceiptsPoints({ route, navigation }) {
     );
   }
 
-  return (
+return (
     <div style={styles.container}>
+      {showConfetti && <Confetti width={windowSize.width} height={windowSize.height} />}
+      
+      {/* Decorative Vines/Trees (CSS animated) */}
+      <div style={styles.vinesContainer}>
+        <div style={styles.vine}></div>
+        <div style={{ ...styles.vine, left: '80%', animationDelay: '1s' }}></div>
+      </div>
+
       <button style={styles.returnButton} onClick={() => navigation && navigation.navigate('Home')}>
         ← Home
       </button>
       <h2 style={styles.title}>Receipt Points</h2>
+
       <div style={styles.pointsBox}>
         <span style={styles.pointsText}>Previous Points: {prevPoints}</span><br />
         <span style={styles.pointsText}>Receipt Points: {totalPoints}</span><br />
         <span style={styles.pointsText}>Updated Points: {updatedPoints}</span>
       </div>
+
       <div style={styles.itemsList}>
         {items.length === 0 ? (
           <span style={styles.noItems}>No items scanned.</span>
