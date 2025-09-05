@@ -49,7 +49,7 @@ router.post("/scan", async (req, res, next) => {
       ? matched.filter(item => item && item.matchedProduct && item.productPoints !== undefined && item.productPoints !== null)
       : [];
 
-    // Map to frontend format, include imageUrl, carbonEmissions, plasticUsage, productId
+        // Map to frontend format, include imageUrl
     const itemsForFrontend = filteredItems.map(item => ({
       name: item.matchedProduct,
       points: item.productPoints,
