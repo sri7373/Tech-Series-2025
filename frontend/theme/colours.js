@@ -1,19 +1,39 @@
-// theme/colours.js
+// colours.js
 export const colours = {
-  primary: "#388E3C",      // deep eco green
-  secondary: "#8BC34A",    // light green accent
-  background: "#E8F5E9",   // soft green background
-  surface: "#FFFFFF",      // card/background surface
-  text: "#1B5E20",         // dark green text
-  textSecondary: "#4E944F",// muted green text
-  muted: "#A5D6A7",        // very light green
-  border: "#C8E6C9",       // greenish border
-  accent: "#FFD54F",       // eco yellow accent
-  onAccent: "#1B5E20",     // text on accent
-  danger: "#D32F2F",       // error red
-  success: "#388E3C",      // success green
-  inputBackground: "#F1F8E9", // input field background
-  shadow: "#A5D6A7",       // greenish shadow
-  shadowDark: "#1B5E20",   // darker green shadow for depth
-  shadowLight: "#C8E6C9",  // lighter green shadow for soft effect
+  // Primary greens
+  primaryGreen: '#2E8B57',      // SeaGreen - main brand color
+  darkGreen: '#1F6B4A',         // Darker green for hover states
+  lightGreen: '#3CB371',        // MediumSeaGreen - for highlights
+  
+  // Secondary oranges
+  primaryOrange: '#FF8C00',     // DarkOrange - for CTAs and accents
+  darkOrange: '#E67E00',        // Darker orange for hover
+  lightOrange: '#FFA042',       // Lighter orange for subtle accents
+  
+  // Neutral palette
+  white: '#FFFFFF',
+  offWhite: '#F8F8F8',
+  lightGray: '#E8E8E8',
+  mediumGray: '#A0A0A0',
+  darkGray: '#505050',
+  black: '#222222',
+  
+  // Functional colors
+  success: '#4CAF50',
+  warning: '#FFC107',
+  error: '#F44336',
+  info: '#2196F3',
+  
+  // Backgrounds
+  background: '#F8F8F8',
+  cardBackground: '#FFFFFF',
+  
+  // Text
+  textPrimary: '#222222',
+  textSecondary: '#505050',
+  textInverted: '#FFFFFF',
+  
+  // Borders
+  borderLight: '#E8E8E8',
+  borderMedium: '#A0A0A0'
 };
