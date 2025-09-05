@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+
 import {
   View,
   Text,
@@ -25,10 +26,10 @@ export default function RecommendationsScreen({ route, navigation }) {
     try {
       setLoading(true);
       console.log('Loading recommendations for product:', product);
-      
+
       const response = await getSustainableAlternativesForProduct(product, 5);
       console.log('Recommendations response:', response);
-      
+
       if (response.success) {
         setOriginalProduct(response.original);
         setAlternatives(response.alternatives);
@@ -43,15 +44,58 @@ export default function RecommendationsScreen({ route, navigation }) {
     }
   };
 
-  const ProductCard = ({ product, isOriginal = false, improvement = null }) => (
-    <View style={[styles.productCard, isOriginal && styles.originalCard]}>
-      {isOriginal && (
-        <View style={styles.originalBadge}>
-          <Text style={styles.originalBadgeText}>Your Product</Text>
+  const MainProductCard = ({ product }) => {
+    // Fun fact: convert CO2 g to approximate car distance in km
+    const funFact = () => {
+      // Average car emits ~120 g CO2 per km
+      const distanceKm = (product.carbonEmissions / 120).toFixed(1);
+      return `💡 This product produces as much CO2 as driving ${distanceKm} km by car!`;
+    };
+
+    return (
+      <View style={styles.mainProductCardRow}>
+        {/* Product Image */}
+        {product.imageUrl && (
+          <Image source={{ uri: product.imageUrl }} style={styles.mainProductImageRow} />
+        )}
+
+        {/* Product Info */}
+        <View style={styles.mainProductInfoRow}>
+          <Text style={styles.mainProductTitle}>{product.name} 🌟</Text>
+          <Text style={styles.productPrice}>${product.price}</Text>
+
+          <View style={styles.statsColumn}>
+            <Text style={styles.statText}>🌍 CO2: {product.carbonEmissions} g</Text>
+            <Text style={styles.statText}>♻️ Plastic: {product.plasticUsage} g</Text>
+            <Text style={styles.statText}>EcoScore: {product.sustainabilityScore}/100</Text>
+            <Text style={styles.statText}>Points: {product.points}</Text>
+          </View>
+
+          {/* Sustainability Bar */}
+          <View style={styles.sustainabilityBarMain}>
+            <View
+              style={[
+                styles.sustainabilityFillMain,
+                { width: `${Math.min(100, product.sustainabilityScore)}%` },
+              ]}
+            />
+            <Text style={styles.sustainabilityTextMain}>
+              Sustainability: {product.sustainabilityScore}/100
+            </Text>
+          </View>
+
+          {/* Fun Fact */}
+          <Text style={styles.funFactText}>{funFact()}</Text>
         </View>
-      )}
-      
-      {!isOriginal && improvement && (
+      </View>
+    );
+  };
+
+
+
+  const ProductCard = ({ product, improvement = null }) => (
+    <View style={styles.productCard}>
+      {improvement && (
         <View style={styles.improvementBadge}>
           <Text style={styles.improvementText}>
             +{improvement.scoreImprovement} pts better!
@@ -62,10 +106,10 @@ export default function RecommendationsScreen({ route, navigation }) {
       {product.imageUrl && (
         <Image source={{ uri: product.imageUrl }} style={styles.productImage} />
       )}
-      
+
       <View style={styles.productInfo}>
         <Text style={styles.productName}>{product.name}</Text>
-        
+
         <View style={styles.statsContainer}>
           <View style={styles.statItem}>
             <Text style={styles.statLabel}>CO2</Text>
@@ -81,7 +125,7 @@ export default function RecommendationsScreen({ route, navigation }) {
           </View>
         </View>
 
-        {!isOriginal && improvement && (
+        {improvement && (
           <View style={styles.improvementDetails}>
             <Text style={styles.improvementTitle}>Environmental Benefits:</Text>
             {improvement.carbonReduction > 0 && (
@@ -97,15 +141,12 @@ export default function RecommendationsScreen({ route, navigation }) {
           </View>
         )}
 
-        <View style={[styles.sustainabilityBar, isOriginal && styles.originalBar]}>
-          <View 
+        <View style={styles.sustainabilityBar}>
+          <View
             style={[
-              styles.sustainabilityFill, 
-              { 
-                width: `${Math.min(100, product.sustainabilityScore)}%`,
-                backgroundColor: isOriginal ? '#FF9800' : '#4CAF50'
-              }
-            ]} 
+              styles.sustainabilityFill,
+              { width: `${Math.min(100, product.sustainabilityScore)}%`, backgroundColor: '#4CAF50' },
+            ]}
           />
           <Text style={styles.sustainabilityText}>
             Sustainability: {product.sustainabilityScore}/100
@@ -114,6 +155,7 @@ export default function RecommendationsScreen({ route, navigation }) {
       </View>
     </View>
   );
+
 
   if (loading) {
     return (
@@ -139,8 +181,8 @@ export default function RecommendationsScreen({ route, navigation }) {
 
       <ScrollView style={styles.scrollContainer} showsVerticalScrollIndicator={false}>
         {/* Current Product */}
-        <Text style={styles.sectionTitle}>Your Scanned Product</Text>
-        <ProductCard product={originalProduct || product} isOriginal={true} />
+        <Text style={styles.sectionTitle}>Your Product</Text>
+        <MainProductCard product={originalProduct || product} isOriginal={true} />
 
         {/* Alternatives */}
         {alternatives.length > 0 ? (
@@ -178,6 +220,93 @@ export default function RecommendationsScreen({ route, navigation }) {
 }
 
 const styles = StyleSheet.create({
+
+  // ===== Main Product (Clicked Product) =====
+  mainProductCardRow: {
+    flexDirection: 'row',
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 16,
+    marginVertical: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+
+  mainProductImageRow: {
+    width: '65%',       // ~2/3 of the horizontal space
+    aspectRatio: 1,     // ensures square
+    borderRadius: 12,
+    marginRight: 16,
+    resizeMode: 'cover',
+  },
+
+
+  mainProductInfoRow: {
+    flex: 1,
+    justifyContent: 'flex-start',
+  },
+
+  mainProductTitle: {
+    fontSize: 26,         // bigger title
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 12,
+  },
+
+  productPrice: {
+    fontSize: 22,
+    fontWeight: '600',
+    color: '#FF5722',
+    marginBottom: 12,
+  },
+
+  statsColumn: {
+    marginBottom: 12,
+  },
+
+  statText: {
+    fontSize: 16,
+    color: '#666',
+    marginBottom: 4,
+  },
+
+  sustainabilityBarMain: {
+    height: 28,
+    backgroundColor: '#e0e0e0',
+    borderRadius: 14,
+    overflow: 'hidden',
+    marginTop: 8,
+    justifyContent: 'center',
+    position: 'relative',
+  },
+
+  sustainabilityFillMain: {
+    height: '100%',
+    backgroundColor: '#4CAF50',
+    borderRadius: 14,
+  },
+
+  sustainabilityTextMain: {
+    position: 'absolute',
+    width: '100%',
+    textAlign: 'center',
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#fff',
+    zIndex: 1,
+  },
+
+  funFactText: {
+    marginTop: 12,
+    fontSize: 14,
+    fontStyle: 'italic',
+    color: '#555',
+  },
+
+  // ===== General Container =====
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',
@@ -193,6 +322,8 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#666',
   },
+
+  // ===== Header =====
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -226,6 +357,8 @@ const styles = StyleSheet.create({
     marginTop: 24,
     marginBottom: 16,
   },
+
+  // ===== Alternative Product Cards =====
   productCard: {
     backgroundColor: '#fff',
     borderRadius: 12,
@@ -282,12 +415,6 @@ const styles = StyleSheet.create({
   },
   productInfo: {
     flex: 1,
-  },
-  productName: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 12,
   },
   statsContainer: {
     flexDirection: 'row',
@@ -353,6 +480,8 @@ const styles = StyleSheet.create({
     color: '#333',
     zIndex: 1,
   },
+
+  // ===== No Alternatives =====
   noAlternativesContainer: {
     backgroundColor: '#fff',
     borderRadius: 12,
@@ -372,6 +501,8 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 24,
   },
+
+  // ===== Tips =====
   tipsContainer: {
     backgroundColor: '#fff',
     borderRadius: 12,

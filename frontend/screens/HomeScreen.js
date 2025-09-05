@@ -50,7 +50,7 @@ export default function HomeScreen({ navigation }) {
     );
   }
 
-    // Sort products so images appear first
+  // Sort products so images appear first
   const sortedProducts = filteredProducts.sort((a, b) => {
     if (a.imageUrl && !b.imageUrl) return -1;
     if (!a.imageUrl && b.imageUrl) return 1;
@@ -84,6 +84,15 @@ export default function HomeScreen({ navigation }) {
         >
           <Ionicons name="cloud-upload-outline" size={28} color="#555" />
           <Text style={styles.navText}>Upload</Text>
+        </TouchableOpacity>
+
+        {/* Voucher Button aligned with other navItems */}
+        <TouchableOpacity
+          style={styles.navItem}
+          onPress={() => navigation.navigate('VoucherScreen')}
+        >
+          <Ionicons name="gift-outline" size={28} color="#FF9800" />
+          <Text style={styles.navText}>Vouchers</Text>
         </TouchableOpacity>
 
         {/* Push logout & profile to bottom */}
@@ -135,7 +144,10 @@ export default function HomeScreen({ navigation }) {
           contentContainerStyle={{ paddingBottom: 20 }}
           numColumns={3}
           renderItem={({ item }) => (
-            <View style={styles.productCard}>
+            <TouchableOpacity
+              style={styles.productCard}
+              onPress={() => navigation.navigate('Recommendations', { product: item })}
+            >
               {item.imageUrl ? (
                 <Image source={{ uri: item.imageUrl }} style={styles.productImage} />
               ) : (
@@ -145,13 +157,13 @@ export default function HomeScreen({ navigation }) {
               )}
               <View style={styles.productInfo}>
                 <Text style={styles.productName}>{item.name}</Text>
-                <Text style={styles.productDetail}>${item.price} </Text>
+                <Text style={styles.productDetail}>${item.price}</Text>
                 <Text style={styles.productDetail}>CO2: {item.carbonEmissions} g</Text>
                 <Text style={styles.productDetail}>Plastic: {item.plasticUsage} g</Text>
                 <Text style={styles.productDetail}>EcoScore: {item.sustainabilityScore}</Text>
                 <Text style={styles.productDetail}>Points: {item.points}</Text>
               </View>
-            </View>
+            </TouchableOpacity>
           )}
         />
       </View>
