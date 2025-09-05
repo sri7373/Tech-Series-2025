@@ -50,6 +50,13 @@ export default function HomeScreen({ navigation }) {
     );
   }
 
+    // Sort products so images appear first
+  const sortedProducts = filteredProducts.sort((a, b) => {
+    if (a.imageUrl && !b.imageUrl) return -1;
+    if (!a.imageUrl && b.imageUrl) return 1;
+    return 0;
+  });
+
   return (
     <View style={styles.container}>
       {/* Sidebar */}
@@ -123,10 +130,10 @@ export default function HomeScreen({ navigation }) {
 
         {/* Product List */}
         <FlatList
-          data={filteredProducts}
+          data={sortedProducts}
           keyExtractor={(item) => item.id || item._id || Math.random().toString()}
           contentContainerStyle={{ paddingBottom: 20 }}
-          numColumns={2}
+          numColumns={3}
           renderItem={({ item }) => (
             <View style={styles.productCard}>
               {item.imageUrl ? (
@@ -253,29 +260,30 @@ const styles = StyleSheet.create({
   },
   productCard: {
     flex: 1,
-    margin: 5,
-    backgroundColor: 'white',
-    borderRadius: 10,
+    margin: 8,
+    backgroundColor: '#fff',
+    borderRadius: 12,
     padding: 10,
     alignItems: 'center',
-    flexDirection: 'row',
+    flexDirection: 'column', // image on top, info below
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.15,
     shadowRadius: 4,
-    elevation: 3,
+    elevation: 4,
   },
   productImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 8,
-    marginRight: 15,
+    width: 100,       // small square
+    height: 100,      // small square
+    borderRadius: 10,
+    marginBottom: 10,
+    resizeMode: 'cover', // fills the square nicely
   },
   noImagePlaceholder: {
-    width: 80,
-    height: 80,
-    borderRadius: 8,
-    marginRight: 15,
+    width: 100,
+    height: 100,
+    borderRadius: 10,
+    marginBottom: 10,
     backgroundColor: '#e0e0e0',
     justifyContent: 'center',
     alignItems: 'center',
@@ -286,17 +294,26 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   productInfo: {
-    flex: 1,
-    justifyContent: 'center',
+    alignItems: 'center', // center the text
   },
   productName: {
     fontSize: 16,
     fontWeight: 'bold',
-    marginBottom: 5,
+    marginBottom: 4,
+    textAlign: 'center',
   },
   productDetail: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: 13,
+    color: '#555',
+    textAlign: 'center',
     marginBottom: 2,
   },
+  productPoints: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#007AFF',
+    marginTop: 4,
+    textAlign: 'center',
+  },
+
 });
