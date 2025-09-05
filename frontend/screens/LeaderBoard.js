@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, StyleSheet, ActivityIndicator, Alert, TouchableOpacity } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { colours, spacing, typography } from '../theme';
 
 export default function Leaderboard() {
   const [users, setUsers] = useState([]);
@@ -131,33 +132,33 @@ export default function Leaderboard() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: '#fff' },
-  title: { fontSize: 22, fontWeight: 'bold', marginBottom: 10, textAlign: 'center' },
-  toggleContainer: { flexDirection: 'row', justifyContent: 'center', marginBottom: 15 },
-  toggleButton: { padding: 10, marginHorizontal: 5, borderRadius: 5, backgroundColor: '#eee' },
-  activeToggle: { backgroundColor: '#007AFF' },
-  toggleText: { color: '#000', fontWeight: 'bold' },
+  container: { flex: 1, padding: spacing.lg, backgroundColor: colours.background },
+  title: { fontSize: typography.title, fontWeight: 'bold', marginBottom: spacing.sm, textAlign: 'center', color: colours.primary },
+  toggleContainer: { flexDirection: 'row', justifyContent: 'center', marginBottom: spacing.md },
+  toggleButton: { padding: spacing.sm, marginHorizontal: spacing.xs, borderRadius: spacing.sm, backgroundColor: colours.muted },
+  activeToggle: { backgroundColor: colours.primary },
+  toggleText: { color: colours.text, fontWeight: 'bold' },
   neighbourhoodHeader: { 
-    fontSize: 18, 
+    fontSize: typography.body, 
     fontWeight: 'bold', 
     textAlign: 'center', 
-    marginBottom: 15, 
-    color: '#007AFF',
-    backgroundColor: '#f0f8ff',
-    padding: 10,
-    borderRadius: 8
+    marginBottom: spacing.md, 
+    color: colours.primary,
+    backgroundColor: colours.inputBackground,
+    padding: spacing.sm,
+    borderRadius: spacing.md
   },
-  row: { flexDirection: 'row', justifyContent: 'space-between', padding: 15, borderBottomWidth: 1, borderColor: '#eee' },
-  highlightRow: { backgroundColor: '#d0f0ff', borderRadius: 5 },
-  bottomRow: { marginTop: 10, borderTopWidth: 2, borderTopColor: '#007AFF' },
-  rank: { fontWeight: 'bold', width: 30 },
+  row: { flexDirection: 'row', justifyContent: 'space-between', padding: spacing.md, borderBottomWidth: 1, borderColor: colours.border },
+  highlightRow: { backgroundColor: colours.muted, borderRadius: spacing.sm },
+  bottomRow: { marginTop: spacing.sm, borderTopWidth: 2, borderTopColor: colours.primary },
+  rank: { fontWeight: 'bold', width: 30, color: colours.text },
   nameContainer: { flex: 1 },
-  name: { fontWeight: 'bold' },
+  name: { fontWeight: 'bold', color: colours.text },
   neighbourhood: { 
-    fontSize: 12, 
-    color: '#666', 
+    fontSize: typography.caption, 
+    color: colours.textSecondary, 
     fontStyle: 'italic',
     marginTop: 2
   },
-  score: { fontWeight: 'bold' },
+  score: { fontWeight: 'bold', color: colours.success },
 });

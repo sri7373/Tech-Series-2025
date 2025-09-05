@@ -3,6 +3,7 @@ import { categories, categoryImages } from './categories';
 import { View, Text, FlatList, TextInput, TouchableOpacity, StyleSheet, Alert, ScrollView, ActivityIndicator, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import LogoutButton from './LogoutButton';
+import { colours, spacing, typography } from '../theme';
 
 export default function HomeScreen({ navigation }) {
   // Helper to normalize category names (lowercase, remove trailing s, replace underscores)
@@ -122,7 +123,7 @@ export default function HomeScreen({ navigation }) {
           style={styles.navItem}
           onPress={() => navigation.navigate('VoucherScreen')}
         >
-          <Ionicons name="gift-outline" size={28} color="#FF9800" />
+          <Ionicons name="gift-outline" size={28} color={colours.primary} />
           <Text style={styles.navText}>Vouchers</Text>
         </TouchableOpacity>
 
@@ -160,12 +161,6 @@ export default function HomeScreen({ navigation }) {
             value={searchText}
             onChangeText={setSearchText}
           />
-          <TouchableOpacity
-            style={styles.filterButton}
-            onPress={() => Alert.alert('Filter clicked')}
-          >
-            <Ionicons name="filter" size={24} color="#fff" />
-          </TouchableOpacity>
         </View>
 
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoryBar} contentContainerStyle={styles.categoryBarContent}>
@@ -238,202 +233,215 @@ export default function HomeScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, flexDirection: 'row', backgroundColor: '#f0f0f0' },
+  container: { flex: 1, flexDirection: 'row', backgroundColor: colours.background },
   sidebar: {
     width: 80,
-    backgroundColor: '#fff',
-    paddingTop: 50,
+    backgroundColor: colours.surface,
+    paddingTop: spacing.xl,
     alignItems: 'center',
     flexDirection: 'column',
   },
   navItem: {
-    marginBottom: 30,
+    marginBottom: spacing.lg,
     alignItems: 'center',
   },
   navText: {
-    color: '#555',
-    fontSize: 12,
+    color: colours.textSecondary,
+    fontSize: typography.caption,
     textAlign: 'center',
   },
   navTextActive: {
-    color: '#007AFF',
-    fontSize: 12,
+    color: colours.primary,
+    fontSize: typography.caption,
     fontWeight: 'bold',
     textAlign: 'center',
   },
   mainContent: { flex: 1, padding: 0 },
   title: {
-    fontSize: 24,
+    fontSize: typography.title,
     fontWeight: 'bold',
-    marginBottom: 5,
+    marginBottom: spacing.sm,
     textAlign: 'center',
     marginTop: 0,
+    color: colours.primary,
   },
   subtitle: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: typography.body,
+    color: colours.textSecondary,
     textAlign: 'center',
-    marginBottom: 15,
+    marginBottom: spacing.md,
   },
-  topBar: { flexDirection: 'row', marginBottom: 20, alignItems: 'center' },
-  searchInput: { flex: 1, height: 40, borderWidth: 1, borderColor: '#aaa', borderRadius: 8, paddingHorizontal: 10 },
-  filterButton: { marginLeft: 10, backgroundColor: '#007AFF', padding: 10, borderRadius: 8 },
-    categoryBar: {
-      marginBottom: 18,
-      marginTop: 8,
-      paddingVertical: 8,
-      backgroundColor: 'transparent',
-      maxHeight: 200,
-    },
-    categoryBarContent: {
-      paddingHorizontal: 24,
-      gap: 16,
-      alignItems: 'center',
-    },
-    categoryButton: {
-      width: 80,
-      height: 90,
-      borderRadius: 16,
-      alignItems: 'center',
-      justifyContent: 'center',
-      backgroundColor: '#fff',
-      boxShadow: '0 2px 8px rgba(0,0,0,0.07)',
-      marginBottom: 4,
-      marginRight: 0,
-    },
-    iconBox: {
-      width: 48,
-      height: 48,
-      borderRadius: 12,
-      backgroundColor: '#f5f5f5',
-      alignItems: 'center',
-      justifyContent: 'center',
-      marginBottom: 4,
-    },
-    categoryIcon: {
-      width: 40,
-      height: 40,
-      borderRadius: 8,
-    },
-    categoryText: {
-      fontSize: 15,
-      textAlign: 'center',
-      marginTop: 2,
-    },
-  addButton: {
-    backgroundColor: '#FF6B35',
-    padding: 15,
-    borderRadius: 8,
+  topBar: { flexDirection: 'row', marginBottom: spacing.lg, alignItems: 'center' },
+  searchInput: { 
+    flex: 1, 
+    height: spacing.xl, // was spacing.lg, now larger
+    borderWidth: 1, 
+    borderColor: colours.border, 
+    borderRadius: spacing.md, 
+    paddingHorizontal: spacing.md,
+    backgroundColor: colours.inputBackground,
+    color: colours.text,
+    fontSize: typography.body, // ensure readable font size
+  },
+  categoryBar: {
+    marginBottom: spacing.md,
+    marginTop: spacing.sm,
+    paddingVertical: spacing.sm,
+    backgroundColor: 'transparent',
+    maxHeight: 200,
+  },
+  categoryBarContent: {
+    paddingHorizontal: spacing.lg,
+    gap: spacing.md,
     alignItems: 'center',
-    marginBottom: 20,
+  },
+  categoryButton: {
+    width: 80,
+    height: 90,
+    borderRadius: spacing.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colours.surface,
+    marginBottom: 4,
+    marginRight: 0,
+  },
+  iconBox: {
+    width: 48,
+    height: 48,
+    borderRadius: spacing.sm,
+    backgroundColor: colours.inputBackground,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 4,
+  },
+  categoryIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: spacing.sm,
+  },
+  categoryText: {
+    fontSize: typography.body,
+    textAlign: 'center',
+    marginTop: 2,
+    color: colours.text,
+  },
+  addButton: {
+    backgroundColor: colours.accent,
+    padding: spacing.md,
+    borderRadius: spacing.md,
+    alignItems: 'center',
+    marginBottom: spacing.lg,
   },
   buttonText: {
-    color: 'white',
-    fontSize: 16,
+    color: colours.onAccent,
+    fontSize: typography.button,
     fontWeight: 'bold',
   },
   formContainer: {
-    backgroundColor: 'white',
-    padding: 15,
-    borderRadius: 8,
-    marginBottom: 20,
+    backgroundColor: colours.surface,
+    padding: spacing.md,
+    borderRadius: spacing.md,
+    marginBottom: spacing.lg,
     maxHeight: 400,
   },
   formTitle: {
-    fontSize: 18,
+    fontSize: typography.body,
     fontWeight: 'bold',
-    marginBottom: 5,
+    marginBottom: spacing.sm,
     textAlign: 'center',
+    color: colours.primary,
   },
   formSubtitle: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: typography.caption,
+    color: colours.textSecondary,
     textAlign: 'center',
-    marginBottom: 15,
+    marginBottom: spacing.md,
   },
   inputContainer: {
-    marginBottom: 15,
+    marginBottom: spacing.md,
   },
   label: {
-    fontSize: 14,
+    fontSize: typography.caption,
     fontWeight: 'bold',
-    marginBottom: 5,
-    marginTop: 10,
+    marginBottom: spacing.sm,
+    marginTop: spacing.sm,
+    color: colours.text,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    padding: 10,
-    fontSize: 14,
-    backgroundColor: '#f9f9f9',
+    borderColor: colours.border,
+    borderRadius: spacing.md,
+    padding: spacing.sm,
+    fontSize: typography.body,
+    backgroundColor: colours.inputBackground,
+    color: colours.text,
   },
   uploadButton: {
-    backgroundColor: '#34C759',
-    padding: 15,
-    borderRadius: 8,
+    backgroundColor: colours.success,
+    padding: spacing.md,
+    borderRadius: spacing.md,
     alignItems: 'center',
-    marginBottom: 15,
+    marginBottom: spacing.md,
   },
   disabledButton: {
-    backgroundColor: '#ccc',
+    backgroundColor: colours.muted,
   },
   productCard: {
     flex: 1,
-    margin: 8,
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 10,
+    margin: spacing.sm,
+    backgroundColor: colours.surface,
+    borderRadius: spacing.md,
+    padding: spacing.sm,
     alignItems: 'center',
-    flexDirection: 'column', // image on top, info below
-    shadowColor: '#000',
+    flexDirection: 'column',
+    shadowColor: colours.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.15,
     shadowRadius: 4,
     elevation: 4,
   },
   productImage: {
-    width: 100,       // small square
-    height: 100,      // small square
-    borderRadius: 10,
-    marginBottom: 10,
-    resizeMode: 'cover', // fills the square nicely
+    width: 100,
+    height: 100,
+    borderRadius: spacing.sm,
+    marginBottom: spacing.sm,
+    resizeMode: 'cover',
   },
   noImagePlaceholder: {
     width: 100,
     height: 100,
-    borderRadius: 10,
-    marginBottom: 10,
-    backgroundColor: '#e0e0e0',
+    borderRadius: spacing.sm,
+    marginBottom: spacing.sm,
+    backgroundColor: colours.muted,
     justifyContent: 'center',
     alignItems: 'center',
   },
   noImageText: {
-    fontSize: 12,
-    color: '#666',
+    fontSize: typography.caption,
+    color: colours.textSecondary,
     textAlign: 'center',
   },
   productInfo: {
-    alignItems: 'center', // center the text
+    alignItems: 'center',
   },
   productName: {
-    fontSize: 16,
+    fontSize: typography.body,
     fontWeight: 'bold',
-    marginBottom: 4,
+    marginBottom: spacing.xs,
     textAlign: 'center',
+    color: colours.primary,
   },
   productDetail: {
-    fontSize: 13,
-    color: '#555',
+    fontSize: typography.caption,
+    color: colours.textSecondary,
     textAlign: 'center',
     marginBottom: 2,
   },
-  // Removed fixedCategoryBarWrapper style
   productPoints: {
-    fontSize: 14,
+    fontSize: typography.body,
     fontWeight: '600',
-    color: '#007AFF',
-    marginTop: 4,
+    color: colours.primary,
+    marginTop: spacing.xs,
     textAlign: 'center',
   },
 

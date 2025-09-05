@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
+import { colours, spacing, typography } from '../theme';
 
 export default function VoucherPage({ navigation }) {
   const [user, setUser] = useState(null);
@@ -11,7 +12,7 @@ export default function VoucherPage({ navigation }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchData = async () => { 
       setLoading(true);
       try {
         const token = await AsyncStorage.getItem('userToken');
@@ -90,19 +91,19 @@ export default function VoucherPage({ navigation }) {
     }
   };
 
-  if (loading) return <ActivityIndicator size="large" color="#007AFF" style={{ marginTop: 50 }} />;
+  if (loading) return <ActivityIndicator size="large" color={colours.primary} style={{ marginTop: spacing.xl }} />;
 
   return (
-    <ScrollView style={{ padding: 20 }}>
+    <ScrollView style={{ padding: spacing.lg, backgroundColor: colours.background }}>
       {/* Return/Home Button */}
-      <TouchableOpacity onPress={() => navigation.navigate('Home')} style={{ marginBottom: 15 }}>
-        <Text style={{ color: '#007AFF', fontWeight: 'bold', fontSize: 16 }}>← Home</Text>
+      <TouchableOpacity onPress={() => navigation.navigate('Home')} style={{ marginBottom: spacing.md }}>
+        <Text style={{ color: colours.primary, fontWeight: 'bold', fontSize: typography.button }}>← Home</Text>
       </TouchableOpacity>
 
       {/* Points */}
-      <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20 }}>
-        <Ionicons name="star" size={24} color="#FFD700" />
-        <Text style={{ marginLeft: 8, fontSize: 16, fontWeight: 'bold' }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: spacing.lg }}>
+        <Ionicons name="star" size={24} color={colours.accent} />
+        <Text style={{ marginLeft: spacing.sm, fontSize: typography.body, fontWeight: 'bold', color: colours.text }}>
           {user?.points ?? 0} Points
         </Text>
       </View>
@@ -112,28 +113,35 @@ export default function VoucherPage({ navigation }) {
         onPress={handleClaimVoucher}
         disabled={!canClaim}
         style={{
-          padding: 12,
-          borderRadius: 8,
-          marginBottom: 20,
-          backgroundColor: canClaim ? '#FF9800' : '#ccc',
+          padding: spacing.md,
+          borderRadius: spacing.md,
+          marginBottom: spacing.lg,
+          backgroundColor: canClaim ? colours.accent : colours.muted,
         }}
       >
-        <Text style={{ color: '#fff', fontWeight: 'bold', textAlign: 'center' }}>
+        <Text style={{ color: colours.onAccent, fontWeight: 'bold', textAlign: 'center', fontSize: typography.button }}>
           {canClaim ? `Claim Voucher (${requiredPoints} Points)` : 'Not enough points'}
         </Text>
       </TouchableOpacity>
 
       {/* Claimed Vouchers */}
-      <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 8 }}>Your Vouchers</Text>
+      <Text style={{ fontSize: typography.body, fontWeight: 'bold', marginBottom: spacing.sm, color: colours.primary }}>Your Vouchers</Text>
       {myVouchers.length === 0 ? (
-        <Text>You don’t own any vouchers yet.</Text>
+        <Text style={{ color: colours.textSecondary }}>You don’t own any vouchers yet.</Text>
       ) : (
         myVouchers.map((v, idx) => (
-          <View key={idx} style={{ padding: 12, borderWidth: 1, borderRadius: 8, marginBottom: 8 }}>
-            <Text>Code: {v.code}</Text>
-            <Text>Discount: {v.discount}%</Text>
-            <Text>Expires: {new Date(v.expires).toLocaleDateString()}</Text>
-            <Text>Used: {v.used ? 'Yes' : 'No'}</Text>
+          <View key={idx} style={{
+            padding: spacing.md,
+            borderWidth: 1,
+            borderColor: colours.border,
+            borderRadius: spacing.md,
+            marginBottom: spacing.sm,
+            backgroundColor: colours.surface,
+          }}>
+            <Text style={{ color: colours.text }}>Code: {v.code}</Text>
+            <Text style={{ color: colours.textSecondary }}>Discount: {v.discount}%</Text>
+            <Text style={{ color: colours.textSecondary }}>Expires: {new Date(v.expires).toLocaleDateString()}</Text>
+            <Text style={{ color: v.used ? colours.danger : colours.success }}>Used: {v.used ? 'Yes' : 'No'}</Text>
           </View>
         ))
       )}
