@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Confetti from 'react-confetti';
+import { colours, spacing, typography } from '../theme';
+import { ImageBackground } from 'react-native';
 
 export default function ReceiptsPoints({ route, navigation }) {
   // Expect route.params.items (array) and route.params.totalPoints (number)
@@ -74,94 +76,112 @@ export default function ReceiptsPoints({ route, navigation }) {
 
   if (loading) {
     return (
-      <div style={styles.container}>
-        <span style={{ color: '#007AFF', fontSize: 22 }}>Loading...</span>
-      </div>
+      <ImageBackground
+        source={require('../assets/leafy.jpg')}
+        style={styles.background}
+        resizeMode="cover"
+      >
+        <div style={styles.overlay}>
+          <span style={{ color: colours.primary, fontSize: 22 }}>Loading...</span>
+        </div>
+      </ImageBackground>
     );
   }
 
-return (
-    <div style={styles.container}>
-      {showConfetti && <Confetti width={windowSize.width} height={windowSize.height} />}
-      
-      {/* Decorative Vines/Trees (CSS animated) */}
-      <div style={styles.vinesContainer}>
-        <div style={styles.vine}></div>
-        <div style={{ ...styles.vine, left: '80%', animationDelay: '1s' }}></div>
+  return (
+    <ImageBackground
+      source={require('../assets/leafy.jpg')}
+      style={styles.background}
+      resizeMode="cover"
+    >
+      <div style={styles.overlay}>
+        {showConfetti && <Confetti width={windowSize.width} height={windowSize.height} />}
+        {/* Decorative Vines/Trees (CSS animated) */}
+        <button style={styles.returnButton} onClick={() => navigation && navigation.navigate('Home')}>
+          ← Home
+        </button>
+        <h2 style={styles.title}>Receipt Points</h2>
+        <div style={styles.pointsBox}>
+          <span style={styles.pointsText}>Previous Points: {prevPoints}</span><br />
+          <span style={styles.pointsText}>Receipt Points: {totalPoints}</span><br />
+          <span style={styles.pointsText}>Updated Points: {updatedPoints}</span>
+        </div>
+        <div style={styles.itemsList}>
+          {items.length === 0 ? (
+            <span style={styles.noItems}>No items scanned.</span>
+          ) : (
+            items.map((item, idx) => (
+              <div key={idx} style={styles.itemRow}>
+                {item.imageUrl ? (
+                  <img src={item.imageUrl} alt={item.name} style={styles.itemImage} />
+                ) : (
+                  <span style={styles.noImage}>No Image</span>
+                )}
+                <span style={styles.itemName}>{item.name}</span>
+                <span style={styles.itemQty}>Qty: {item.qty}</span>
+                <span style={styles.itemPoints}>Points: {item.pointsEarned ?? item.points}</span>
+              </div>
+            ))
+          )}
+        </div>
       </div>
-
-      <button style={styles.returnButton} onClick={() => navigation && navigation.navigate('Home')}>
-        ← Home
-      </button>
-      <h2 style={styles.title}>Receipt Points</h2>
-
-      <div style={styles.pointsBox}>
-        <span style={styles.pointsText}>Previous Points: {prevPoints}</span><br />
-        <span style={styles.pointsText}>Receipt Points: {totalPoints}</span><br />
-        <span style={styles.pointsText}>Updated Points: {updatedPoints}</span>
-      </div>
-
-      <div style={styles.itemsList}>
-        {items.length === 0 ? (
-          <span style={styles.noItems}>No items scanned.</span>
-        ) : (
-          items.map((item, idx) => (
-            <div key={idx} style={styles.itemRow}>
-              {item.imageUrl ? (
-                <img src={item.imageUrl} alt={item.name} style={styles.itemImage} />
-              ) : (
-                <span style={styles.noImage}>No Image</span>
-              )}
-              <span style={styles.itemName}>{item.name}</span>
-              <span style={styles.itemQty}>Qty: {item.qty}</span>
-              <span style={styles.itemPoints}>Points: {item.pointsEarned ?? item.points}</span>
-            </div>
-          ))
-        )}
-      </div>
-    </div>
+    </ImageBackground>
   );
 }
 
 const styles = {
-  container: {
+  background: {
     minHeight: '100vh',
+    width: '100vw',
+    backgroundColor: colours.background,
+    position: 'relative',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  overlay: {
+    width: '100%',
+    minHeight: '100vh',
+    background: 'rgba(232,245,233,0.5)',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    background: '#f8f9fa',
     position: 'relative',
   },
   returnButton: {
     position: 'absolute',
-    top: 40,
-    left: 20,
-    background: '#fff',
-    padding: '6px 14px',
-    borderRadius: 8,
+    top: spacing.lg,
+    left: spacing.lg,
+    background: colours.surface,
+    padding: `${spacing.xs}px 14px`,
+    borderRadius: spacing.md,
     fontWeight: 'bold',
-    fontSize: 16,
-    color: '#007AFF',
+    fontSize: typography.button,
+    color: colours.primary,
     border: 'none',
     cursor: 'pointer',
     zIndex: 2,
+    boxShadow: `0 2px 8px ${colours.shadow}`,
   },
   title: {
     marginTop: 80,
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#222',
+    color: colours.primary,
+    textAlign: 'center',
+    letterSpacing: 1,
   },
   pointsBox: {
     marginTop: 30,
-    background: '#28a745',
+    background: colours.primary,
     padding: '12px 30px',
     borderRadius: 10,
-    color: '#fff',
+    color: colours.surface,
     fontSize: 22,
     fontWeight: 600,
     border: 'none',
     display: 'inline-block',
+    boxShadow: `0 2px 8px ${colours.shadow}`,
   },
   pointsText: {
     fontSize: 22,
@@ -171,14 +191,14 @@ const styles = {
     marginTop: 40,
     width: '80%',
     maxWidth: 500,
-    background: '#fff',
+    background: colours.surface,
     borderRadius: 12,
-    boxShadow: '0 2px 8px rgba(0,0,0,0.07)',
+    boxShadow: `0 2px 8px ${colours.shadow}`,
     padding: 24,
   },
   noItems: {
     fontSize: 18,
-    color: '#888',
+    color: colours.textSecondary,
     textAlign: 'center',
   },
   itemRow: {
@@ -186,7 +206,7 @@ const styles = {
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: '10px 0',
-    borderBottom: '1px solid #eee',
+    borderBottom: `1px solid ${colours.border}`,
     gap: 16,
   },
   itemImage: {
@@ -202,8 +222,8 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    background: '#eee',
-    color: '#888',
+    background: colours.muted,
+    color: colours.textSecondary,
     borderRadius: 8,
     fontSize: 12,
     marginRight: 8,
@@ -211,17 +231,36 @@ const styles = {
   itemName: {
     fontWeight: 'bold',
     fontSize: 18,
-    color: '#333',
+    color: colours.primary,
   },
   itemQty: {
     fontSize: 16,
-    color: '#555',
+    color: colours.text,
     marginLeft: 20,
   },
   itemPoints: {
     fontSize: 16,
-    color: '#28a745',
+    color: colours.success,
     marginLeft: 20,
     fontWeight: 'bold',
+  },
+  vinesContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: 60,
+    zIndex: 1,
+    pointerEvents: 'none',
+  },
+  vine: {
+    position: 'absolute',
+    left: '10%',
+    top: 0,
+    width: 120,
+    height: 60,
+    background: 'linear-gradient(90deg, #388E3C 60%, #A5D6A7 100%)',
+    borderRadius: 60,
+    animation: 'vineSwing 3s infinite alternate',
   },
 };
