@@ -4,12 +4,10 @@ import { Ionicons } from '@expo/vector-icons';
 import LogoutButton from './LogoutButton';
 
 export default function HomeScreen({ navigation }) {
-  // ...existing code...
   const [products, setProducts] = useState([]); // All products (auto-fetched)
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [searchText, setSearchText] = useState('');
   const [loading, setLoading] = useState(true);
-  // ...existing code...
 
   // Fetch auto products from API
   useEffect(() => {
@@ -43,7 +41,6 @@ export default function HomeScreen({ navigation }) {
     setFilteredProducts(filtered);
   }, [searchText, products]);
 
-  // ...existing code...
 
   if (loading) {
     return (
@@ -118,8 +115,6 @@ export default function HomeScreen({ navigation }) {
           </TouchableOpacity>
         </View>
 
-  {/* ...existing code... */}
-
         {/* Product List */}
         <FlatList
           data={filteredProducts}
@@ -137,8 +132,10 @@ export default function HomeScreen({ navigation }) {
               )}
               <View style={styles.productInfo}>
                 <Text style={styles.productName}>{item.name}</Text>
-                <Text style={styles.productDetail}>CO2: {item.carbonEmissions} kg</Text>
+                <Text style={styles.productDetail}>${item.price} </Text>
+                <Text style={styles.productDetail}>CO2: {item.carbonEmissions} g</Text>
                 <Text style={styles.productDetail}>Plastic: {item.plasticUsage} g</Text>
+                <Text style={styles.productDetail}>EcoScore: {item.sustainabilityScore}</Text>
                 <Text style={styles.productDetail}>Points: {item.points}</Text>
               </View>
             </View>

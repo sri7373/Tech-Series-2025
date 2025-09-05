@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "scrape:fairprice": "node scripts/runScraper.js",
+    "scrape": "npm run scrape:fairprice",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -12,10 +16,12 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.879.0",
     "@ericblade/quagga2": "^1.8.4",
+    "aws-sdk": "^2.1692.0",
     "axios": "^1.11.0",
     "bcrypt": "^6.0.0",
     "bcryptjs": "^3.0.2",
     "better-sqlite3": "^12.2.0",
+    "cheerio": "^1.1.2",
     "config": "^4.1.1",
     "cors": "^2.8.5",
     "dotenv": "^17.2.2",
@@ -32,7 +38,8 @@
     "sharp": "^0.34.3",
     "sqlite3": "^5.1.7",
     "swagger-jsdoc": "^6.2.8",
-    "swagger-ui-express": "^5.0.1"
+    "swagger-ui-express": "^5.0.1",
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.10"

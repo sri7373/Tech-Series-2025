@@ -1,17 +1,49 @@
 const express = require('express');
 const router = express.Router();
-const userService = require('../services/userService');
+const { User } = require('../db/models');
 
-
-
-// FETCH LEADERBOARD /api/leaderboard
+// GET /api/leaderboard
 router.get('/', async (req, res) => {
   try {
-    const users = await userService.getTopUsers(10);
-    res.json(users);
-  } catch (err) {
-    console.error(err);
+    const users = await User.find({})
+      .select('username email points neighbourhood')
+      .sort({ points: -1 });
+    
+    const usersWithRank = users.map((user, index) => ({
+      ...user.toObject(),
+      rank: index + 1
+    }));
+    
+    res.json(usersWithRank);
+  } catch (error) {
     res.status(500).json({ error: 'Failed to fetch leaderboard' });
+  }
+});
+
+router.get('/ranks/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    
+    const user = await User.findById(userId).select('points neighbourhood');
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const nationalRank = await User.countDocuments({
+      points: { $gt: user.points }
+    }) + 1;
+
+    const neighbourhoodRank = await User.countDocuments({
+      neighbourhood: user.neighbourhood,
+      points: { $gt: user.points }
+    }) + 1;
+
+    res.json({
+      nationalRank,
+      neighbourhoodRank,
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to calculate ranks' });
   }
 });
 
