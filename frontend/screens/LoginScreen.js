@@ -31,6 +31,15 @@ export default function LoginScreen({ navigation }) {
         await login(data.user, data.token);
 
         console.log('Login successful');
+        // Store all user data
+        await AsyncStorage.setItem('userToken', data.token);
+        await AsyncStorage.setItem('userId', data.user._id);
+        await AsyncStorage.setItem('userPoints', data.user.points.toString());
+        await AsyncStorage.setItem('username', data.user.username || '');
+        await AsyncStorage.setItem('email', data.user.email || '');
+        await AsyncStorage.setItem('neighbourhood', data.user.neighbourhood || '');
+
+        navigation.replace('Home'); // Using replace to prevent going back
 
       } else {
         Alert.alert('Login Failed', data.error || 'Invalid credentials');
