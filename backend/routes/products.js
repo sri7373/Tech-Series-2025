@@ -45,10 +45,12 @@ router.post('/', upload.single('image'), async (req, res) => {
 
 
 const preprocessImage = async (imageBuffer) => {
+  // Ensure output is a valid JPEG
   return await sharp(imageBuffer)
     .greyscale()
     .normalize()
     .sharpen()
+    .jpeg({ quality: 90 }) // Force JPEG output
     .toBuffer();
 };
 
@@ -61,7 +63,7 @@ router.post('/scan-barcode', upload.single('image'), async (req, res) => {
   // Check if Multer file upload (mobile)
   if (req.file && req.file.buffer) {
     imageBuffer = await preprocessImage(req.file.buffer);
-    tempPath = path.join(os.tmpdir(), `${Date.now()}-${req.file.originalname}`);
+    tempPath = path.join(os.tmpdir(), filename); // Always use .jpg extension
     fs.writeFileSync(tempPath, imageBuffer);
   } else if (req.body.image && req.body.image.startsWith('data:image')) {
     // Handle base64 upload (web)
@@ -72,7 +74,7 @@ router.post('/scan-barcode', upload.single('image'), async (req, res) => {
     const base64Data = matches[2];
     imageBuffer = Buffer.from(base64Data, 'base64');
     imageBuffer = await preprocessImage(imageBuffer);
-    tempPath = path.join(os.tmpdir(), filename);
+    tempPath = path.join(os.tmpdir(), filename); // Always use .jpg extension
     fs.writeFileSync(tempPath, imageBuffer);
   } else {
     return res.status(400).json({ error: 'No image uploaded' });
@@ -87,7 +89,14 @@ router.post('/scan-barcode', upload.single('image'), async (req, res) => {
         readers: ['ean_reader', 'ean_8_reader', 'upc_reader', 'upc_e_reader']
       }
     }, async (result) => {
-      fs.unlinkSync(tempPath); // Clean up temp file
+      // Safely clean up temp file
+      try {
+        if (fs.existsSync(tempPath)) {
+          fs.unlinkSync(tempPath);
+        }
+      } catch (err) {
+        console.error('Error deleting temp file:', err);
+      }
 
       if (!result || !result.codeResult) {
         return res.status(404).json({ error: 'Barcode not found in image' });
@@ -99,7 +108,7 @@ router.post('/scan-barcode', upload.single('image'), async (req, res) => {
       if (!product) {
         return res.status(404).json({ error: 'Product not found' });
       }
-
+ 
       res.json({
         barcode,
         product: {
@@ -117,9 +126,18 @@ router.post('/scan-barcode', upload.single('image'), async (req, res) => {
     });
   } catch (error) {
     console.error(error);
+    // Clean up temp file if error occurs
+    try {
+      if (fs.existsSync(tempPath)) {
+        fs.unlinkSync(tempPath);
+      }
+    } catch (err) {
+      console.error('Error deleting temp file after catch:', err);
+    }
     res.status(500).json({ error: 'Failed to process image' });
   }
 });
+
 
 // GET /api/products/sustainable-alternatives
 router.post('/sustainable-alternatives', async (req, res) => {
