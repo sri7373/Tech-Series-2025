@@ -16,6 +16,7 @@ import AutoProductScreen from './screens/AutoProductScreen';
 import RecommendationsScreen from './screens/RecommendationsScreen';
 import ReceiptsPoints from './screens/ReceiptsPoints';
 import MonthlyRewardsScreen from './screens/MonthlyRewards';
+import SignupScreen from './screens/Signup';
 
 const Stack = createNativeStackNavigator();
 
@@ -28,6 +29,11 @@ export default function App() {
           component={LoginScreen}
           options={{ headerShown: false }}
         />
+        <Stack.Screen 
+          name="Signup" 
+          component={SignupScreen} 
+        />
+
         <Stack.Screen
           name="Home"
           component={HomeScreen}
