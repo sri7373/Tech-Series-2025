@@ -10,7 +10,7 @@ export default function HomeScreen({ navigation }) {
     return str ? str.toLowerCase().replace(/_/g, ' ').replace(/s$/, '') : '';
   }
   
-  
+
   
   const [products, setProducts] = useState([]); // All products (auto-fetched)
   const [filteredProducts, setFilteredProducts] = useState([]);
@@ -261,13 +261,13 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
   },
-  mainContent: { flex: 1, padding: 20 },
+  mainContent: { flex: 1, padding: 0 },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 5,
     textAlign: 'center',
-    marginTop: 20,
+    marginTop: 0,
   },
   subtitle: {
     fontSize: 14,
