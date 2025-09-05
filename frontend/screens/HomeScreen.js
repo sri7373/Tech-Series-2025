@@ -5,6 +5,10 @@ import { Ionicons } from '@expo/vector-icons';
 import LogoutButton from './LogoutButton';
 
 export default function HomeScreen({ navigation }) {
+  // Helper to normalize category names (lowercase, remove trailing s, replace underscores)
+  function normalizeCategory(str) {
+    return str ? str.toLowerCase().replace(/_/g, ' ').replace(/s$/, '') : '';
+  }
   
   
   
@@ -13,6 +17,9 @@ export default function HomeScreen({ navigation }) {
   const [searchText, setSearchText] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [loading, setLoading] = useState(true);
+  const PAGE_SIZE = 10;
+  const [page, setPage] = useState(1);
+  const [displayedProducts, setDisplayedProducts] = useState([]);
 
   // Fetch auto products from API
   useEffect(() => {
@@ -27,6 +34,7 @@ export default function HomeScreen({ navigation }) {
       if (response.ok) {
         setProducts(data);
         setFilteredProducts(data.products || []);
+        setDisplayedProducts(data.products ? data.products.slice(0, PAGE_SIZE) : []);
       } else {
         Alert.alert('Error', data.error || 'Failed to load products');
       }
@@ -43,13 +51,27 @@ export default function HomeScreen({ navigation }) {
       let filtered = products.filter((product) =>
       product.name.toLowerCase().includes(searchText.toLowerCase())
     );
-      // Category filter
-      if (selectedCategory !== 'All') {
-        filtered = filtered.filter(product => product.category.toLowerCase() === selectedCategory.toLowerCase());
-      }
+        // Category filter (flexible match)
+        if (selectedCategory !== 'All') {
+          const normSelected = normalizeCategory(selectedCategory);
+          filtered = filtered.filter(product =>
+            product.category && normalizeCategory(product.category) === normSelected
+          );
+        }
     setFilteredProducts(filtered);
+    setPage(1);
+    setDisplayedProducts(filtered.slice(0, PAGE_SIZE));
     }, [searchText, products, selectedCategory]);
 
+
+  // Load more products when scrolling
+  const handleLoadMore = () => {
+    if (filteredProducts.length > displayedProducts.length) {
+      const nextPage = page + 1;
+      setPage(nextPage);
+      setDisplayedProducts(filteredProducts.slice(0, nextPage * PAGE_SIZE));
+    }
+  };
 
   if (loading) {
     return (
@@ -157,7 +179,7 @@ export default function HomeScreen({ navigation }) {
         {/* Product List */}
       <View style={{ flex: 1, marginTop: 0 }}>
           <FlatList
-            data={filteredProducts}
+            data={displayedProducts}
             keyExtractor={(item) => item.id || item._id || Math.random().toString()}
             contentContainerStyle={{ paddingBottom: 20 }}
             numColumns={2}
@@ -173,7 +195,7 @@ export default function HomeScreen({ navigation }) {
                 <View style={styles.productInfo}>
                   <Text style={styles.productName}>{item.name}</Text>
                   <Text style={styles.productDetail}>${item.price} </Text>
-                  <Text style={styles.productDetail}>CO 2: {item.carbonEmissions} g</Text>
+                  <Text style={styles.productDetail}>CO2: {item.carbonEmissions} g</Text>
                   <Text style={styles.productDetail}>Plastic: {item.plasticUsage} g</Text>
                   <Text style={styles.productDetail}>EcoScore: {item.sustainabilityScore}</Text>
                   <Text style={styles.productDetail}>Points: {item.points}</Text>
@@ -181,6 +203,8 @@ export default function HomeScreen({ navigation }) {
                 </View>
               </View>
             )}
+            onEndReached={handleLoadMore}
+            onEndReachedThreshold={0.5}
           />
         </View>
       </View>
