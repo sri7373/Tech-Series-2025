@@ -10,9 +10,9 @@ export default function HomeScreen({ navigation }) {
   function normalizeCategory(str) {
     return str ? str.toLowerCase().replace(/_/g, ' ').replace(/s$/, '') : '';
   }
-  
 
-  
+
+
   const [products, setProducts] = useState([]); // All products (auto-fetched)
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [searchText, setSearchText] = useState('');
@@ -50,20 +50,20 @@ export default function HomeScreen({ navigation }) {
 
   // Filter products by search text
   useEffect(() => {
-      let filtered = products.filter((product) =>
+    let filtered = products.filter((product) =>
       product.name.toLowerCase().includes(searchText.toLowerCase())
     );
-        // Category filter (flexible match)
-        if (selectedCategory !== 'All') {
-          const normSelected = normalizeCategory(selectedCategory);
-          filtered = filtered.filter(product =>
-            product.category && normalizeCategory(product.category) === normSelected
-          );
-        }
+    // Category filter (flexible match)
+    if (selectedCategory !== 'All') {
+      const normSelected = normalizeCategory(selectedCategory);
+      filtered = filtered.filter(product =>
+        product.category && normalizeCategory(product.category) === normSelected
+      );
+    }
     setFilteredProducts(filtered);
     setPage(1);
     setDisplayedProducts(filtered.slice(0, PAGE_SIZE));
-    }, [searchText, products, selectedCategory]);
+  }, [searchText, products, selectedCategory]);
 
 
   // Load more products when scrolling
@@ -201,12 +201,12 @@ export default function HomeScreen({ navigation }) {
               />
             </View>
 
-            <View style={{ width: '100%', alignItems: 'center', justifyContent: 'center' }}>
+            <View style={{ width: '100%' }}>
               <ScrollView
                 horizontal
                 showsHorizontalScrollIndicator={false}
                 style={styles.categoryBar}
-                contentContainerStyle={[styles.categoryBarContent, { justifyContent: 'center', alignItems: 'center' }]}
+                contentContainerStyle={[styles.categoryBarContent, { paddingHorizontal: 16 }]} // add padding for spacing
               >
                 {['All', ...categories].map((cat, idx) => (
                   <TouchableOpacity
@@ -250,7 +250,7 @@ export default function HomeScreen({ navigation }) {
             </View>
 
             {/* Product List */}
-          <View style={{ flex: 1, marginTop: 0 }}>
+            <View style={{ flex: 1, marginTop: 0 }}>
               <FlatList
                 data={displayedProducts}
                 keyExtractor={(item) => item.id || item._id || Math.random().toString()}
@@ -297,10 +297,10 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'rgba(232,245,233,0.5)', // less opaque overlay
   },
-  container: { 
-    flex: 1, 
-    flexDirection: 'row', 
-    backgroundColor: 'transparent' 
+  container: {
+    flex: 1,
+    flexDirection: 'row',
+    backgroundColor: 'transparent'
   },
   sidebar: {
     width: 80,
@@ -345,19 +345,19 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: spacing.md,
   },
-  topBar: { 
-    flexDirection: 'row', 
-    marginBottom: spacing.lg, 
+  topBar: {
+    flexDirection: 'row',
+    marginBottom: spacing.lg,
     alignItems: 'center',
     marginTop: spacing.md, // move down a bit
     justifyContent: 'center',
   },
-  searchInput: { 
+  searchInput: {
     width: '80%', // make it smaller and not flush to sides
     height: spacing.xl,
-    borderWidth: 1, 
-    borderColor: colours.border, 
-    borderRadius: spacing.md, 
+    borderWidth: 1,
+    borderColor: colours.border,
+    borderRadius: spacing.md,
     paddingHorizontal: spacing.md,
     backgroundColor: colours.inputBackground,
     color: colours.text,
