@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, Alert, ScrollView, FlatList, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, Alert, ScrollView, Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { BarChart } from 'react-native-chart-kit';
+import { LineChart } from 'react-native-chart-kit';
+import { ScrollView as RNScrollView } from 'react-native'; // alias for horizontal scroll
+import { processColor } from 'react-native';
 
 export default function ProfileScreen() {
   const [user, setUser] = useState(null);
@@ -104,18 +106,36 @@ export default function ProfileScreen() {
     loadProfile();
   }, []);
 
-  // Prepare bar chart data for ecoPoints only
-  const chartLabels = dailyStats.map(stat => stat.date.slice(5)); // MM-DD
-  const pointsData = dailyStats.map(stat => stat.ecoPoints);
+  // Prepare line chart data for ecoPoints only
+  // Sort dailyStats chronologically (oldest first, newest last)
+  const sortedStats = [...dailyStats].sort((a, b) => a.date.localeCompare(b.date));
+  const chartLabels = sortedStats.map(stat => {
+    const [year, month, day] = stat.date.split('-');
+    return `${parseInt(day)}/${parseInt(month)}`; // D/M
+  });
+  const pointsData = sortedStats.map(stat => stat.ecoPoints);
+
+  // Find today's index (last one in sortedStats)
+  const todayIdx = sortedStats.length - 1;
+
+  // Custom dot colors: red for today, green for others
+  const getDotColor = (idx) =>
+    idx === todayIdx ? "#d32f2f" : "#43a047";
 
   const pointsChartData = {
     labels: chartLabels,
     datasets: [
       {
-        data: pointsData
+        data: pointsData,
+        color: (opacity = 1) => `rgba(81, 160, 71, ${opacity})`, // green
+        strokeWidth: 3
       }
     ]
   };
+
+  // Calculate chart width based on number of labels (points)
+  const minPointWidth = 40;
+  const chartWidth = Math.max(Dimensions.get('window').width * 0.9, pointsData.length * minPointWidth);
 
   if (loading) {
     return (
@@ -168,50 +188,67 @@ export default function ProfileScreen() {
           </Text>
         )}
 
-        {/* Eco Points Bar Chart */}
-        {dailyStats.length > 0 && (
-          <BarChart
-            data={pointsChartData}
-            width={Dimensions.get('window').width * 0.9}
-            height={220}
-            yAxisLabel=""
-            chartConfig={{
-              backgroundColor: "#fff",
-              backgroundGradientFrom: "#fff",
-              backgroundGradientTo: "#fff",
-              decimalPlaces: 0,
-              color: (opacity = 1) => `rgba(81, 160, 71, ${opacity})`, // green
-              labelColor: (opacity = 1) => `rgba(51,51,51,${opacity})`,
-              barPercentage: 0.5,
-              propsForBackgroundLines: {
-                strokeDasharray: "",
-              },
-            }}
-            style={{
-              marginVertical: 8,
-              borderRadius: 12,
-            }}
-            fromZero
-            showBarTops={false}
-          />
-        )}
-
-        {/* Daily blocks */}
-        <FlatList
-          data={dailyStats}
-          keyExtractor={item => item.date}
-          renderItem={({ item }) => (
-            <View style={styles.dayBlock}>
-              <Text style={styles.dayDate}>{item.date}</Text>
-              <Text style={styles.dayPoints}>Eco Points: {item.ecoPoints}</Text>
-              <Text style={styles.dayCarbon}>Carbon Emissions: {item.carbon} kg</Text>
-              <Text style={styles.dayPlastic}>Plastic Usage: {item.plastic} g</Text>
+        {/* Full width Eco Points Line Chart */}
+        {sortedStats.length > 0 && (
+          <RNScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{ alignItems: 'center', justifyContent: 'center' }}
+            style={{ width: '100%' }}
+          >
+            <View style={{ position: 'relative' }}>
+              <LineChart
+                data={pointsChartData}
+                width={chartWidth}
+                height={220}
+                yAxisLabel=""
+                yAxisSuffix=" pts"
+                chartConfig={{
+                  backgroundColor: "#fff",
+                  backgroundGradientFrom: "#fff",
+                  backgroundGradientTo: "#fff",
+                  decimalPlaces: 0,
+                  color: (opacity = 1) => `rgba(81, 160, 71, ${opacity})`, // green
+                  labelColor: (opacity = 1) => `rgba(51,51,51,${opacity})`,
+                  propsForDots: {
+                    r: "5",
+                    strokeWidth: "2",
+                    stroke: "#43a047"
+                  },
+                  propsForBackgroundLines: {
+                    strokeDasharray: "",
+                  },
+                }}
+                style={{
+                  marginVertical: 4,
+                  borderRadius: 12,
+                  alignSelf: 'center'
+                }}
+                fromZero
+                bezier
+                renderDotContent={({ index, x, y, indexData }) => (
+                  index === todayIdx ? (
+                    <View
+                      key={index}
+                      style={{
+                        position: 'absolute',
+                        left: x - 6,
+                        top: y - 6,
+                        width: 12,
+                        height: 12,
+                        borderRadius: 6,
+                        backgroundColor: '#d32f2f',
+                        borderWidth: 2,
+                        borderColor: '#fff',
+                        zIndex: 10,
+                      }}
+                    />
+                  ) : null
+                )}
+              />
             </View>
-          )}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={{ marginTop: 10 }}
-        />
+          </RNScrollView>
+        )}
       </View>
 
       {/* Ranks */}
@@ -297,47 +334,48 @@ const styles = StyleSheet.create({
   },
   dashboardSection: {
     width: '90%',
-    marginTop: 30,
-    marginBottom: 10,
+    marginTop: 20, // less spacing above
+    marginBottom: 0, // less spacing below
     backgroundColor: '#e8f5e9',
     borderRadius: 12,
-    padding: 15,
+    padding: 12,
     alignItems: 'center'
   },
   trendText: {
-    fontSize: 16,
+    fontSize: 15,
     color: '#388e3c',
     fontWeight: 'bold',
-    marginBottom: 10,
+    marginBottom: 6,
     textAlign: 'center'
   },
   dayBlock: {
     backgroundColor: '#fff',
     borderRadius: 10,
-    padding: 12,
-    marginRight: 10,
+    padding: 10,
+    marginRight: 8,
     alignItems: 'flex-start',
-    minWidth: 140,
-    elevation: 2
+    minWidth: 130,
+    elevation: 2,
+    marginBottom: 0
   },
   dayDate: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: 'bold',
     color: '#007AFF',
-    marginBottom: 4
+    marginBottom: 2
   },
   dayPoints: {
-    fontSize: 14,
+    fontSize: 13,
     color: '#333',
-    marginBottom: 2
+    marginBottom: 1
   },
   dayCarbon: {
-    fontSize: 13,
+    fontSize: 12,
     color: '#388e3c',
-    marginBottom: 2
+    marginBottom: 1
   },
   dayPlastic: {
-    fontSize: 13,
+    fontSize: 12,
     color: '#1976d2'
   },
   rankSection: { 
