@@ -1,12 +1,17 @@
 import React, { useState, useEffect } from 'react';
+import { categories, categoryImages } from './categories';
 import { View, Text, FlatList, TextInput, TouchableOpacity, StyleSheet, Alert, ScrollView, ActivityIndicator, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import LogoutButton from './LogoutButton';
 
 export default function HomeScreen({ navigation }) {
+  
+  
+  
   const [products, setProducts] = useState([]); // All products (auto-fetched)
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [searchText, setSearchText] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('All');
   const [loading, setLoading] = useState(true);
 
   // Fetch auto products from API
@@ -35,11 +40,15 @@ export default function HomeScreen({ navigation }) {
 
   // Filter products by search text
   useEffect(() => {
-    const filtered = products.filter((product) =>
+      let filtered = products.filter((product) =>
       product.name.toLowerCase().includes(searchText.toLowerCase())
     );
+      // Category filter
+      if (selectedCategory !== 'All') {
+        filtered = filtered.filter(product => product.category.toLowerCase() === selectedCategory.toLowerCase());
+      }
     setFilteredProducts(filtered);
-  }, [searchText, products]);
+    }, [searchText, products, selectedCategory]);
 
 
   if (loading) {
@@ -115,32 +124,65 @@ export default function HomeScreen({ navigation }) {
           </TouchableOpacity>
         </View>
 
-        {/* Product List */}
-        <FlatList
-          data={filteredProducts}
-          keyExtractor={(item) => item.id || item._id || Math.random().toString()}
-          contentContainerStyle={{ paddingBottom: 20 }}
-          numColumns={2}
-          renderItem={({ item }) => (
-            <View style={styles.productCard}>
-              {item.imageUrl ? (
-                <Image source={{ uri: item.imageUrl }} style={styles.productImage} />
-              ) : (
-                <View style={styles.noImagePlaceholder}>
-                  <Text style={styles.noImageText}>No Image</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoryBar} contentContainerStyle={styles.categoryBarContent}>
+            {['All', ...categories].map((cat, idx) => (
+              <TouchableOpacity
+                key={cat}
+                style={{
+                  ...styles.categoryButton,
+                  borderColor: selectedCategory === cat ? '#FF6B35' : '#eee',
+                  borderWidth: selectedCategory === cat ? 2 : 1,
+                  backgroundColor: '#fff',
+                  marginRight: 16,
+                }}
+                onPress={() => setSelectedCategory(cat)}
+              >
+                <View style={styles.iconBox}>
+                  <Image
+                    source={{ uri: cat === 'All' ? 'https://cdn-icons-png.flaticon.com/512/1046/1046783.png' : categoryImages[cat] }}
+                    style={styles.categoryIcon}
+                    resizeMode="contain"
+                  />
                 </View>
-              )}
-              <View style={styles.productInfo}>
-                <Text style={styles.productName}>{item.name}</Text>
-                <Text style={styles.productDetail}>${item.price} </Text>
-                <Text style={styles.productDetail}>CO2: {item.carbonEmissions} g</Text>
-                <Text style={styles.productDetail}>Plastic: {item.plasticUsage} g</Text>
-                <Text style={styles.productDetail}>EcoScore: {item.sustainabilityScore}</Text>
-                <Text style={styles.productDetail}>Points: {item.points}</Text>
+                <Text style={{
+                  ...styles.categoryText,
+                  color: selectedCategory === cat ? '#FF6B35' : '#333',
+                  fontWeight: selectedCategory === cat ? 'bold' : 'normal',
+                  textTransform: 'capitalize',
+                }}>{cat.replace('_', ' ')}</Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+
+        {/* Product List */}
+      <View style={{ flex: 1, marginTop: 0 }}>
+          <FlatList
+            data={filteredProducts}
+            keyExtractor={(item) => item.id || item._id || Math.random().toString()}
+            contentContainerStyle={{ paddingBottom: 20 }}
+            numColumns={2}
+            renderItem={({ item }) => (
+              <View style={styles.productCard}>
+                {item.imageUrl ? (
+                  <Image source={{ uri: item.imageUrl }} style={styles.productImage} />
+                ) : (
+                  <View style={styles.noImagePlaceholder}>
+                    <Text style={styles.noImageText}>No Image</Text>
+                  </View>
+                )}
+                <View style={styles.productInfo}>
+                  <Text style={styles.productName}>{item.name}</Text>
+                  <Text style={styles.productDetail}>${item.price} </Text>
+                  <Text style={styles.productDetail}>CO 2: {item.carbonEmissions} g</Text>
+                  <Text style={styles.productDetail}>Plastic: {item.plasticUsage} g</Text>
+                  <Text style={styles.productDetail}>EcoScore: {item.sustainabilityScore}</Text>
+                  <Text style={styles.productDetail}>Points: {item.points}</Text>
+                  <Text style={styles.productDetail}>Category: {item.category}</Text>
+                </View>
               </View>
-            </View>
-          )}
-        />
+            )}
+          />
+        </View>
       </View>
     </View>
   );
@@ -176,7 +218,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 5,
     textAlign: 'center',
-    marginTop: 20,
+    marginTop: 160,
   },
   subtitle: {
     fontSize: 14,
@@ -187,6 +229,48 @@ const styles = StyleSheet.create({
   topBar: { flexDirection: 'row', marginBottom: 20, alignItems: 'center' },
   searchInput: { flex: 1, height: 40, borderWidth: 1, borderColor: '#aaa', borderRadius: 8, paddingHorizontal: 10 },
   filterButton: { marginLeft: 10, backgroundColor: '#007AFF', padding: 10, borderRadius: 8 },
+    categoryBar: {
+      marginBottom: 18,
+      marginTop: 8,
+      paddingVertical: 8,
+      backgroundColor: 'transparent',
+      maxHeight: 100,
+    },
+    categoryBarContent: {
+      paddingHorizontal: 24,
+      gap: 16,
+      alignItems: 'center',
+    },
+    categoryButton: {
+      width: 80,
+      height: 90,
+      borderRadius: 16,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: '#fff',
+      boxShadow: '0 2px 8px rgba(0,0,0,0.07)',
+      marginBottom: 4,
+      marginRight: 0,
+    },
+    iconBox: {
+      width: 48,
+      height: 48,
+      borderRadius: 12,
+      backgroundColor: '#f5f5f5',
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginBottom: 4,
+    },
+    categoryIcon: {
+      width: 40,
+      height: 40,
+      borderRadius: 8,
+    },
+    categoryText: {
+      fontSize: 15,
+      textAlign: 'center',
+      marginTop: 2,
+    },
   addButton: {
     backgroundColor: '#FF6B35',
     padding: 15,
@@ -293,4 +377,5 @@ const styles = StyleSheet.create({
     color: '#666',
     marginBottom: 2,
   },
+  // Removed fixedCategoryBarWrapper style
 });
