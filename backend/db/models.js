@@ -44,12 +44,24 @@ const userSchema = new mongoose.Schema({
   },
   isAdmin: { type: Boolean, default: false },
   points: { type: Number, default: 0 },
-  neighbourhood: { type: String, defaut: "" },
+  monthlyRank: { type: Number, default: 0 },
+  neighbourhoodRank: { type: Number, default: 0 },
+  lastMonthlyReset: { type: Date, default: Date.now },
+  claimedMonthlyReward: [{
+    month: { type: String },
+    rewards: [{
+      type: { type: String, enum: ['500 points', 'national_top5', 'neighbourhood_top3']},
+      amount: { type: Number },
+      claimed: { type: Boolean, default: false}
+    }]
+  }],
   vouchers: [{
     code: String,
     discount: Number, // percentage discount
+    amount: Number, // fixed amount discount
     expires: Date,
-    used: { type: Boolean, default: false }
+    used: { type: Boolean, default: false },
+    type: { type: String, enum: ['regular', 'monthly_reward'], default: 'regular' }
   }]
 
 });

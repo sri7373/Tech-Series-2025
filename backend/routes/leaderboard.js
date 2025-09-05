@@ -8,7 +8,7 @@ router.get('/', async (req, res) => {
     const users = await User.find({})
       .select('username email points neighbourhood')
       .sort({ points: -1 });
-    
+
     const usersWithRank = users.map((user, index) => ({
       ...user.toObject(),
       rank: index + 1
@@ -17,6 +17,26 @@ router.get('/', async (req, res) => {
     res.json(usersWithRank);
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch leaderboard' });
+  }
+});
+
+// GET /api/leaderboard/neighbourhood/:neighbourhood
+router.get('/neighbourhood/:neighbourhood', async (req, res) => {
+  try {
+    const { neighbourhood } = req.params;
+    
+    const users = await User.find({ neighbourhood })
+      .select('username email points neighbourhood')
+      .sort({ points: -1 });
+
+    const usersWithRank = users.map((user, index) => ({
+      ...user.toObject(),
+      rank: index + 1
+    }));
+    
+    res.json(usersWithRank);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch neighbourhood leaderboard' });
   }
 });
 
@@ -41,6 +61,7 @@ router.get('/ranks/:userId', async (req, res) => {
     res.json({
       nationalRank,
       neighbourhoodRank,
+      points: user.points
     });
   } catch (error) {
     res.status(500).json({ error: 'Failed to calculate ranks' });

@@ -5,12 +5,13 @@ const {
   getPersonalizedRecommendations,
   calculateSustainabilityScore 
 } = require('../services/recommendationService');
+const auth = require('../middleware/auth');
 const { Product } = require('../db/models');
 
 const router = express.Router();
 
 // GET /api/recommendations/alternatives/:productId
-router.get('/alternatives/:productId', async (req, res) => {
+router.get('/alternatives/:productId', auth, async (req, res) => {
   try {
     const { productId } = req.params;
     const limit = parseInt(req.query.limit) || 3;
@@ -35,7 +36,7 @@ router.get('/alternatives/:productId', async (req, res) => {
 });
 
 // GET /api/recommendations/personalized
-router.get('/personalized', async (req, res) => {
+router.get('/personalized', auth, async (req, res) => {
   try {
     const limit = parseInt(req.query.limit) || 5;
     const userId = req.query.userId; // Optional for future user-specific recommendations
@@ -58,7 +59,7 @@ router.get('/personalized', async (req, res) => {
 });
 
 // GET /api/recommendations/sustainability-scores
-router.get('/sustainability-scores', async (req, res) => {
+router.get('/sustainability-scores', auth, async (req, res) => {
   try {
     const products = await Product.find({});
     
@@ -91,7 +92,7 @@ router.get('/sustainability-scores', async (req, res) => {
 });
 
 // POST /api/recommendations/compare
-router.post('/compare', async (req, res) => {
+router.post('/compare', auth, async (req, res) => {
   try {
     const { productIds } = req.body;
     

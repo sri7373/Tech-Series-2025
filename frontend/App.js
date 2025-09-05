@@ -15,6 +15,7 @@ import ProfileScreen from './screens/ProfileScreen';
 import AutoProductScreen from './screens/AutoProductScreen';
 import RecommendationsScreen from './screens/RecommendationsScreen';
 import ReceiptsPoints from './screens/ReceiptsPoints';
+import MonthlyRewardsScreen from './screens/MonthlyRewards';
 
 const Stack = createNativeStackNavigator();
 
@@ -50,6 +51,12 @@ export default function App() {
           name="VoucherScreen"
           component={VoucherScreen}
           options={{ title: 'My Vouchers', headerShown: false }}
+        />
+
+        <Stack.Screen
+          name="MonthlyRewards"
+          component={MonthlyRewardsScreen}
+          options={{ title: 'Monthly Rewards', headerShown: false }}
         />
 
         <Stack.Screen
