@@ -283,7 +283,7 @@ const styles = StyleSheet.create({
       marginTop: 8,
       paddingVertical: 8,
       backgroundColor: 'transparent',
-      maxHeight: 100,
+      maxHeight: 200,
     },
     categoryBarContent: {
       paddingHorizontal: 24,
