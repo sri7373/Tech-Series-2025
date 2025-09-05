@@ -15,6 +15,8 @@ export default function LoginScreen({ navigation }) {
       });
       const data = await response.json();
 
+      console.log('Login response data:', data);
+
       if (response.ok) {
         // Store all user data
         await AsyncStorage.setItem('userToken', data.token);

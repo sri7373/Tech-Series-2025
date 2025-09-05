@@ -112,3 +112,42 @@ export const uploadFile = async (formData) => {
   });
   return response.data;
 };
+
+// Monthly Rewards API calls
+export const checkMonthlyRewards = async () => {
+  try {
+    const token = await AsyncStorage.getItem('token');
+    const response = await fetch(`${API_BASE_URL}/rewards/monthly-rewards/check`, {
+      headers: { 'x-auth-token': token }
+    });
+    const data = await response.json();
+    if (response.ok) {
+      return data;
+    } else {
+      throw new Error(data.error || 'Failed to check monthly rewards');
+    }
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const claimMonthlyRewards = async () => {
+  try {
+    const token = await AsyncStorage.getItem('token');
+    const response = await fetch(`${API_BASE_URL}/rewards/monthly-rewards/claim`, {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        'x-auth-token': token 
+      }
+    });
+    const data = await response.json();
+    if (response.ok) {
+      return data;
+    } else {
+      throw new Error(data.error || 'Failed to claim monthly rewards');
+    }
+  } catch (error) {
+    throw error;
+  }
+};

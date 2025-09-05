@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const auth = require('../middleware/auth');
 const multer = require('multer');
 const { uploadToS3 } = require('../services/s3Service');
 const productService = require('../services/productService');
@@ -27,7 +28,7 @@ router.get('/', async (req, res) => {
 
 
 // create product
-router.post('/', upload.single('image'), async (req, res) => {
+router.post('/', auth, upload.single('image'), async (req, res) => {
   try {
 
     let imageUrl;

@@ -1,4 +1,5 @@
 const express = require('express');
+const auth = require('../middleware/auth');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
@@ -84,7 +85,7 @@ const fetchProductImageFromAPI = async (productName) => {
 };
 
 // POST /api/upload/product-simple - Create product without image (for testing)
-router.post('/product-simple', async (req, res) => {
+router.post('/product-simple', auth, async (req, res) => {
   try {
     const { name, carbonEmissions, plasticUsage, points } = req.body;
     
@@ -137,7 +138,7 @@ router.post('/product-simple', async (req, res) => {
 });
 
 // POST /api/upload/product-auto - Create product with auto-fetched image
-router.post('/product-auto', async (req, res) => {
+router.post('/product-auto', auth, async (req, res) => {
   try {
     const { name, carbonEmissions, plasticUsage, points } = req.body;
     
@@ -197,7 +198,7 @@ router.post('/product-auto', async (req, res) => {
 });
 
 // POST /api/upload - Simple image upload
-router.post('/', upload.single('image'), (req, res) => {
+router.post('/', auth, upload.single('image'), (req, res) => {
   if (!req.file) {
     return res.status(400).json({ error: 'No file uploaded' });
   }
@@ -260,7 +261,7 @@ router.post('/product', upload.single('image'), async (req, res) => {
 });
 
 // GET /api/upload/product/:id/image - Get product image
-router.get('/product/:id/image', async (req, res) => {
+router.get('/product/:id/image', auth, async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
     
@@ -278,7 +279,7 @@ router.get('/product/:id/image', async (req, res) => {
 });
 
 // GET /api/upload/products - Get all products with image URLs
-router.get('/products', async (req, res) => {
+router.get('/products', auth, async (req, res) => {
   try {
     const products = await Product.find({});
     

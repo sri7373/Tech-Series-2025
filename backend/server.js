@@ -76,6 +76,7 @@ const authRoutes = require('./routes/auth');
 const leaderboardRoutes = require('./routes/leaderboard');
 const scraperRoutes = require('./routes/scraper');
 const voucherRoutes = require('./routes/vouchers');
+const monthlyRewardsRoutes = require('./routes/monthly-rewards');
 
 
 app.use('/api/auth', authRoutes);
@@ -88,6 +89,7 @@ app.use('/api/receipts', receiptRoutes);
 app.use('/api/leaderboard', leaderboardRoutes);
 app.use('/api/scraper', scraperRoutes);
 app.use('/api/vouchers', voucherRoutes);
+app.use('/api/monthly-rewards', monthlyRewardsRoutes);
 
 
 
