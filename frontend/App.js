@@ -128,6 +128,43 @@ function AuthNavigator() {
           options={{ title: 'Receipt Points', headerShown: false }}
         />
         <Stack.Screen name="Logout" component={LogoutButton} />
+          <Stack.Screen
+            name="Points"
+            component={PointsPage}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="Auto"
+            component={AutoProductScreen}
+            options={{ title: 'Smart Products' }}
+          />
+          <Stack.Screen name="Profile" component={ProfileScreen} />
+          <Stack.Screen
+            name="Recommendations"
+            component={RecommendationsScreen}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="ReceiptsPoints"
+            component={ReceiptsPoints}
+            options={{ title: 'Receipt Points', headerShown: false }}
+          />
+          <Stack.Screen 
+            name="Logout" 
+            component={LogoutButton}
+            options={{ title: 'Logout' }}
+          />
+        </>
+        ) : (
+          // Unauthenticated screens
+          <>
+            <Stack.Screen
+              name="Login"
+              component={LoginScreen}
+              options={{ headerShown: false }}
+            />
+          </>
+        )}
       </Stack.Navigator>
     </NavigationContainer>
   );

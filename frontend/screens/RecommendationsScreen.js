@@ -9,6 +9,7 @@ import {
   Image,
   ActivityIndicator,
   Alert,
+  ImageBackground,
 } from 'react-native';
 import { getSustainableAlternativesForProduct } from '../services/api';
 
@@ -159,67 +160,88 @@ export default function RecommendationsScreen({ route, navigation }) {
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#4CAF50" />
-        <Text style={styles.loadingText}>Finding sustainable alternatives...</Text>
-      </View>
+      <ImageBackground
+        source={require('../assets/leafy.jpg')}
+        style={styles.background}
+        resizeMode="cover"
+      >
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#4CAF50" />
+          <Text style={styles.loadingText}>Finding sustainable alternatives...</Text>
+        </View>
+      </ImageBackground>
     );
   }
 
   return (
-    <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => navigation.goBack()}
-        >
-          <Text style={styles.backButtonText}>← Back</Text>
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Sustainable Alternatives</Text>
-      </View>
-
-      <ScrollView style={styles.scrollContainer} showsVerticalScrollIndicator={false}>
-        {/* Current Product */}
-        <Text style={styles.sectionTitle}>Your Product</Text>
-        <MainProductCard product={originalProduct || product} isOriginal={true} />
-
-        {/* Alternatives */}
-        {alternatives.length > 0 ? (
-          <>
-            <Text style={styles.sectionTitle}>
-              Better Alternatives ({alternatives.length} found)
-            </Text>
-            {alternatives.map((alternative, index) => (
-              <ProductCard
-                key={alternative._id || index}
-                product={alternative}
-                improvement={alternative.improvement}
-              />
-            ))}
-          </>
-        ) : (
-          <View style={styles.noAlternativesContainer}>
-            <Text style={styles.noAlternativesTitle}>Great Choice! 🌟</Text>
-            <Text style={styles.noAlternativesText}>
-              This product is already one of the most sustainable options in its category.
-            </Text>
-          </View>
-        )}
-
-        {/* Tips */}
-        <View style={styles.tipsContainer}>
-          <Text style={styles.tipsTitle}>💡 Sustainability Tips</Text>
-          <Text style={styles.tipText}>• Look for products with lower CO2 emissions</Text>
-          <Text style={styles.tipText}>• Choose items with minimal plastic packaging</Text>
-          <Text style={styles.tipText}>• Higher points = more environmentally friendly</Text>
+    <ImageBackground
+      source={require('../assets/leafy.jpg')}
+      style={styles.background}
+      resizeMode="cover"
+    >
+      <View style={styles.overlay}>
+        {/* Header */}
+        <View style={styles.header}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => navigation.goBack()}
+          >
+            <Text style={styles.backButtonText}>← Back</Text>
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Sustainable Alternatives</Text>
         </View>
-      </ScrollView>
-    </View>
+
+        <ScrollView style={styles.scrollContainer} showsVerticalScrollIndicator={false}>
+          {/* Current Product */}
+          <Text style={styles.sectionTitle}>Your Product</Text>
+          <MainProductCard product={originalProduct || product} isOriginal={true} />
+
+          {/* Alternatives */}
+          {alternatives.length > 0 ? (
+            <>
+              <Text style={styles.sectionTitle}>
+                Better Alternatives ({alternatives.length} found)
+              </Text>
+              {alternatives.map((alternative, index) => (
+                <ProductCard
+                  key={alternative._id || index}
+                  product={alternative}
+                  improvement={alternative.improvement}
+                />
+              ))}
+            </>
+          ) : (
+            <View style={styles.noAlternativesContainer}>
+              <Text style={styles.noAlternativesTitle}>Great Choice! 🌟</Text>
+              <Text style={styles.noAlternativesText}>
+                This product is already one of the most sustainable options in its category.
+              </Text>
+            </View>
+          )}
+
+          {/* Tips */}
+          <View style={styles.tipsContainer}>
+            <Text style={styles.tipsTitle}>💡 Sustainability Tips</Text>
+            <Text style={styles.tipText}>• Look for products with lower CO2 emissions</Text>
+            <Text style={styles.tipText}>• Choose items with minimal plastic packaging</Text>
+            <Text style={styles.tipText}>• Higher points = more environmentally friendly</Text>
+          </View>
+        </ScrollView>
+      </View>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
+  background: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
+  },
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(232,245,233,0.5)', // semi-transparent overlay
+  },
 
   // ===== Main Product (Clicked Product) =====
   mainProductCardRow: {
@@ -236,8 +258,8 @@ const styles = StyleSheet.create({
   },
 
   mainProductImageRow: {
-    width: '65%',       // ~2/3 of the horizontal space
-    aspectRatio: 1,     // ensures square
+    width: 180,       // increased from 120
+    height: 180,      // increased from 120
     borderRadius: 12,
     marginRight: 16,
     resizeMode: 'cover',
@@ -406,8 +428,8 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   productImage: {
-    width: '100%',
-    height: 160,
+    width: 180,       // increased from 120
+    height: 180,
     borderRadius: 8,
     marginBottom: 12,
     backgroundColor: '#f0f0f0',
