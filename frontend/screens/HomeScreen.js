@@ -1,27 +1,67 @@
 import React, { useState, useEffect } from 'react';
 import { categories, categoryImages } from './categories';
-import { View, Text, FlatList, TextInput, TouchableOpacity, StyleSheet, Alert, ScrollView, ActivityIndicator, Image, ImageBackground } from 'react-native';
+import { View, Text, FlatList, TextInput, TouchableOpacity, StyleSheet, Alert, ScrollView, ActivityIndicator, ImageBackground, Dimensions, Animated, Easing, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import LogoutButton from './LogoutButton';
 import { colours, spacing, typography } from '../theme';
+import NavigationBar from './NavigationBar';
+import ProductCard from './ProductCard';
 
 export default function HomeScreen({ navigation }) {
   // Helper to normalize category names (lowercase, remove trailing s, replace underscores)
   function normalizeCategory(str) {
     return str ? str.toLowerCase().replace(/_/g, ' ').replace(/s$/, '') : '';
   }
-
-
-
-  const [products, setProducts] = useState([]); // All products (auto-fetched)
+  
+  const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [searchText, setSearchText] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [loading, setLoading] = useState(true);
-  const PAGE_SIZE = 10;
+  const PAGE_SIZE = 20;
   const [page, setPage] = useState(1);
   const [displayedProducts, setDisplayedProducts] = useState([]);
-  const [hoveredNav, setHoveredNav] = useState(null);
+  const [numColumns, setNumColumns] = useState(calculateColumns());
+  const [itemWidth, setItemWidth] = useState(320); // Fixed width for narrower cards
+  const [userPoints, setUserPoints] = useState(1240);
+  const bounceAnim = new Animated.Value(0);
+
+  // Calculate number of columns based on screen width
+  function calculateColumns() {
+    const windowWidth = Dimensions.get('window').width;
+    const sidebarWidth = 80;
+    const contentWidth = windowWidth - sidebarWidth;
+    const padding = spacing.lg * 2;
+    
+    // Calculate how many 160px cards can fit with spacing
+    const availableWidth = contentWidth - padding;
+    const columns = Math.floor(availableWidth / (320 + spacing.sm));
+    
+    return Math.max(1, columns); // Ensure at least 1 column
+  }
+
+  // Animation for category selection
+  const animateCategorySelect = () => {
+    bounceAnim.setValue(0);
+    Animated.timing(bounceAnim, {
+      toValue: 1,
+      duration: 300,
+      easing: Easing.elastic(1),
+      useNativeDriver: true,
+    }).start();
+  };
+
+  // Update columns on screen resize
+  useEffect(() => {
+    const updateLayout = () => {
+      setNumColumns(calculateColumns());
+    };
+    
+    const subscription = Dimensions.addEventListener('change', updateLayout);
+    updateLayout();
+    
+    return () => subscription?.remove();
+  }, []);
 
   // Fetch auto products from API
   useEffect(() => {
@@ -75,6 +115,12 @@ export default function HomeScreen({ navigation }) {
     }
   };
 
+  // Handle category selection with animation
+  const handleCategorySelect = (category) => {
+    setSelectedCategory(category);
+    animateCategorySelect();
+  };
+
   if (loading) {
     return (
       <ImageBackground
@@ -82,19 +128,21 @@ export default function HomeScreen({ navigation }) {
         style={styles.background}
         resizeMode="cover"
       >
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(232,245,233,0.5)' }}>
-          <ActivityIndicator size="large" color={colours.primary} />
+        <View style={[styles.container, styles.loadingContainer]}>
+          <View style={styles.sidebarPlaceholder} />
+          <View style={styles.loadingContent}>
+            <ActivityIndicator size="large" color={colours.primary} />
+            <Text style={styles.loadingText}>Loading eco-friendly products...</Text>
+          </View>
         </View>
       </ImageBackground>
     );
   }
 
-  // Sort products so images appear first
-  const sortedProducts = filteredProducts.sort((a, b) => {
-    if (a.imageUrl && !b.imageUrl) return -1;
-    if (!a.imageUrl && b.imageUrl) return 1;
-    return 0;
-  });
+  // Render product item using the new ProductCard component
+  const renderProductItem = ({ item }) => (
+    <ProductCard item={item} width={itemWidth} animation={bounceAnim} />
+  );
 
   return (
     <ImageBackground
@@ -104,180 +152,107 @@ export default function HomeScreen({ navigation }) {
     >
       <View style={styles.overlay}>
         <View style={styles.container}>
-          {/* Sidebar */}
-          <View style={styles.sidebar}>
-            <TouchableOpacity
-              style={[
-                styles.navItem,
-                hoveredNav === 'home' && styles.navItemHover
-              ]}
-              onPress={() => navigation.navigate('Home')}
-              onMouseEnter={() => setHoveredNav('home')}
-              onMouseLeave={() => setHoveredNav(null)}
-            >
-              <Ionicons name="home" size={28} color="#007AFF" />
-              <Text style={styles.navTextActive}>ECOmmerce</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[
-                styles.navItem,
-                hoveredNav === 'leaderboard' && styles.navItemHover
-              ]}
-              onPress={() => navigation.navigate('Leaderboard')}
-              onMouseEnter={() => setHoveredNav('leaderboard')}
-              onMouseLeave={() => setHoveredNav(null)}
-            >
-              <Ionicons name="trophy" size={28} color="#555" />
-              <Text style={styles.navText}>Leaderboard</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[
-                styles.navItem,
-                hoveredNav === 'upload' && styles.navItemHover
-              ]}
-              onPress={() => navigation.navigate('Upload')}
-              onMouseEnter={() => setHoveredNav('upload')}
-              onMouseLeave={() => setHoveredNav(null)}
-            >
-              <Ionicons name="cloud-upload-outline" size={28} color="#555" />
-              <Text style={styles.navText}>Upload</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[
-                styles.navItem,
-                hoveredNav === 'voucher' && styles.navItemHover
-              ]}
-              onPress={() => navigation.navigate('VoucherScreen')}
-              onMouseEnter={() => setHoveredNav('voucher')}
-              onMouseLeave={() => setHoveredNav(null)}
-            >
-              <Ionicons name="gift-outline" size={28} color={colours.primary} />
-              <Text style={styles.navText}>Vouchers</Text>
-            </TouchableOpacity>
-
-            <View style={{ flex: 1 }} />
-
-            <TouchableOpacity
-              style={[
-                styles.navItem,
-                hoveredNav === 'profile' && styles.navItemHover
-              ]}
-              onPress={() => navigation.navigate('Profile')}
-              onMouseEnter={() => setHoveredNav('profile')}
-              onMouseLeave={() => setHoveredNav(null)}
-            >
-              <Ionicons name="person-circle" size={28} color="#007AFF" />
-              <Text style={styles.navText}>Profile</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[
-                styles.navItem,
-                hoveredNav === 'logout' && styles.navItemHover
-              ]}
-              onPress={() => navigation.navigate('Logout')}
-              onMouseEnter={() => setHoveredNav('logout')}
-              onMouseLeave={() => setHoveredNav(null)}
-            >
-              <Ionicons name="log-out-outline" size={28} color="#FF3B30" />
-              <Text style={styles.navText}>Logout</Text>
-            </TouchableOpacity>
-          </View>
+          {/* Sidebar - Using NavigationBar component */}
+          <NavigationBar navigation={navigation} />
 
           {/* Main Content */}
           <View style={styles.mainContent}>
-            {/* Title & Subtitle */}
-
-            {/* Search Bar */}
-            <View style={styles.topBar}>
-              <TextInput
-                style={styles.searchInput}
-                placeholder="Search products..."
-                value={searchText}
-                onChangeText={setSearchText}
-              />
+            {/* Header with user points and search - Reduced padding between them */}
+            <View style={styles.header}>
+              <View style={styles.userPointsContainer}>
+                <View style={styles.pointsBadge}>
+                  <Ionicons name="leaf" size={20} color={colours.primaryGreen} />
+                  <Text style={styles.pointsCount}>{userPoints}</Text>
+                </View>
+                <Text style={styles.pointsLabel}>Eco Points</Text>
+              </View>
+              
+              <View style={styles.searchContainer}>
+                <Ionicons name="search" size={20} color={colours.mediumGray} style={styles.searchIcon} />
+                <TextInput
+                  style={styles.searchInput}
+                  placeholder="Search sustainable products..."
+                  value={searchText}
+                  onChangeText={setSearchText}
+                  placeholderTextColor={colours.mediumGray}
+                />
+              </View>
             </View>
 
-            <View style={{ width: '100%' }}>
+            {/* Category Selector */}
+            <View style={styles.categorySection}>
+              <Text style={styles.sectionTitle}>Browse Categories</Text>
               <ScrollView
                 horizontal
                 showsHorizontalScrollIndicator={false}
                 style={styles.categoryBar}
-                contentContainerStyle={[styles.categoryBarContent, { paddingHorizontal: 16 }]} // add padding for spacing
+                contentContainerStyle={styles.categoryBarContent}
               >
-                {['All', ...categories].map((cat, idx) => (
+                {['All', ...categories].map((cat) => (
                   <TouchableOpacity
                     key={cat}
-                    style={{
-                      ...styles.categoryButton,
-                      borderColor: selectedCategory === cat ? colours.shadowDark : colours.border, // use shadowDark for selected
-                      borderWidth: selectedCategory === cat ? 2 : 1,
-                      backgroundColor: selectedCategory === cat ? colours.muted : colours.surface, // highlight selected
-                      marginRight: 16,
-                      height: 110,
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                      // Add shadow to navigator/category button
-                      shadowColor: colours.shadowDark,
-                      shadowOffset: { width: 0, height: 2 },
-                      shadowOpacity: selectedCategory === cat ? 0.25 : 0.12,
-                      shadowRadius: selectedCategory === cat ? 6 : 3,
-                      elevation: selectedCategory === cat ? 6 : 2,
-                    }}
-                    onPress={() => setSelectedCategory(cat)}
+                    style={[
+                      styles.categoryButton,
+                      selectedCategory === cat && styles.categoryButtonSelected
+                    ]}
+                    onPress={() => handleCategorySelect(cat)}
                   >
-                    <View style={styles.iconBox}>
+                    <View style={[
+                      styles.iconBox,
+                      selectedCategory === cat && styles.iconBoxSelected
+                    ]}>
                       <Image
                         source={{ uri: cat === 'All' ? 'https://cdn-icons-png.flaticon.com/512/1046/1046783.png' : categoryImages[cat] }}
                         style={styles.categoryIcon}
                         resizeMode="contain"
                       />
                     </View>
-                    <Text style={{
-                      ...styles.categoryText,
-                      color: selectedCategory === cat ? colours.primary : colours.text,
-                      fontWeight: selectedCategory === cat ? 'bold' : 'normal',
-                      textTransform: 'capitalize',
-                    }}>
-                      {cat.replace('_', ' ')}
+                    <Text style={[
+                      styles.categoryTextItem,
+                      selectedCategory === cat && styles.categoryTextSelected
+                    ]} numberOfLines={1}>
+                      {cat === 'All' ? 'Popular' : cat.replace('_', ' ')}
                     </Text>
                   </TouchableOpacity>
                 ))}
               </ScrollView>
             </View>
 
-            {/* Product List */}
-            <View style={{ flex: 1, marginTop: 0 }}>
+            {/* Results Count */}
+            <View style={styles.resultsHeader}>
+              <Text style={styles.resultsCount}>
+                {filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''} found
+                {selectedCategory !== 'All' ? ` in ${selectedCategory.replace('_', ' ')}` : ' in Popular'}
+                {searchText ? ` for "${searchText}"` : ''}
+              </Text>
+              
+              <TouchableOpacity style={styles.filterButton}>
+                <Ionicons name="filter" size={16} color={colours.primary} />
+                <Text style={styles.filterText}>Filters</Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Product Grid */}
+            <View style={styles.productsContainer}>
               <FlatList
                 data={displayedProducts}
                 keyExtractor={(item) => item.id || item._id || Math.random().toString()}
-                contentContainerStyle={{ paddingBottom: 20 }}
-                numColumns={4}
-                renderItem={({ item }) => (
-                  <View style={styles.productCard}>
-                    {item.imageUrl ? (
-                      <Image source={{ uri: item.imageUrl }} style={styles.productImage} />
-                    ) : (
-                      <View style={styles.noImagePlaceholder}>
-                        <Text style={styles.noImageText}>No Image</Text>
-                      </View>
-                    )}
-                    <View style={styles.productInfo}>
-                      <Text style={styles.productName}>{item.name}</Text>
-                      <Text style={styles.productDetail}>${item.price} </Text>
-                      <Text style={styles.productDetail}>CO2: {item.carbonEmissions} g</Text>
-                      <Text style={styles.productDetail}>Plastic: {item.plasticUsage} g</Text>
-                      <Text style={styles.productDetail}>EcoScore: {item.sustainabilityScore}</Text>
-                      <Text style={styles.productDetail}>Points: {item.points}</Text>
-                      <Text style={styles.productDetail}>Category: {item.category}</Text>
-                    </View>
-                  </View>
-                )}
+                contentContainerStyle={styles.gridContainer}
+                numColumns={numColumns}
+                columnWrapperStyle={numColumns > 1 ? styles.columnWrapper : null}
+                renderItem={renderProductItem}
                 onEndReached={handleLoadMore}
-                onEndReachedThreshold={0.5}
+                onEndReachedThreshold={0.3}
+                key={numColumns}
+                ListEmptyComponent={
+                  <View style={styles.emptyState}>
+                    <Ionicons name="search-outline" size={48} color={colours.mediumGray} />
+                    <Text style={styles.emptyStateText}>No products found</Text>
+                    <Text style={styles.emptyStateSubtext}>
+                      Try adjusting your search or category filters
+                    </Text>
+                  </View>
+                }
               />
             </View>
           </View>
@@ -295,250 +270,225 @@ const styles = StyleSheet.create({
   },
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(232,245,233,0.5)', // less opaque overlay
+    backgroundColor: 'rgba(255, 255, 255, 0.85)',
   },
-  container: {
-    flex: 1,
-    flexDirection: 'row',
-    backgroundColor: 'transparent'
+  container: { 
+    flex: 1, 
+    flexDirection: 'row', 
   },
-  sidebar: {
+  loadingContainer: {
+    backgroundColor: 'transparent',
+  },
+  sidebarPlaceholder: {
     width: 80,
     backgroundColor: colours.surface,
-    paddingTop: spacing.xl,
-    alignItems: 'center',
-    flexDirection: 'column',
   },
-  navItem: {
-    marginBottom: spacing.lg,
-    alignItems: 'center',
-    borderRadius: spacing.md,
-    transition: 'background-color 0.2s',
+  loadingContent: {
+    flex: 1, 
+    justifyContent: 'center', 
+    alignItems: 'center', 
+    backgroundColor: 'transparent'
   },
-  navItemHover: {
-    backgroundColor: colours.muted,
-    boxShadow: `0 2px 8px ${colours.shadowDark}`,
-  },
-  navText: {
+  loadingText: {
+    marginTop: spacing.md,
     color: colours.textSecondary,
-    fontSize: typography.caption,
-    textAlign: 'center',
+    fontSize: typography.sizes.base,
   },
-  navTextActive: {
-    color: colours.primary,
-    fontSize: typography.caption,
-    fontWeight: 'bold',
-    textAlign: 'center',
+  mainContent: { 
+    flex: 1, 
+    padding: spacing.md,
   },
-  mainContent: { flex: 1, padding: 0 },
-  title: {
-    fontSize: typography.title,
-    fontWeight: 'bold',
-    marginBottom: spacing.sm,
-    textAlign: 'center',
-    marginTop: 0,
-    color: colours.primary,
-  },
-  subtitle: {
-    fontSize: typography.body,
-    color: colours.textSecondary,
-    textAlign: 'center',
-    marginBottom: spacing.md,
-  },
-  topBar: {
+  header: {
     flexDirection: 'row',
-    marginBottom: spacing.lg,
+    justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: spacing.md, // move down a bit
-    justifyContent: 'center',
+    marginBottom: spacing.lg,
+    paddingHorizontal: 0, // Reduced horizontal padding
   },
-  searchInput: {
-    width: '80%', // make it smaller and not flush to sides
-    height: spacing.xl,
-    borderWidth: 1,
-    borderColor: colours.border,
-    borderRadius: spacing.md,
+  userPointsContainer: {
+    alignItems: 'center',
+    flex: 1,
+    marginRight: spacing.md, // Reduced space between points and search
+  },
+  pointsBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colours.white,
     paddingHorizontal: spacing.md,
-    backgroundColor: colours.inputBackground,
-    color: colours.text,
-    fontSize: typography.body,
-    alignSelf: 'center',
+    paddingVertical: spacing.xs,
+    borderRadius: 20,
+    shadowColor: colours.shadowDark,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  pointsCount: {
+    fontSize: typography.sizes.lg,
+    fontWeight: typography.weights.bold,
+    color: colours.primaryGreen,
+    marginLeft: spacing.xs,
+  },
+  pointsLabel: {
+    fontSize: typography.sizes.xs,
+    color: colours.textSecondary,
+    marginTop: spacing.xs,
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 2,
+    backgroundColor: colours.white,
+    borderRadius: 25,
+    paddingHorizontal: spacing.md,
+    shadowColor: colours.shadowDark,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  searchIcon: {
+    marginRight: spacing.xs,
+  },
+  searchInput: { 
+    flex: 1,
+    height: 45,
+    color: colours.textPrimary,
+    fontSize: typography.sizes.base,
+  },
+  categorySection: {
+    marginBottom: spacing.lg,
+    backgroundColor: colours.white,
+    borderRadius: 16,
+    padding: spacing.md,
+    shadowColor: colours.shadowDark,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
+    elevation: 1,
+  },
+  sectionTitle: {
+    fontSize: typography.sizes.lg,
+    fontWeight: typography.weights.bold,
+    color: colours.textPrimary,
+    marginBottom: spacing.md,
   },
   categoryBar: {
-    marginBottom: spacing.md,
-    marginTop: spacing.sm,
-    paddingVertical: spacing.sm,
-    backgroundColor: 'transparent',
-    maxHeight: 200,
+    paddingVertical: spacing.xs,
   },
   categoryBarContent: {
-    paddingHorizontal: spacing.lg,
-    gap: spacing.md,
+    paddingHorizontal: spacing.xs,
     alignItems: 'center',
   },
   categoryButton: {
     width: 80,
-    height: 90,
-    borderRadius: spacing.md,
+    height: 100,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colours.surface,
-    marginBottom: 4,
-    marginRight: 0,
-    borderColor: colours.border, // changed from '#eee' to theme green border
+    backgroundColor: colours.offWhite,
+    marginRight: spacing.md,
+    borderWidth: 2,
+    borderColor: 'transparent',
+  },
+  categoryButtonSelected: {
+    borderColor: colours.primaryGreen,
+    backgroundColor: colours.lightGreen + '20',
+    shadowColor: colours.primaryGreen,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 3,
   },
   iconBox: {
-    width: 48,
-    height: 48,
-    borderRadius: spacing.sm,
-    backgroundColor: colours.inputBackground,
+    width: 50,
+    height: 50,
+    borderRadius: 12,
+    backgroundColor: colours.white,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 4,
+    marginBottom: spacing.xs,
+    shadowColor: colours.shadowDark,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  iconBoxSelected: {
+    backgroundColor: colours.primaryGreen + '20',
+    transform: [{ scale: 1.1 }],
   },
   categoryIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: spacing.sm,
+    width: 36,
+    height: 36,
   },
-  categoryText: {
-    fontSize: typography.body,
+  categoryTextItem: {
+    fontSize: typography.sizes.xs,
     textAlign: 'center',
-    marginTop: 2,
-    color: colours.text,
-  },
-  addButton: {
-    backgroundColor: colours.accent,
-    padding: spacing.md,
-    borderRadius: spacing.md,
-    alignItems: 'center',
-    marginBottom: spacing.lg,
-  },
-  buttonText: {
-    color: colours.onAccent,
-    fontSize: typography.button,
-    fontWeight: 'bold',
-  },
-  formContainer: {
-    backgroundColor: colours.surface,
-    padding: spacing.md,
-    borderRadius: spacing.md,
-    marginBottom: spacing.lg,
-    maxHeight: 400,
-    borderColor: colours.border, // green border for forms
-    borderWidth: 1,
-  },
-  formTitle: {
-    fontSize: typography.body,
-    fontWeight: 'bold',
-    marginBottom: spacing.sm,
-    textAlign: 'center',
-    color: colours.primary,
-  },
-  formSubtitle: {
-    fontSize: typography.caption,
     color: colours.textSecondary,
-    textAlign: 'center',
-    marginBottom: spacing.md,
+    fontWeight: typography.weights.medium,
   },
-  inputContainer: {
-    marginBottom: spacing.md,
+  categoryTextSelected: {
+    color: colours.primaryGreen,
+    fontWeight: typography.weights.bold,
   },
-  label: {
-    fontSize: typography.caption,
-    fontWeight: 'bold',
-    marginBottom: spacing.sm,
-    marginTop: spacing.sm,
-    color: colours.text,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: colours.border, // changed from '#ddd' to theme green border
-    borderRadius: spacing.md,
-    padding: spacing.sm,
-    fontSize: typography.body,
-    backgroundColor: colours.inputBackground,
-    color: colours.text,
-  },
-  uploadButton: {
-    backgroundColor: colours.success,
-    padding: spacing.md,
-    borderRadius: spacing.md,
+  resultsHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: spacing.md,
+    paddingHorizontal: spacing.lg,
   },
-  uploadBox: {
-    border: `1.5px solid ${colours.border}`, // ensure green border for upload box
-    borderRadius: spacing.md,
-    padding: spacing.md,
-    marginBottom: spacing.lg,
-    backgroundColor: colours.surface,
+  resultsCount: {
+    fontSize: typography.sizes.base,
+    color: colours.textSecondary,
   },
-  disabledButton: {
-    backgroundColor: colours.muted,
-  },
-  productCard: {
-    flex: 1,
-    margin: spacing.sm,
-    backgroundColor: colours.surface,
-    borderRadius: spacing.md,
-    padding: spacing.sm,
+  filterButton: {
+    flexDirection: 'row',
     alignItems: 'center',
-    flexDirection: 'column',
-    borderColor: colours.border,
-    borderWidth: 1,
-    // Add shadow for product card
+    backgroundColor: colours.white,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    borderRadius: 16,
     shadowColor: colours.shadowDark,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.18,
-    shadowRadius: 8,
-    elevation: 8,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 1,
   },
-  productImage: {
-    width: 160, // increased from 100
-    height: 160, // increased from 100
-    borderRadius: spacing.md,
-    marginBottom: spacing.sm,
-    resizeMode: 'cover',
+  filterText: {
+    fontSize: typography.sizes.sm,
+    color: colours.primary,
+    marginLeft: spacing.xs,
+    fontWeight: typography.weights.medium,
   },
-  noImagePlaceholder: {
-    width: 160, // match productImage size
-    height: 160,
-    borderRadius: spacing.md,
-    marginBottom: spacing.sm,
-    backgroundColor: colours.muted,
+  productsContainer: {
+    flex: 1,
+  },
+  gridContainer: {
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.xs,
+  },
+  columnWrapper: {
+    justifyContent: 'flex-start',
+    gap: spacing.sm,
+  },
+  emptyState: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    borderColor: colours.border,
-    borderWidth: 1,
+    padding: spacing.xl,
   },
-  noImageText: {
-    fontSize: typography.caption,
+  emptyStateText: {
+    fontSize: typography.sizes.lg,
+    fontWeight: typography.weights.medium,
     color: colours.textSecondary,
+    marginTop: spacing.md,
+  },
+  emptyStateSubtext: {
+    fontSize: typography.sizes.sm,
+    color: colours.mediumGray,
     textAlign: 'center',
-  },
-  productInfo: {
-    alignItems: 'center',
-  },
-  productName: {
-    fontSize: typography.body,
-    fontWeight: 'bold',
-    marginBottom: spacing.xs,
-    textAlign: 'center',
-    color: colours.primary,
-  },
-  productDetail: {
-    fontSize: typography.caption,
-    color: colours.textSecondary,
-    textAlign: 'center',
-    marginBottom: 2,
-  },
-  productPoints: {
-    fontSize: typography.body,
-    fontWeight: '600',
-    color: colours.primary,
     marginTop: spacing.xs,
-    textAlign: 'center',
   },
-
 });

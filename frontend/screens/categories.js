@@ -1,29 +1,23 @@
 // frontend/screens/categories.js
 
 export const categories = [
-  'beverages',
-  'snacks',
-  'dairy',
-  'personal_care',
-  'cleaning',
-  'food',
-  'frozen',
-  'meat',
-  'packaging',
-  'health',
-  'household'
+  'Beverages',
+  'Snacks',
+  'Dairy',
+  'Beauty & Personal Care',
+  'Cooking',
+  'Meat',
+  'Fruits & Vegetables',
+  'Household'
 ];
 
 export const categoryImages = {
-  beverages: 'https://cdn-icons-png.flaticon.com/512/1046/1046784.png',
-  snacks: 'https://cdn-icons-png.flaticon.com/512/1046/1046786.png',
-  dairy: 'https://cdn-icons-png.flaticon.com/512/1046/1046785.png',
-  personal_care: 'https://cdn-icons-png.flaticon.com/512/1046/1046790.png',
-  cleaning: 'https://cdn-icons-png.flaticon.com/512/1046/1046789.png',
-  food: 'https://cdn-icons-png.flaticon.com/512/1046/1046787.png',
-  frozen: 'https://cdn-icons-png.flaticon.com/512/1046/1046788.png',
-  meat: 'https://cdn-icons-png.flaticon.com/512/1046/1046791.png',
-  packaging: 'https://cdn-icons-png.flaticon.com/512/1046/1046792.png',
-  health: 'https://cdn-icons-png.flaticon.com/512/1046/1046793.png',
-  household: 'https://cdn-icons-png.flaticon.com/512/19013/19013093.png',
+  Beverages: 'https://cdn-icons-png.flaticon.com/512/1046/1046784.png',
+  Snacks: 'https://cdn-icons-png.flaticon.com/512/1046/1046786.png',
+  Dairy: 'https://cdn-icons-png.flaticon.com/512/1046/1046785.png',
+  'Beauty & Personal Care': 'https://cdn-icons-png.flaticon.com/512/1046/1046790.png',
+  Cooking: 'https://cdn-icons-png.flaticon.com/512/1046/1046787.png',
+  Meat: 'https://cdn-icons-png.flaticon.com/512/1046/1046791.png',
+  'Fruits & Vegetables': 'https://cdn-icons-png.flaticon.com/512/1046/1046793.png',
+  Household: 'https://cdn-icons-png.flaticon.com/512/19013/19013093.png',
 };

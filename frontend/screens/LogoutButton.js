@@ -1,32 +1,20 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function LogoutButton({ navigation }) {
   const [loading, setLoading] = useState(false);
+  const { logout } = useAuth();
 
   const handleLogout = async () => {
     setLoading(true);
     try {
-      const token = await AsyncStorage.getItem('userToken');
-      if (token) {
-        await fetch('http://localhost:3000/api/auth/logout', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-auth-token': token,
-          },
-        });
-      }
+      await logout();
 
-      await AsyncStorage.removeItem('userToken');
-
-      navigation.reset({
-        index: 0,
-        routes: [{ name: 'Login' }],
-      });
     } catch (err) {
       console.error('Logout error:', err);
+    } finally {
       setLoading(false);
     }
   };
