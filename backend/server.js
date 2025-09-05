@@ -75,6 +75,7 @@ const uploadRouter = require('./routes/upload');
 const authRoutes = require('./routes/auth'); 
 const leaderboardRoutes = require('./routes/leaderboard');
 const scraperRoutes = require('./routes/scraper');
+const voucherRoutes = require('./routes/vouchers');
 
 
 app.use('/api/auth', authRoutes);
@@ -86,6 +87,7 @@ app.use('/api/recommendations', recommendationRoutes);
 app.use('/api/receipts', receiptRoutes);
 app.use('/api/leaderboard', leaderboardRoutes);
 app.use('/api/scraper', scraperRoutes);
+app.use('/api/vouchers', voucherRoutes);
 
 
 
