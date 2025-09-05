@@ -90,14 +90,20 @@ export default function HomeScreen({ navigation }) {
           <Ionicons name="person-circle" size={28} color="#007AFF" />
           <Text style={styles.navText}>Profile</Text>
         </TouchableOpacity>
-        
-        <LogoutButton navigation={navigation} />
+
+        <TouchableOpacity
+          style={styles.navItem}
+          onPress={() => navigation.navigate('Logout')}
+        >
+          <Ionicons name="log-out-outline" size={28} color="#FF3B30" />
+          <Text style={styles.navText}>Logout</Text>
+        </TouchableOpacity>
       </View>
 
       {/* Main Content */}
       <View style={styles.mainContent}>
         {/* Title & Subtitle */}
-  <Text style={styles.title}>Products</Text>
+        <Text style={styles.title}>Products</Text>
 
         {/* Search Bar */}
         <View style={styles.topBar}>

@@ -9,7 +9,7 @@ import Leaderboard from './screens/LeaderBoard';
 import Upload from './screens/Upload'; // New Upload screen
 import PointsPage from './screens/PointsPage'; // Optional: points page after upload
 // import ProductDetail from './screens/ProductDetail';
-// import LogoutButton from './screens/LogoutButton';
+import LogoutButton from './screens/LogoutButton';
 import ProfileScreen from './screens/ProfileScreen';
 import AutoProductScreen from './screens/AutoProductScreen';
 import RecommendationsScreen from './screens/RecommendationsScreen';
@@ -65,6 +65,7 @@ export default function App() {
           component={ReceiptsPoints}
           options={{ title: 'Receipt Points', headerShown: false }}
         />
+        <Stack.Screen name="Logout" component={LogoutButton} />
       </Stack.Navigator>
     </NavigationContainer>
   );

@@ -1,40 +1,90 @@
-import React from 'react';
-import { TouchableOpacity, Text, Alert, StyleSheet } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function LogoutButton({ navigation }) {
-  const handleLogout = () => {
-    console.log("Pressed logout"); // check if this prints
-    Alert.alert(
-      "Confirm Logout",
-      "Are you sure you want to log out?",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Logout",
-          style: "destructive",
-          onPress: () => navigation.replace("Login")
-        }
-      ]
-    );
+  const [loading, setLoading] = useState(false);
+
+  const handleLogout = async () => {
+    setLoading(true);
+    try {
+      const token = await AsyncStorage.getItem('userToken');
+      if (token) {
+        await fetch('http://localhost:3000/api/auth/logout', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-auth-token': token,
+          },
+        });
+      }
+
+      await AsyncStorage.removeItem('userToken');
+
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Login' }],
+      });
+    } catch (err) {
+      console.error('Logout error:', err);
+      setLoading(false);
+    }
   };
 
   return (
-    <TouchableOpacity style={styles.button} onPress={handleLogout}>
-      <Ionicons name="log-out-outline" size={28} color="#FF3B30" />
-      <Text style={styles.text}>Logout</Text>
-    </TouchableOpacity>
+    <View style={styles.container}>
+      <View style={styles.card}>
+        <Text style={styles.prompt}>Are you sure you want to log out?</Text>
+
+        {loading ? (
+          <ActivityIndicator size="large" color="#FF3B30" style={{ marginTop: 20 }} />
+        ) : (
+          <View style={styles.buttonRow}>
+            <TouchableOpacity
+              style={[styles.button, styles.cancelButton]}
+              onPress={() => navigation.goBack()}
+            >
+              <Text style={styles.cancelText}>Cancel</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.button, styles.logoutButton]}
+              onPress={handleLogout}
+            >
+              <Text style={styles.logoutText}>Logout</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+      </View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  button: { 
-    alignItems: 'center', 
-    marginBottom: 20 
+  container: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#f2f2f2' },
+  card: {
+    width: '80%',
+    backgroundColor: '#fff',
+    padding: 30,
+    borderRadius: 20,
+    alignItems: 'center',
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
   },
-  text: { 
-    color: '#FF3B30', 
-    fontSize: 12, 
-    textAlign: 'center' 
+  prompt: { fontSize: 20, fontWeight: 'bold', marginBottom: 25, textAlign: 'center', color: '#333' },
+  buttonRow: { flexDirection: 'row', justifyContent: 'space-between', width: '100%' },
+  button: {
+    flex: 1,
+    paddingVertical: 12,
+    marginHorizontal: 5,
+    borderRadius: 10,
+    alignItems: 'center',
   },
+  cancelButton: { backgroundColor: '#ccc' },
+  logoutButton: { backgroundColor: '#FF3B30' },
+  cancelText: { color: '#333', fontSize: 16, fontWeight: '600' },
+  logoutText: { color: '#fff', fontSize: 16, fontWeight: '600' },
 });
