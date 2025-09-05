@@ -23,7 +23,7 @@ export default function Leaderboard({ navigation }) {
 
       const response = await fetch('http://localhost:3000/api/leaderboard');
       const data = await response.json();
-      
+
       if (response.ok) {
         setUsers(data);
         const currentUser = data.find(u => u._id === userId);
@@ -98,32 +98,36 @@ export default function Leaderboard({ navigation }) {
     >
       <View style={styles.overlay}>
         <View style={styles.container}>
+          {/* Sidebar */}
           <NavigationBar navigation={navigation} />
 
+          {/* Main Content */}
           <View style={styles.mainContent}>
-            <View style={styles.header}>
-              <Text style={styles.title}>🏆 Leaderboard</Text>
-              
-              <View style={styles.toggleContainer}>
+            {/* Custom Header */}
+            <View style={styles.headerBar}>
+              <Text style={styles.headerTitle}>Leaderboard</Text>
+
+              <View style={styles.toggleContainerHeader}>
                 <TouchableOpacity
-                  style={[styles.toggleButton, rankingType === 'nation' && styles.activeToggle]}
+                  style={[styles.toggleButtonHeader, rankingType === 'nation' && styles.activeToggleHeader]}
                   onPress={() => setRankingType('nation')}
                 >
-                  <Text style={[styles.toggleText, rankingType === 'nation' && styles.activeToggleText]}>
+                  <Text style={[styles.toggleTextHeader, rankingType === 'nation' && styles.activeToggleTextHeader]}>
                     National
                   </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                  style={[styles.toggleButton, rankingType === 'neighbourhood' && styles.activeToggle]}
+                  style={[styles.toggleButtonHeader, rankingType === 'neighbourhood' && styles.activeToggleHeader]}
                   onPress={() => setRankingType('neighbourhood')}
                 >
-                  <Text style={[styles.toggleText, rankingType === 'neighbourhood' && styles.activeToggleText]}>
+                  <Text style={[styles.toggleTextHeader, rankingType === 'neighbourhood' && styles.activeToggleTextHeader]}>
                     Neighborhood
                   </Text>
                 </TouchableOpacity>
               </View>
             </View>
 
+            {/* Loading / Content */}
             {loading ? (
               <View style={styles.loadingContainer}>
                 <ActivityIndicator size="large" color={colours.primary} />
@@ -158,25 +162,59 @@ const styles = StyleSheet.create({
   background: { flex: 1, width: '100%', height: '100%' },
   overlay: { flex: 1, backgroundColor: 'rgba(255, 255, 255, 0.9)' },
   container: { flex: 1, flexDirection: 'row' },
-  mainContent: { flex: 1, padding: spacing.lg },
-  header: { marginBottom: spacing.lg, alignItems: 'center' },
-  title: {
-    fontSize: typography.sizes.xxl,
+  mainContent: { flex: 1 },
+
+  /* Header styles */
+  headerBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: colours.white,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: colours.borderLight,
+    shadowColor: colours.shadowDark,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    height: 100,
+  },
+  headerTitle: {
+    fontSize: typography.sizes.xl,
     fontWeight: typography.weights.bold,
     color: colours.primary,
-    marginBottom: spacing.md,
   },
-  toggleContainer: {
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.lg,
+  },
+  toggleContainerHeader: {
     flexDirection: 'row',
     backgroundColor: colours.offWhite,
     borderRadius: 20,
     padding: spacing.xs,
   },
-  toggleButton: { paddingVertical: spacing.sm, paddingHorizontal: spacing.lg, borderRadius: 16 },
-  activeToggle: { backgroundColor: colours.primaryGreen },
-  toggleText: { color: colours.textSecondary, fontSize: typography.sizes.sm },
-  activeToggleText: { color: colours.white, fontWeight: typography.weights.bold },
+  toggleButtonHeader: {
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.lg,
+    borderRadius: 16,
+  },
+  activeToggleHeader: {
+    backgroundColor: colours.primaryGreen,
+  },
+  toggleTextHeader: {
+    color: colours.textSecondary,
+    fontSize: typography.sizes.sm,
+  },
+  activeToggleTextHeader: {
+    color: colours.white,
+    fontWeight: typography.weights.bold,
+  },
 
+  /* Leaderboard list styles */
   neighbourhoodHeader: {
     backgroundColor: colours.white,
     padding: spacing.md,

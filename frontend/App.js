@@ -32,6 +32,7 @@ export default function App() {
         <Stack.Screen 
           name="Signup" 
           component={SignupScreen} 
+          options={{ headerShown: false }}
         />
 
         <Stack.Screen
@@ -39,13 +40,14 @@ export default function App() {
           component={HomeScreen}
           options={{
             title: 'Home',
-            headerLeft: () => null,
+            // headerLeft: () => null,
+            headerShown: false
           }}
         />
         <Stack.Screen
           name="Leaderboard"
           component={Leaderboard}
-          options={{ title: 'Leaderboard' }}
+          options={{ title: 'Leaderboard', headerShown: false }}
         />
         <Stack.Screen
           name="Upload"
@@ -73,7 +75,8 @@ export default function App() {
         <Stack.Screen
           name="Auto"
           component={AutoProductScreen}
-          options={{ title: 'Smart Products' }}
+          options={{ title: 'Smart Products', headerShown: false }}
+          
         />
         <Stack.Screen name="Profile" component={ProfileScreen} />
         <Stack.Screen

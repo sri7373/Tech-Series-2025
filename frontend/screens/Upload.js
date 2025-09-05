@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage'; // add if not present
+import { View, Text, TouchableOpacity, StyleSheet, Alert, Image, ActivityIndicator, ImageBackground } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colours, spacing, typography } from '../theme';
-import { ImageBackground } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import NavigationBar from './NavigationBar';
 
 export default function Upload({ navigation }) {
   const [image, setImage] = useState(null);
   const [loading, setLoading] = useState(false);
   const [uploadType, setUploadType] = useState(null); // 'barcode' or 'receipt'
+  const [isDragging, setIsDragging] = useState(false);
 
   // Handle file input and convert to base64
   const handleFileChange = (event) => {
@@ -17,6 +20,32 @@ export default function Upload({ navigation }) {
       setImage({ uri: reader.result }); // reader.result is base64 string
     };
     reader.readAsDataURL(file);
+  };
+
+  // Handle drag and drop
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+    
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+      const file = files[0];
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImage({ uri: reader.result });
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   // Scan barcode by uploading base64 image as JSON
@@ -119,181 +148,367 @@ export default function Upload({ navigation }) {
   return (
     <ImageBackground
       source={require('../assets/leafy.jpg')}
-      style={{ flex: 1, width: '100%', height: '100%' }}
+      style={styles.background}
       resizeMode="cover"
     >
-      <div style={styles.overlay}>
-        <div style={styles.appTitleContainer}>
-          <span style={styles.appTitle}>ECOmmerce</span>
-        </div>
-        <div style={styles.card}>
-          <div style={styles.buttonRow}>
-            <button
-              style={{
-                ...styles.confirmButton,
-                ...(uploadType === 'barcode' ? styles.selectedButton : {}),
-              }}
-              onClick={() => { setUploadType('barcode'); setImage(null); }}
-            >
-              Upload Barcode
-            </button>
-            <button
-              style={{
-                ...styles.confirmButton,
-                ...(uploadType === 'receipt' ? styles.selectedButton : {}),
-              }}
-              onClick={() => { setUploadType('receipt'); setImage(null); }}
-            >
-              Upload Receipt
-            </button>
-          </div>
-          <div style={styles.uploadBox}>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleFileChange}
-              style={{ width: '100%', height: '100%', opacity: 0, position: 'absolute', left: 0, top: 0, cursor: 'pointer' }}
-              disabled={!uploadType}
-            />
-            {!image ? (
-              <span style={styles.uploadText}>
-                {uploadType === 'barcode'
-                  ? '📷 Upload Barcode Image'
-                  : uploadType === 'receipt'
-                    ? '🧾 Upload Receipt Image'
-                    : 'Select upload type'}
-              </span>
-            ) : (
-              <img src={image.uri} alt="preview" style={styles.preview} />
-            )}
-          </div>
-          {uploadType && image && (
-            <button
-              style={styles.confirmButton}
-              onClick={uploadType === 'barcode' ? scanProductBarcode : scanReceipt}
-              disabled={loading}
-            >
-              {loading
-                ? (uploadType === 'barcode' ? 'Scanning Barcode...' : 'Scanning Receipt...')
-                : (uploadType === 'barcode' ? '✅ Scan Barcode' : '✅ Scan Receipt')}
-            </button>
-          )}
-        </div>
-        <button
-          style={styles.returnButton}
-          onClick={() => navigation && navigation.navigate('Home')}
-        >
-          ← Home
-        </button>
-      </div>
+      <View style={styles.overlay}>
+        <View style={styles.container}>
+          <NavigationBar navigation={navigation} />
+
+          <View style={styles.mainContent}>
+            <View style={styles.centeredContainer}>
+              <View style={styles.card}>
+                <Text style={styles.title}>Upload & Scan</Text>
+                <Text style={styles.subtitle}>
+                  Upload a barcode or receipt to earn eco points
+                </Text>
+
+                {/* Upload Type Selection */}
+                <View style={styles.buttonRow}>
+                  <TouchableOpacity
+                    style={[
+                      styles.typeButton,
+                      uploadType === 'barcode' && styles.typeButtonSelected
+                    ]}
+                    onPress={() => { setUploadType('barcode'); setImage(null); }}
+                  >
+                    <Ionicons name="barcode-outline" size={24} color={uploadType === 'barcode' ? colours.white : colours.primary} />
+                    <Text style={[
+                      styles.typeButtonText,
+                      uploadType === 'barcode' && styles.typeButtonTextSelected
+                    ]}>
+                      Barcode
+                    </Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={[
+                      styles.typeButton,
+                      uploadType === 'receipt' && styles.typeButtonSelected
+                    ]}
+                    onPress={() => { setUploadType('receipt'); setImage(null); }}
+                  >
+                    <Ionicons name="receipt-outline" size={24} color={uploadType === 'receipt' ? colours.white : colours.primary} />
+                    <Text style={[
+                      styles.typeButtonText,
+                      uploadType === 'receipt' && styles.typeButtonTextSelected
+                    ]}>
+                      Receipt
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+
+                {/* Drop Zone */}
+                {uploadType && (
+                  <View style={styles.uploadSection}>
+                    <Text style={styles.uploadTitle}>
+                      {uploadType === 'barcode' ? 'Upload Barcode' : 'Upload Receipt'}
+                    </Text>
+                    
+                    <View
+                      style={[
+                        styles.dropZone,
+                        isDragging && styles.dropZoneDragging,
+                        image && styles.dropZoneHasImage
+                      ]}
+                      onDragOver={handleDragOver}
+                      onDragLeave={handleDragLeave}
+                      onDrop={handleDrop}
+                    >
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFileChange}
+                        style={styles.fileInput}
+                        disabled={!uploadType}
+                      />
+                      
+                      {!image ? (
+                        <View style={styles.uploadContent}>
+                          <Ionicons 
+                            name={uploadType === 'barcode' ? "barcode" : "receipt"} 
+                            size={48} 
+                            color={isDragging ? colours.primary : colours.mediumGray} 
+                          />
+                          <Text style={styles.uploadText}>
+                            {isDragging ? 'Drop image here' : 
+                            uploadType === 'barcode' ? 'Click to upload barcode' : 
+                            'Click to upload receipt'}
+                          </Text>
+                          <Text style={styles.uploadSubtext}>
+                            or drag and drop
+                          </Text>
+                        </View>
+                      ) : (
+                        <View style={styles.previewContainer}>
+                          <Image 
+                            source={{ uri: image.uri }} 
+                            style={styles.previewImage} 
+                            resizeMode="contain"
+                          />
+                          <TouchableOpacity 
+                            style={styles.removeButton}
+                            onPress={() => setImage(null)}
+                          >
+                            <Ionicons name="close-circle" size={24} color={colours.error} />
+                          </TouchableOpacity>
+                        </View>
+                      )}
+                    </View>
+                  </View>
+                )}
+
+                {/* Scan Button */}
+                {uploadType && image && (
+                  <TouchableOpacity
+                    style={[
+                      styles.scanButton,
+                      loading && styles.scanButtonDisabled
+                    ]}
+                    onPress={uploadType === 'barcode' ? scanProductBarcode : scanReceipt}
+                    disabled={loading}
+                  >
+                    {loading ? (
+                      <ActivityIndicator size="small" color={colours.white} />
+                    ) : (
+                      <>
+                        <Ionicons 
+                          name={uploadType === 'barcode' ? "scan-outline" : "checkmark-circle-outline"} 
+                          size={20} 
+                          color={colours.white} 
+                        />
+                        <Text style={styles.scanButtonText}>
+                          {uploadType === 'barcode' ? 'Scan Barcode' : 'Scan Receipt'}
+                        </Text>
+                      </>
+                    )}
+                  </TouchableOpacity>
+                )}
+
+                {/* Instructions */}
+                <View style={styles.instructions}>
+                  <Text style={styles.instructionsTitle}>How it works:</Text>
+                  <View style={styles.instructionItem}>
+                    <Ionicons name="camera-outline" size={16} color={colours.primary} />
+                    <Text style={styles.instructionText}>
+                      Take a clear photo of your {uploadType === 'barcode' ? 'product barcode' : 'store receipt'}
+                    </Text>
+                  </View>
+                  <View style={styles.instructionItem}>
+                    <Ionicons name="cloud-upload-outline" size={16} color={colours.primary} />
+                    <Text style={styles.instructionText}>
+                      Upload the image using the drop zone above
+                    </Text>
+                  </View>
+                  <View style={styles.instructionItem}>
+                    <Ionicons name="leaf-outline" size={16} color={colours.primary} />
+                    <Text style={styles.instructionText}>
+                      Earn eco points for sustainable purchases
+                    </Text>
+                  </View>
+                </View>
+              </View>
+            </View>
+          </View>
+        </View>
+      </View>
     </ImageBackground>
   );
 }
 
-const styles = {
-  overlay: {
-    width: '100%',
-    minHeight: '100vh',
-    background: 'rgba(232,245,233,0.5)',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    position: 'relative',
+const styles = StyleSheet.create({
+  background: { 
+    flex: 1, 
+    width: '100%', 
+    height: '100%' 
   },
-  appTitleContainer: {
-    width: '100%',
-    alignItems: 'center',
-    marginTop: spacing.lg,
-    marginBottom: spacing.sm,
-    display: 'flex',
+  overlay: { 
+    flex: 1, 
+    backgroundColor: 'rgba(255, 255, 255, 0.85)' 
+  },
+  container: { 
+    flex: 1, 
+    flexDirection: 'row' 
+  },
+  mainContent: { 
+    flex: 1, 
+    padding: spacing.lg 
+  },
+  centeredContainer: {
+    flex: 1,
     justifyContent: 'center',
-  },
-  appTitle: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: colours.primary,
-    textAlign: 'center',
-    letterSpacing: 1,
+    alignItems: 'center',
   },
   card: {
-    background: colours.surface,
-    borderRadius: spacing.lg,
-    boxShadow: `0 4px 24px ${colours.shadow}`,
+    backgroundColor: colours.white,
+    borderRadius: 20,
     padding: spacing.xl,
-    display: 'flex',
-    flexDirection: 'column',
+    width: '100%',
+    maxWidth: 500,
+    shadowColor: colours.shadowDark,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 5,
     alignItems: 'center',
-    minWidth: 340,
-    maxWidth: 400,
-    margin: 'auto',
   },
-  uploadBox: {
-    width: 220,
-    height: 220,
-    background: colours.inputBackground,
-    borderRadius: spacing.lg,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: spacing.lg,
-    display: 'flex',
-    position: 'relative',
-    overflow: 'hidden',
-    border: `1.5px solid ${colours.border}`,
-    boxShadow: `0 2px 8px ${colours.shadow}`,
-  },
-  uploadText: {
-    fontSize: typography.body,
-    fontWeight: 'bold',
-    textAlign: 'center',
+  title: {
+    fontSize: typography.sizes.xxxl,
+    fontWeight: typography.weights.bold,
     color: colours.primary,
-    zIndex: 1,
+    marginBottom: spacing.xs,
+    textAlign: 'center',
   },
-  preview: {
-    width: 190,
-    height: 190,
-    borderRadius: spacing.md,
-    objectFit: 'cover',
-    zIndex: 1,
-    boxShadow: `0 2px 8px ${colours.shadow}`,
+  subtitle: {
+    fontSize: typography.sizes.base,
+    color: colours.textSecondary,
+    textAlign: 'center',
+    marginBottom: spacing.xl,
   },
   buttonRow: {
-    display: 'flex',
-    gap: 16,
-    marginBottom: spacing.md,
-    marginTop: spacing.md,
-    width: '100%',
+    flexDirection: 'row',
     justifyContent: 'center',
+    marginBottom: spacing.xl,
+    gap: spacing.md,
   },
-  confirmButton: {
-    background: colours.primary,
-    padding: `${spacing.sm}px ${spacing.lg}px`,
-    borderRadius: spacing.md,
-    color: colours.surface,
-    fontSize: typography.button,
-    fontWeight: 600,
-    border: 'none',
-    cursor: 'pointer',
-    transition: 'background 0.2s',
-    minWidth: 140,
+  typeButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: spacing.md,
+    borderRadius: 12,
+    backgroundColor: colours.offWhite,
+    borderWidth: 2,
+    borderColor: 'transparent',
+    minWidth: 120,
+    gap: spacing.xs,
   },
-  selectedButton: {
-    background: colours.secondary,
-    border: `2px solid ${colours.secondary}`,
-    color: colours.surface,
+  typeButtonSelected: {
+    backgroundColor: colours.primaryGreen,
+    borderColor: colours.primaryGreen,
   },
-  returnButton: {
+  typeButtonText: {
+    fontSize: typography.sizes.base,
+    fontWeight: typography.weights.medium,
+    color: colours.textPrimary,
+  },
+  typeButtonTextSelected: {
+    color: colours.white,
+    fontWeight: typography.weights.bold,
+  },
+  uploadSection: {
+    width: '100%',
+    marginBottom: spacing.lg,
+  },
+  uploadTitle: {
+    fontSize: typography.sizes.lg,
+    fontWeight: typography.weights.bold,
+    color: colours.textPrimary,
+    marginBottom: spacing.md,
+    textAlign: 'center',
+  },
+  dropZone: {
+    width: '100%',
+    height: 200,
+    backgroundColor: colours.offWhite,
+    borderRadius: 16,
+    borderWidth: 2,
+    borderStyle: 'dashed',
+    borderColor: colours.borderLight,
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'relative',
+    overflow: 'hidden',
+  },
+  dropZoneDragging: {
+    borderColor: colours.primary,
+    backgroundColor: colours.lightGreen + '40',
+  },
+  dropZoneHasImage: {
+    borderColor: colours.primaryGreen,
+  },
+  fileInput: {
     position: 'absolute',
-    top: spacing.lg,
-    left: spacing.lg,
-    background: colours.surface,
-    padding: `${spacing.xs}px 14px`,
-    borderRadius: spacing.md,
-    fontWeight: 'bold',
-    fontSize: typography.button,
-    color: colours.primary,
-    border: 'none',
+    width: '100%',
+    height: '100%',
+    opacity: 0,
     cursor: 'pointer',
-    zIndex: 2,
-    boxShadow: `0 2px 8px ${colours.shadow}`,
   },
-};
+  uploadContent: {
+    alignItems: 'center',
+    padding: spacing.lg,
+  },
+  uploadText: {
+    fontSize: typography.sizes.base,
+    fontWeight: typography.weights.medium,
+    color: colours.textPrimary,
+    marginTop: spacing.md,
+    textAlign: 'center',
+  },
+  uploadSubtext: {
+    fontSize: typography.sizes.sm,
+    color: colours.textSecondary,
+    marginTop: spacing.xs,
+  },
+  previewContainer: {
+    width: '100%',
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'relative',
+  },
+  previewImage: {
+    width: '90%',
+    height: '90%',
+    borderRadius: 8,
+  },
+  removeButton: {
+    position: 'absolute',
+    top: spacing.xs,
+    right: spacing.xs,
+    backgroundColor: colours.white,
+    borderRadius: 20,
+    padding: 2,
+  },
+  scanButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colours.primaryOrange,
+    padding: spacing.md,
+    borderRadius: 12,
+    marginBottom: spacing.lg,
+    gap: spacing.sm,
+    minWidth: 200,
+  },
+  scanButtonDisabled: {
+    backgroundColor: colours.mediumGray,
+  },
+  scanButtonText: {
+    fontSize: typography.sizes.base,
+    fontWeight: typography.weights.bold,
+    color: colours.white,
+  },
+  instructions: {
+    width: '100%',
+    backgroundColor: colours.offWhite,
+    borderRadius: 12,
+    padding: spacing.md,
+  },
+  instructionsTitle: {
+    fontSize: typography.sizes.base,
+    fontWeight: typography.weights.bold,
+    color: colours.textPrimary,
+    marginBottom: spacing.sm,
+  },
+  instructionItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: spacing.xs,
+    gap: spacing.sm,
+  },
+  instructionText: {
+    fontSize: typography.sizes.sm,
+    color: colours.textSecondary,
+    flex: 1,
+  },
+});
