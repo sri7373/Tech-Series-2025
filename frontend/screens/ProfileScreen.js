@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, Alert, ScrollView, FlatList } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, Alert, ScrollView, FlatList, Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { BarChart } from 'react-native-chart-kit';
 
 export default function ProfileScreen() {
   const [user, setUser] = useState(null);
@@ -103,6 +104,19 @@ export default function ProfileScreen() {
     loadProfile();
   }, []);
 
+  // Prepare bar chart data for ecoPoints only
+  const chartLabels = dailyStats.map(stat => stat.date.slice(5)); // MM-DD
+  const pointsData = dailyStats.map(stat => stat.ecoPoints);
+
+  const pointsChartData = {
+    labels: chartLabels,
+    datasets: [
+      {
+        data: pointsData
+      }
+    ]
+  };
+
   if (loading) {
     return (
       <View style={styles.centered}>
@@ -153,6 +167,36 @@ export default function ProfileScreen() {
               : `Down ${Math.abs(todayTrend)}% in points today compared to yesterday.`}
           </Text>
         )}
+
+        {/* Eco Points Bar Chart */}
+        {dailyStats.length > 0 && (
+          <BarChart
+            data={pointsChartData}
+            width={Dimensions.get('window').width * 0.9}
+            height={220}
+            yAxisLabel=""
+            chartConfig={{
+              backgroundColor: "#fff",
+              backgroundGradientFrom: "#fff",
+              backgroundGradientTo: "#fff",
+              decimalPlaces: 0,
+              color: (opacity = 1) => `rgba(81, 160, 71, ${opacity})`, // green
+              labelColor: (opacity = 1) => `rgba(51,51,51,${opacity})`,
+              barPercentage: 0.5,
+              propsForBackgroundLines: {
+                strokeDasharray: "",
+              },
+            }}
+            style={{
+              marginVertical: 8,
+              borderRadius: 12,
+            }}
+            fromZero
+            showBarTops={false}
+          />
+        )}
+
+        {/* Daily blocks */}
         <FlatList
           data={dailyStats}
           keyExtractor={item => item.date}
