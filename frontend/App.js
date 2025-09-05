@@ -16,6 +16,7 @@ import AutoProductScreen from './screens/AutoProductScreen';
 import RecommendationsScreen from './screens/RecommendationsScreen';
 import ReceiptsPoints from './screens/ReceiptsPoints';
 import MonthlyRewardsScreen from './screens/MonthlyRewards';
+import SignupScreen from './screens/Signup';
 
 const Stack = createNativeStackNavigator();
 
@@ -69,6 +70,8 @@ export default function App() {
           component={AutoProductScreen}
           options={{ title: 'Smart Products' }}
         />
+
+        <Stack.Screen name="Signup" component={SignupScreen} />
         <Stack.Screen name="Profile" component={ProfileScreen} />
         <Stack.Screen
           name="Recommendations"

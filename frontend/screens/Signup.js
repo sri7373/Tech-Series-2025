@@ -1,37 +1,35 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ImageBackground } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colours, spacing, typography } from '../theme';
 
-export default function LoginScreen({ navigation }) {
+export default function SignupScreen({ navigation }) {
+  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleLogin = async () => {
+  const handleSignup = async () => {
+    if (!username || !email || !password) {
+      Alert.alert('Validation Error', 'Please fill in all fields.');
+      return;
+    }
+
     try {
-      const response = await fetch('http://localhost:3000/api/auth/login', {
+      const response = await fetch('http://localhost:3000/api/users', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ username, email, password }),
       });
+
       const data = await response.json();
 
-      console.log('Login response data:', data);
-
       if (response.ok) {
-        // Store all user data
-        await AsyncStorage.setItem('userToken', data.token);
-        await AsyncStorage.setItem('userId', data.user._id);
-        await AsyncStorage.setItem('userPoints', data.user.points.toString());
-        await AsyncStorage.setItem('username', data.user.username || '');
-        await AsyncStorage.setItem('email', data.user.email || '');
-        await AsyncStorage.setItem('neighbourhood', data.user.neighbourhood || '');
-
-        navigation.replace('Home'); // Using replace to prevent going back
+        Alert.alert('Success', 'User created successfully!');
+        navigation.goBack(); // Navigate back to Login screen
       } else {
-        Alert.alert('Login Failed', data.error || 'Invalid credentials');
+        Alert.alert('Signup Failed', data.error || 'Could not create account.');
       }
     } catch (err) {
+      console.error(err);
       Alert.alert('Error', 'Could not connect to server');
     }
   };
@@ -45,6 +43,13 @@ export default function LoginScreen({ navigation }) {
       <View style={styles.container}>
         <View style={styles.card}>
           <Text style={styles.title}>ECOmmerce</Text>
+
+          <TextInput
+            style={styles.input}
+            placeholder="Enter your username"
+            value={username}
+            onChangeText={setUsername}
+          />
 
           <TextInput
             style={styles.input}
@@ -62,17 +67,13 @@ export default function LoginScreen({ navigation }) {
             onChangeText={setPassword}
           />
 
-          <TouchableOpacity onPress={() => Alert.alert('Forgot Password clicked')}>
-            <Text style={styles.linkText}>Forgot password?</Text>
+          <TouchableOpacity style={styles.loginButton} onPress={handleSignup}>
+            <Text style={styles.loginText}>Sign Up</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
-            <Text style={styles.loginText}>Login</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity onPress={() => navigation.navigate('Signup')}>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
             <Text style={styles.signupText}>
-              Don’t have an account? <Text style={{ fontWeight: 'bold' }}>Sign up</Text>
+              Already have an account? <Text style={{ fontWeight: 'bold' }}>Login</Text>
             </Text>
           </TouchableOpacity>
         </View>
@@ -82,16 +83,12 @@ export default function LoginScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  background: {
-    flex: 1,
-    width: '100%',
-    height: '100%',
-  },
+  background: { flex: 1, width: '100%', height: '100%' },
   container: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(232,245,233,0.5)', // less opaque overlay
+    backgroundColor: 'rgba(232,245,233,0.5)',
     padding: spacing.lg,
   },
   card: {
@@ -106,12 +103,7 @@ const styles = StyleSheet.create({
     elevation: 8,
     alignItems: 'center',
   },
-  title: {
-    fontSize: typography.title,
-    fontWeight: '700',
-    color: colours.primary,
-    marginBottom: spacing.lg,
-  },
+  title: { fontSize: typography.title, fontWeight: '700', color: colours.primary, marginBottom: spacing.lg },
   input: {
     width: '100%',
     height: spacing.xl,
@@ -123,12 +115,6 @@ const styles = StyleSheet.create({
     fontSize: typography.body,
     backgroundColor: colours.inputBackground,
     color: colours.text,
-    fontWeight: '600',
-  },
-  linkText: {
-    color: colours.secondary,
-    alignSelf: 'flex-end',
-    marginBottom: spacing.lg,
     fontWeight: '600',
   },
   loginButton: {
@@ -145,14 +131,6 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     elevation: 5,
   },
-  loginText: {
-    color: colours.surface,
-    fontSize: typography.button,
-    fontWeight: '700',
-  },
-  signupText: {
-    fontSize: typography.caption,
-    color: colours.textSecondary,
-    textAlign: 'center',
-  },
+  loginText: { color: colours.surface, fontSize: typography.button, fontWeight: '700' },
+  signupText: { fontSize: typography.caption, color: colours.textSecondary, textAlign: 'center' },
 });
