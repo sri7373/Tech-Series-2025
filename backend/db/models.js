@@ -43,7 +43,13 @@ const userSchema = new mongoose.Schema({
   },
   isAdmin: { type: Boolean, default: false },
   points: { type: Number, default: 0 },
-  neighbourhood: { type: String, defaut: "" }
+  neighbourhood: { type: String, defaut: "" },
+  vouchers: [{
+    code: String,
+    discount: Number, // percentage discount
+    expires: Date,
+    used: { type: Boolean, default: false }
+  }]
 
 });
 
