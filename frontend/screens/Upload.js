@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage'; // add if not present
 
 export default function Upload({ navigation }) {
   const [image, setImage] = useState(null);
@@ -52,10 +53,6 @@ export default function Upload({ navigation }) {
       alert('No image. Please select an image first.');
       return;
     }
-
-    // console.log('Uploading receipt image for scanning...');
-    // console.log(image.uri);
-
     setLoading(true);
     try {
       const response = await fetch('http://localhost:3000/api/receipts/scan', {
@@ -65,9 +62,42 @@ export default function Upload({ navigation }) {
       });
 
       const result = await response.json();
-      if (result && result.items) {
-        // Navigate to ReceiptsPoints screen with items and totalPoints
 
+      console.log('Receipt scan result:', result);
+
+      if (result && result.items) {
+        console.log('Scanned items:', result.items);
+        console.log('Total points:', result.totalPoints);
+        console.log('Total carbon emissions:', result.carbonEmissions);
+        console.log('Total plastic usage:', result.plasticUsage);
+        // Save receipt to DB
+        const userId = await AsyncStorage.getItem('userId');
+        const token = await AsyncStorage.getItem('userToken');
+        const itemsWithProductId = result.items.map(item => ({
+          ...item,
+          productId: item.productId // ensure productId is present if available
+        }));
+        const receiptPayload = {
+          userId,
+          items: itemsWithProductId,
+          points: result.totalPoints,
+          carbonEmissions: result.carbonEmissions,
+          plasticUsage: result.plasticUsage,
+          uploadedAt: new Date().toISOString()
+        };
+
+        console.log('Saving receipt:', receiptPayload);
+
+        await fetch('http://localhost:3000/api/receipts', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-auth-token': token
+          },
+          body: JSON.stringify(receiptPayload)
+        });
+
+        // Navigate to ReceiptsPoints screen with items and totalPoints
         if (navigation) {
           navigation.navigate('ReceiptsPoints', {
             items: result.items,

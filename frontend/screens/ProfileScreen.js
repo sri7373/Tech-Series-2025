@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, Alert, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, Alert, ScrollView, FlatList } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -8,6 +8,9 @@ export default function ProfileScreen() {
   const [nationalRank, setNationalRank] = useState(null);
   const [neighbourhoodRank, setNeighbourhoodRank] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [receipts, setReceipts] = useState([]);
+  const [dailyStats, setDailyStats] = useState([]);
+  const [todayTrend, setTodayTrend] = useState(null);
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -43,6 +46,48 @@ export default function ProfileScreen() {
           if (rankResponse.ok) {
             setNationalRank(rankData.nationalRank);
             setNeighbourhoodRank(rankData.neighbourhoodRank);
+          }
+
+          // Fetch receipts history for eco journey dashboard
+          const receiptsResponse = await fetch(`http://localhost:3000/api/receipts/history/${userId}`, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              'x-auth-token': token,
+            },
+          });
+          const receiptsData = await receiptsResponse.json();
+          if (receiptsResponse.ok) {
+            setReceipts(receiptsData);
+
+            // Aggregate receipts by day using uploadedAt
+            const statsByDay = {};
+            receiptsData.forEach(r => {
+              const day = r.uploadedAt.slice(0, 10); // YYYY-MM-DD
+              if (!statsByDay[day]) {
+                statsByDay[day] = { ecoPoints: 0, carbon: 0, plastic: 0 };
+              } 
+              statsByDay[day].ecoPoints += r.points || 0;
+              statsByDay[day].carbon += r.carbonEmissions || 0;
+              statsByDay[day].plastic += r.plasticUsage || 0;
+            });
+            // Convert to array sorted by date desc
+            const dailyStatsArr = Object.entries(statsByDay)
+              .map(([date, stats]) => ({ date, ...stats }))
+              .sort((a, b) => b.date.localeCompare(a.date));
+            setDailyStats(dailyStatsArr);
+
+            // Calculate today's trend vs yesterday
+            if (dailyStatsArr.length >= 2) {
+              const today = dailyStatsArr[0];
+              const yesterday = dailyStatsArr[1];
+              const percentChange = yesterday.ecoPoints === 0
+                ? 100
+                : Math.round(((today.ecoPoints - yesterday.ecoPoints) / yesterday.ecoPoints) * 100);
+              setTodayTrend(percentChange);
+            } else {
+              setTodayTrend(null);
+            }
           }
         } else {
           Alert.alert('Error', userData.error || 'Failed to fetch user profile');
@@ -98,6 +143,33 @@ export default function ProfileScreen() {
         <Text style={styles.pointsText}>{user.points} Points</Text>
       </View>
       
+      {/* Eco Journey Dashboard */}
+      <View style={styles.dashboardSection}>
+        <Text style={styles.sectionTitle}>Eco Journey Dashboard</Text>
+        {todayTrend !== null && (
+          <Text style={styles.trendText}>
+            {todayTrend >= 0
+              ? `Up ${todayTrend}% in points today compared to yesterday!`
+              : `Down ${Math.abs(todayTrend)}% in points today compared to yesterday.`}
+          </Text>
+        )}
+        <FlatList
+          data={dailyStats}
+          keyExtractor={item => item.date}
+          renderItem={({ item }) => (
+            <View style={styles.dayBlock}>
+              <Text style={styles.dayDate}>{item.date}</Text>
+              <Text style={styles.dayPoints}>Eco Points: {item.ecoPoints}</Text>
+              <Text style={styles.dayCarbon}>Carbon Emissions: {item.carbon} kg</Text>
+              <Text style={styles.dayPlastic}>Plastic Usage: {item.plastic} g</Text>
+            </View>
+          )}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={{ marginTop: 10 }}
+        />
+      </View>
+
       {/* Ranks */}
       <View style={styles.rankSection}>
         <Text style={styles.sectionTitle}>Your Rankings</Text>
@@ -178,6 +250,51 @@ const styles = StyleSheet.create({
     color: '#333', 
     marginLeft: 8, 
     fontWeight: 'bold' 
+  },
+  dashboardSection: {
+    width: '90%',
+    marginTop: 30,
+    marginBottom: 10,
+    backgroundColor: '#e8f5e9',
+    borderRadius: 12,
+    padding: 15,
+    alignItems: 'center'
+  },
+  trendText: {
+    fontSize: 16,
+    color: '#388e3c',
+    fontWeight: 'bold',
+    marginBottom: 10,
+    textAlign: 'center'
+  },
+  dayBlock: {
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 12,
+    marginRight: 10,
+    alignItems: 'flex-start',
+    minWidth: 140,
+    elevation: 2
+  },
+  dayDate: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#007AFF',
+    marginBottom: 4
+  },
+  dayPoints: {
+    fontSize: 14,
+    color: '#333',
+    marginBottom: 2
+  },
+  dayCarbon: {
+    fontSize: 13,
+    color: '#388e3c',
+    marginBottom: 2
+  },
+  dayPlastic: {
+    fontSize: 13,
+    color: '#1976d2'
   },
   rankSection: { 
     width: '90%', 

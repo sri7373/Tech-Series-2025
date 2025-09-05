@@ -19,6 +19,7 @@ const productSchema = new mongoose.Schema({
   
 const Product = mongoose.model('Product', productSchema, 'SuperMarket');
 
+
 // User collection
 const userSchema = new mongoose.Schema({
   username: { 
@@ -93,4 +94,20 @@ function validateUserUpdate(user) {
   return schema.validate(user);
 }
 
-module.exports = { Product, User, BlacklistedToken, validateUser, validateUserUpdate };
+// ...existing code...
+
+const receiptSchema = new mongoose.Schema({
+  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  products: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }],
+  points: { type: Number, required: true },
+  carbonEmissions: { type: Number, required: true },
+  plasticUsage: { type: Number, required: true },
+  uploadedAt: { type: Date, default: Date.now }
+});
+
+const Receipt = mongoose.model('Receipt', receiptSchema, 'Receipts');
+
+// ...existing code...
+
+module.exports = { Product, User, BlacklistedToken, Receipt, validateUser, validateUserUpdate };
+
