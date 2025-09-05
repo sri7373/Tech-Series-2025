@@ -60,7 +60,12 @@ export default function Leaderboard() {
     return (
       <View style={[styles.row, isCurrentUser && styles.highlightRow]}>
         <Text style={styles.rank}>{item.rank}</Text>
-        <Text style={styles.name}>{item.username || item.name}</Text>
+        <View style={styles.nameContainer}>
+          <Text style={styles.name}>{item.username || item.name}</Text>
+          {rankingType === 'nation' && item.neighbourhood && (
+            <Text style={styles.neighbourhood}>{item.neighbourhood}</Text>
+          )}
+        </View>
         <Text style={styles.score}>{item.points}</Text>
       </View>
     );
@@ -71,7 +76,12 @@ export default function Leaderboard() {
     return (
       <View style={[styles.row, styles.highlightRow, styles.bottomRow]}>
         <Text style={styles.rank}>{currentUserData.rank}</Text>
-        <Text style={styles.name}>{currentUserData.username || currentUserData.name}</Text>
+        <View style={styles.nameContainer}>
+          <Text style={styles.name}>{currentUserData.username || currentUserData.name}</Text>
+          {rankingType === 'nation' && currentUserData.neighbourhood && (
+            <Text style={styles.neighbourhood}>{currentUserData.neighbourhood}</Text>
+          )}
+        </View>
         <Text style={styles.score}>{currentUserData.points}</Text>
       </View>
     );
@@ -103,6 +113,11 @@ export default function Leaderboard() {
         <ActivityIndicator size="large" color="#007AFF" />
       ) : (
         <>
+          {rankingType === 'neighbourhood' && currentUserNeighborhood && (
+            <Text style={styles.neighbourhoodHeader}>
+              {currentUserNeighborhood} Rankings
+            </Text>
+          )}
           <FlatList
             data={usersWithRank.slice(0, 10)}
             keyExtractor={(item) => item._id || item.id || Math.random().toString()}
@@ -122,10 +137,27 @@ const styles = StyleSheet.create({
   toggleButton: { padding: 10, marginHorizontal: 5, borderRadius: 5, backgroundColor: '#eee' },
   activeToggle: { backgroundColor: '#007AFF' },
   toggleText: { color: '#000', fontWeight: 'bold' },
+  neighbourhoodHeader: { 
+    fontSize: 18, 
+    fontWeight: 'bold', 
+    textAlign: 'center', 
+    marginBottom: 15, 
+    color: '#007AFF',
+    backgroundColor: '#f0f8ff',
+    padding: 10,
+    borderRadius: 8
+  },
   row: { flexDirection: 'row', justifyContent: 'space-between', padding: 15, borderBottomWidth: 1, borderColor: '#eee' },
   highlightRow: { backgroundColor: '#d0f0ff', borderRadius: 5 },
   bottomRow: { marginTop: 10, borderTopWidth: 2, borderTopColor: '#007AFF' },
   rank: { fontWeight: 'bold', width: 30 },
-  name: { flex: 1 },
+  nameContainer: { flex: 1 },
+  name: { fontWeight: 'bold' },
+  neighbourhood: { 
+    fontSize: 12, 
+    color: '#666', 
+    fontStyle: 'italic',
+    marginTop: 2
+  },
   score: { fontWeight: 'bold' },
 });
