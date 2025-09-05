@@ -178,6 +178,9 @@ export default function HomeScreen({ navigation }) {
                   borderWidth: selectedCategory === cat ? 2 : 1,
                   backgroundColor: '#fff',
                   marginRight: 16,
+                  height: 110,
+                  justifyContent: 'center',
+                  alignItems: 'center', 
                 }}
                 onPress={() => setSelectedCategory(cat)}
               >
@@ -264,7 +267,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 5,
     textAlign: 'center',
-    marginTop: 160,
+    marginTop: 20,
   },
   subtitle: {
     fontSize: 14,
