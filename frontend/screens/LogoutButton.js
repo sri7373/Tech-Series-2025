@@ -11,7 +11,7 @@ export default function LogoutButton({ navigation }) {
     setLoading(true);
     try {
       await logout();
-      navigation.replace('Login');
+
     } catch (err) {
       console.error('Logout error:', err);
     } finally {
