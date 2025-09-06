@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { categories, categoryImages } from './categories';
 import { View, Text, FlatList, TextInput, TouchableOpacity, StyleSheet, Alert, ScrollView, ActivityIndicator, ImageBackground, Dimensions, Animated, Easing, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import LogoutButton from './LogoutButton';
 import { colours, spacing, typography } from '../theme';
 import NavigationBar from './NavigationBar';
@@ -23,7 +24,7 @@ export default function HomeScreen({ navigation }) {
   const [displayedProducts, setDisplayedProducts] = useState([]);
   const [numColumns, setNumColumns] = useState(calculateColumns());
   const [itemWidth, setItemWidth] = useState(320);
-  const [userPoints, setUserPoints] = useState(1240);
+  const [userPoints, setUserPoints] = useState(0);
   const bounceAnim = new Animated.Value(0);
 
   // Calculate number of columns based on screen width
@@ -62,6 +63,20 @@ export default function HomeScreen({ navigation }) {
     return () => subscription?.remove();
   }, []);
 
+  useEffect(() => {
+     const fetchUserPoints = async () => {
+      try {
+        const points = await AsyncStorage.getItem('userPoints');
+        if (points !== null) {
+          setUserPoints(parseInt(points, 10));
+        }
+      } catch (error) {
+        console.error("Failed to fetch user points from storage", error);
+      }
+    };
+    fetchUserPoints();
+  }, []);
+  
   // Fetch auto products from API
   useEffect(() => {
     fetchProducts();
