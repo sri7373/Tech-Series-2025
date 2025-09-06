@@ -6,8 +6,8 @@ import { colours, spacing, typography } from '../theme';
 const ProductCard = ({ item, width, animation }) => {
   const getScoreColor = (score) => {
     if (score >= 80) return colours.success;
-    if (score >= 60) return colours.primaryGreen;
-    if (score >= 40) return colours.primaryOrange;
+    if (score >= 50) return colours.primaryGreen;
+    if (score >= 30) return colours.primaryOrange;
     return colours.error;
   };
 
@@ -95,7 +95,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colours.borderLight,
     height: 380, // Taller card
-    width: 160, // Narrower card
+    // width: 160, // Narrower card
   },
   imageContainer: {
     width: '100%',

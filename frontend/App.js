@@ -20,6 +20,7 @@ import AutoProductScreen from './screens/AutoProductScreen';
 import RecommendationsScreen from './screens/RecommendationsScreen';
 import ReceiptsPoints from './screens/ReceiptsPoints';
 import MonthlyRewardsScreen from './screens/MonthlyRewards';
+import SignupScreen from './screens/Signup';
 
 const Stack = createNativeStackNavigator();
 
@@ -61,37 +62,38 @@ function AuthNavigator() {
   }
 
   return (
-    <NavigationContainer
-      initialState={initialState}
-      onStateChange={(state) => {
-        // Only save state for authenticated users
-        if (isAuthenticated) {
-          AsyncStorage.setItem(NAVIGATION_PERSISTENCE_KEY, JSON.stringify(state));
-        }
-      }}
-    >
-      <Stack.Navigator screenOptions={{ headerShown: true }}>
-        {isAuthenticated ? (
-          // Authenticated screens
-          <>
-            <Stack.Screen
-              name="Home"
-              component={HomeScreen}
-              options={{
-                title: 'Home',
-                headerLeft: () => null,
-            }}
-          />
-          <Stack.Screen
-            name="Leaderboard"
-            component={Leaderboard}
-            options={{ title: 'Leaderboard' }}
-          />
-          <Stack.Screen
-            name="Upload"
-            component={Upload}
-            options={{ title: 'Upload Image', headerShown: false }}
-          />
+    <NavigationContainer>
+      <Stack.Navigator initialRouteName="Login">
+        <Stack.Screen
+          name="Login"
+          component={LoginScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen 
+          name="Signup" 
+          component={SignupScreen} 
+          options={{ headerShown: false }}
+        />
+
+        <Stack.Screen
+          name="Home"
+          component={HomeScreen}
+          options={{
+            title: 'Home',
+            // headerLeft: () => null,
+            headerShown: false
+          }}
+        />
+        <Stack.Screen
+          name="Leaderboard"
+          component={Leaderboard}
+          options={{ title: 'Leaderboard', headerShown: false }}
+        />
+        <Stack.Screen
+          name="Upload"
+          component={Upload}
+          options={{ title: 'Upload Image', headerShown: false }}
+        />
 
           <Stack.Screen
             name="VoucherScreen"
@@ -105,43 +107,29 @@ function AuthNavigator() {
             options={{ title: 'Monthly Rewards', headerShown: false }}
           />
 
-          <Stack.Screen
-            name="Points"
-            component={PointsPage}
-            options={{ headerShown: false }}
-          />
-          <Stack.Screen
-            name="Auto"
-            component={AutoProductScreen}
-            options={{ title: 'Smart Products' }}
-          />
-          <Stack.Screen name="Profile" component={ProfileScreen} />
-          <Stack.Screen
-            name="Recommendations"
-            component={RecommendationsScreen}
-            options={{ headerShown: false }}
-          />
-          <Stack.Screen
-            name="ReceiptsPoints"
-            component={ReceiptsPoints}
-            options={{ title: 'Receipt Points', headerShown: false }}
-          />
-          <Stack.Screen 
-            name="Logout" 
-            component={LogoutButton}
-            options={{ title: 'Logout' }}
-          />
-        </>
-        ) : (
-          // Unauthenticated screens
-          <>
-            <Stack.Screen
-              name="Login"
-              component={LoginScreen}
-              options={{ headerShown: false }}
-            />
-          </>
-        )}
+        <Stack.Screen
+          name="Points"
+          component={PointsPage}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Auto"
+          component={AutoProductScreen}
+          options={{ title: 'Smart Products', headerShown: false }}
+          
+        />
+        <Stack.Screen name="Profile" component={ProfileScreen} />
+        <Stack.Screen
+          name="Recommendations"
+          component={RecommendationsScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="ReceiptsPoints"
+          component={ReceiptsPoints}
+          options={{ title: 'Receipt Points', headerShown: false }}
+        />
+        <Stack.Screen name="Logout" component={LogoutButton} />
       </Stack.Navigator>
     </NavigationContainer>
   );

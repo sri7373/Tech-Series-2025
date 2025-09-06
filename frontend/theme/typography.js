@@ -2,7 +2,6 @@
 import { Platform } from 'react-native';
 
 export const typography = {
-  // Font sizes - responsive scaling would be better in real app
   sizes: {
     xxs: 10,
     xs: 12,
@@ -27,14 +26,14 @@ export const typography = {
   // Font families (example - adjust based on your actual fonts)
   families: {
     primary: Platform.select({
-      ios: 'System',
-      android: 'Roboto',
-      web: 'Arial, sans-serif'
+      ios: 'Avenir',
+      android: 'sans-serif',
+      web: "'Inter', sans-serif"
     }),
     heading: Platform.select({
-      ios: 'System',
-      android: 'Roboto',
-      web: "'Montserrat', sans-serif"
+      ios: 'Avenir-Heavy',
+      android: 'sans-serif-condensed',
+      web: "'Inter', sans-serif"
     })
   }
 };
