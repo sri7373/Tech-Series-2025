@@ -27,10 +27,14 @@ export default function LoginScreen({ navigation }) {
       console.log('Login response data:', data);
 
       if (response.ok) {
-        // Use AuthContext login method
-        await login(data.user, data.token);
+        await AsyncStorage.setItem('userToken', data.token);
+        await AsyncStorage.setItem('userId', data.user._id);
+        await AsyncStorage.setItem('userPoints', data.user.points.toString());
+        await AsyncStorage.setItem('username', data.user.username || '');
+        await AsyncStorage.setItem('email', data.user.email || '');
+        await AsyncStorage.setItem('neighbourhood', data.user.neighbourhood || '');
 
-        console.log('Login successful');
+        navigation.replace('Home'); // Using replace to prevent going back
 
       } else {
         Alert.alert('Login Failed', data.error || 'Invalid credentials');
