@@ -1,4 +1,14 @@
 {
+  "name": "tech-series-2025",
+  "private": true,
+  "scripts": {
+    "postinstall": "cd frontend && npm install && cd ../backend && npm install",
+     "build":"npm run build:frontend && npm run build:backend",
+     "build:frontend": "cd frontend && npm run build",
+    "build:backend": "cd backend && npm install",
+    "start": "node backend/server.js",
+    "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install"
+  },
   "dependencies": {
     "joi": "^18.0.1"
   }
