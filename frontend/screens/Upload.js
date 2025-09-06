@@ -160,7 +160,7 @@ export default function Upload({ navigation }) {
               <View style={styles.card}>
                 <Text style={styles.title}>Upload & Scan</Text>
                 <Text style={styles.subtitle}>
-                  Upload a receipt to earn eco points!!!
+                  Upload a receipt to earn eco points, or a product barcode to find sustainable alternatives.
                 </Text>
 
                 {/* Upload Type Selection */}
@@ -250,7 +250,7 @@ export default function Upload({ navigation }) {
                             style={styles.removeButton}
                             onPress={() => setImage(null)}
                           >
-                            <Ionicons name="close-circle" size={24} color={colours.error} />
+                            <Ionicons name="close-circle" sizeUp={24} color={colours.error} />
                           </TouchableOpacity>
                         </View>
                       )}
