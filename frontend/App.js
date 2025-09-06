@@ -62,8 +62,16 @@ function AuthNavigator() {
   }
 
   return (
-    <NavigationContainer>
-      <Stack.Navigator initialRouteName="Login">
+    <NavigationContainer
+      // initialState={initialState}
+      // onStateChange={(state) => {
+      //   // Only save state for authenticated users
+      //   if (isAuthenticated) {
+      //     AsyncStorage.setItem(NAVIGATION_PERSISTENCE_KEY, JSON.stringify(state));
+      //   }
+      // }}
+    >
+    <Stack.Navigator initialRouteName="Login">
         <Stack.Screen
           name="Login"
           component={LoginScreen}
@@ -84,6 +92,7 @@ function AuthNavigator() {
             headerShown: false
           }}
         />
+
         <Stack.Screen
           name="Leaderboard"
           component={Leaderboard}
@@ -95,17 +104,17 @@ function AuthNavigator() {
           options={{ title: 'Upload Image', headerShown: false }}
         />
 
-          <Stack.Screen
-            name="VoucherScreen"
-            component={VoucherScreen}
-            options={{ title: 'My Vouchers', headerShown: false }}
-          />
+        <Stack.Screen
+          name="VoucherScreen"
+          component={VoucherScreen}
+          options={{ title: 'My Vouchers', headerShown: false }}
+        />
 
-          <Stack.Screen
-            name="MonthlyRewards"
-            component={MonthlyRewardsScreen}
-            options={{ title: 'Monthly Rewards', headerShown: false }}
-          />
+        <Stack.Screen
+          name="MonthlyRewards"
+          component={MonthlyRewardsScreen}
+          options={{ title: 'Monthly Rewards', headerShown: false }}
+        />
 
         <Stack.Screen
           name="Points"

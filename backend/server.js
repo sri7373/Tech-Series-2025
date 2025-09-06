@@ -6,6 +6,7 @@ if (!process.env.MINDEE_API_KEY) {
 
 
 const express = require('express');
+const path = require('path');
 const cors = require('cors');
 const connectDB = require('./db/config');   // MongoDB connection
 const config = require('config');   // Environmnent variables
@@ -39,6 +40,9 @@ app.use(cors({
   exposedHeaders: ['x-auth-token'],
   credentials: true
 }));
+
+// Serve static files from public/
+app.use(express.static(path.join(__dirname, 'public')));
 
 // JWT Private Key Check
 if (!process.env.JWT_PRIVATE_KEY) {
@@ -102,8 +106,9 @@ app.get('/scan-receipt', (req, res) => {
 });
 
 // ================== Start Server ==================
-const PORT = 3000;
-app.listen(PORT, () => {
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, '0.0.0.0',() => {
   console.log(`🚀 Server running at http://localhost:${PORT}`);
   console.log(`📖 API Docs at http://localhost:${PORT}/docs`);
 });
+

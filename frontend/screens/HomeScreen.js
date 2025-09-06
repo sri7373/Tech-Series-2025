@@ -8,12 +8,13 @@ import { colours, spacing, typography } from '../theme';
 import NavigationBar from './NavigationBar';
 import ProductCard from './ProductCard';
 
+
 export default function HomeScreen({ navigation }) {
   // Helper to normalize category names (lowercase, remove trailing s, replace underscores)
   function normalizeCategory(str) {
     return str ? str.toLowerCase().replace(/_/g, ' ').replace(/s$/, '') : '';
   }
-  
+
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [searchText, setSearchText] = useState('');
@@ -56,10 +57,10 @@ export default function HomeScreen({ navigation }) {
     const updateLayout = () => {
       setNumColumns(calculateColumns());
     };
-    
+
     const subscription = Dimensions.addEventListener('change', updateLayout);
     updateLayout();
-    
+
     return () => subscription?.remove();
   }, []);
 
@@ -104,7 +105,7 @@ export default function HomeScreen({ navigation }) {
 
   // Filter products by search text
   useEffect(() => {
-      let filtered = products.filter((product) =>
+    let filtered = products.filter((product) =>
       product.name.toLowerCase().includes(searchText.toLowerCase())
     );
         if (selectedCategory !== 'All') {
@@ -116,7 +117,7 @@ export default function HomeScreen({ navigation }) {
     setFilteredProducts(filtered);
     setPage(1);
     setDisplayedProducts(filtered.slice(0, PAGE_SIZE));
-    }, [searchText, products, selectedCategory]);
+  }, [searchText, products, selectedCategory]);
 
   // Load more products when scrolling
   const handleLoadMore = () => {
@@ -153,7 +154,13 @@ export default function HomeScreen({ navigation }) {
 
   // Render product item using the new ProductCard component
   const renderProductItem = ({ item }) => (
-    <ProductCard item={item} width={itemWidth} animation={bounceAnim} />
+    
+    <TouchableOpacity
+      onPress={() => navigation.navigate('Recommendations', { product: item })}
+      activeOpacity={0.8} // optional: for touch feedback
+    >
+      <ProductCard item={item} width={itemWidth} animation={bounceAnim} />
+    </TouchableOpacity>
   );
 
   return (
@@ -286,9 +293,9 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'rgba(255, 255, 255, 0.85)',
   },
-  container: { 
-    flex: 1, 
-    flexDirection: 'row', 
+  container: {
+    flex: 1,
+    flexDirection: 'row',
   },
   loadingContainer: {
     backgroundColor: 'transparent',
@@ -298,9 +305,9 @@ const styles = StyleSheet.create({
     backgroundColor: colours.surface,
   },
   loadingContent: {
-    flex: 1, 
-    justifyContent: 'center', 
-    alignItems: 'center', 
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
     backgroundColor: 'transparent'
   },
   loadingText: {
@@ -369,7 +376,7 @@ const styles = StyleSheet.create({
   searchIcon: {
     marginRight: spacing.xs,
   },
-  searchInput: { 
+  searchInput: {
     flex: 1,
     height: 40,
     color: colours.textPrimary,

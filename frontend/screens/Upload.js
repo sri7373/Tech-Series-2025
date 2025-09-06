@@ -36,7 +36,7 @@ export default function Upload({ navigation }) {
   const handleDrop = (e) => {
     e.preventDefault();
     setIsDragging(false);
-    
+
     const files = e.dataTransfer.files;
     if (files.length > 0) {
       const file = files[0];
@@ -79,9 +79,11 @@ export default function Upload({ navigation }) {
 
       const result = await response.json();
       if (result && result.product) {
+
         if (navigation) {
           navigation.navigate('Recommendations', { product: result.product });
         }
+
       } else {
         alert(result.error || 'Scan failed. No barcode detected or product not found.');
       }
@@ -201,7 +203,7 @@ export default function Upload({ navigation }) {
               <View style={styles.card}>
                 <Text style={styles.title}>Upload & Scan</Text>
                 <Text style={styles.subtitle}>
-                  Upload a barcode or receipt to earn eco points
+                  Upload a receipt to earn eco points, or a product barcode to find sustainable alternatives.
                 </Text>
 
                 {/* Upload Type Selection */}
@@ -245,7 +247,7 @@ export default function Upload({ navigation }) {
                     <Text style={styles.uploadTitle}>
                       {uploadType === 'barcode' ? 'Upload Barcode' : 'Upload Receipt'}
                     </Text>
-                    
+
                     <View
                       style={[
                         styles.dropZone,
@@ -263,18 +265,18 @@ export default function Upload({ navigation }) {
                         style={styles.fileInput}
                         disabled={!uploadType}
                       />
-                      
+
                       {!image ? (
                         <View style={styles.uploadContent}>
-                          <Ionicons 
-                            name={uploadType === 'barcode' ? "barcode" : "receipt"} 
-                            size={48} 
-                            color={isDragging ? colours.primary : colours.mediumGray} 
+                          <Ionicons
+                            name={uploadType === 'barcode' ? "barcode" : "receipt"}
+                            size={48}
+                            color={isDragging ? colours.primary : colours.mediumGray}
                           />
                           <Text style={styles.uploadText}>
-                            {isDragging ? 'Drop image here' : 
-                            uploadType === 'barcode' ? 'Click to upload barcode' : 
-                            'Click to upload receipt'}
+                            {isDragging ? 'Drop image here' :
+                              uploadType === 'barcode' ? 'Click to upload barcode' :
+                                'Click to upload receipt'}
                           </Text>
                           <Text style={styles.uploadSubtext}>
                             or drag and drop
@@ -282,16 +284,16 @@ export default function Upload({ navigation }) {
                         </View>
                       ) : (
                         <View style={styles.previewContainer}>
-                          <Image 
-                            source={{ uri: image.uri }} 
-                            style={styles.previewImage} 
+                          <Image
+                            source={{ uri: image.uri }}
+                            style={styles.previewImage}
                             resizeMode="contain"
                           />
-                          <TouchableOpacity 
+                          <TouchableOpacity
                             style={styles.removeButton}
                             onPress={() => setImage(null)}
                           >
-                            <Ionicons name="close-circle" size={24} color={colours.error} />
+                            <Ionicons name="close-circle" sizeUp={24} color={colours.error} />
                           </TouchableOpacity>
                         </View>
                       )}
@@ -313,10 +315,10 @@ export default function Upload({ navigation }) {
                       <ActivityIndicator size="small" color={colours.white} />
                     ) : (
                       <>
-                        <Ionicons 
-                          name={uploadType === 'barcode' ? "scan-outline" : "checkmark-circle-outline"} 
-                          size={20} 
-                          color={colours.white} 
+                        <Ionicons
+                          name={uploadType === 'barcode' ? "scan-outline" : "checkmark-circle-outline"}
+                          size={20}
+                          color={colours.white}
                         />
                         <Text style={styles.scanButtonText}>
                           {uploadType === 'barcode' ? 'Scan Barcode' : 'Scan Receipt'}
@@ -327,27 +329,34 @@ export default function Upload({ navigation }) {
                 )}
 
                 {/* Instructions */}
-                <View style={styles.instructions}>
-                  <Text style={styles.instructionsTitle}>How it works:</Text>
-                  <View style={styles.instructionItem}>
-                    <Ionicons name="camera-outline" size={16} color={colours.primary} />
-                    <Text style={styles.instructionText}>
-                      Take a clear photo of your {uploadType === 'barcode' ? 'product barcode' : 'store receipt'}
-                    </Text>
+                {uploadType && (
+                  <View style={styles.instructions}>
+                    <Text style={styles.instructionsTitle}>How it works:</Text>
+
+                    <View style={styles.instructionItem}>
+                      <Ionicons name="camera-outline" size={16} color={colours.primary} />
+                      <Text style={styles.instructionText}>
+                        Take a clear photo of your {uploadType === 'barcode' ? 'product barcode' : 'store receipt'}
+                      </Text>
+                    </View>
+
+                    <View style={styles.instructionItem}>
+                      <Ionicons name="cloud-upload-outline" size={16} color={colours.primary} />
+                      <Text style={styles.instructionText}>
+                        Upload the image using the drop zone above
+                      </Text>
+                    </View>
+
+                    <View style={styles.instructionItem}>
+                      <Ionicons name="leaf-outline" size={16} color={colours.primary} />
+                      <Text style={styles.instructionText}>
+                        {uploadType === 'barcode'
+                          ? 'Find out better alternatives that are more sustainable'
+                          : 'Earn eco points for sustainable purchases'}
+                      </Text>
+                    </View>
                   </View>
-                  <View style={styles.instructionItem}>
-                    <Ionicons name="cloud-upload-outline" size={16} color={colours.primary} />
-                    <Text style={styles.instructionText}>
-                      Upload the image using the drop zone above
-                    </Text>
-                  </View>
-                  <View style={styles.instructionItem}>
-                    <Ionicons name="leaf-outline" size={16} color={colours.primary} />
-                    <Text style={styles.instructionText}>
-                      Earn eco points for sustainable purchases
-                    </Text>
-                  </View>
-                </View>
+                )}
               </View>
             </View>
           </View>
@@ -358,22 +367,22 @@ export default function Upload({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  background: { 
-    flex: 1, 
-    width: '100%', 
-    height: '100%' 
+  background: {
+    flex: 1,
+    width: '100%',
+    height: '100%'
   },
-  overlay: { 
-    flex: 1, 
-    backgroundColor: 'rgba(255, 255, 255, 0.85)' 
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.85)'
   },
-  container: { 
-    flex: 1, 
-    flexDirection: 'row' 
+  container: {
+    flex: 1,
+    flexDirection: 'row'
   },
-  mainContent: { 
-    flex: 1, 
-    padding: spacing.lg 
+  mainContent: {
+    flex: 1,
+    padding: spacing.lg
   },
   centeredContainer: {
     flex: 1,
@@ -457,9 +466,10 @@ const styles = StyleSheet.create({
     borderColor: colours.borderLight,
     justifyContent: 'center',
     alignItems: 'center',
-    position: 'relative',
+    position: 'relative',  // ✅ this keeps fileInput aligned
     overflow: 'hidden',
   },
+
   dropZoneDragging: {
     borderColor: colours.primary,
     backgroundColor: colours.lightGreen + '40',
@@ -469,11 +479,17 @@ const styles = StyleSheet.create({
   },
   fileInput: {
     position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
     width: '100%',
     height: '100%',
     opacity: 0,
     cursor: 'pointer',
+    zIndex: 10, // <--- force it above the icon/text
   },
+
   uploadContent: {
     alignItems: 'center',
     padding: spacing.lg,
