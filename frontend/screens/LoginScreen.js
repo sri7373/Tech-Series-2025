@@ -15,7 +15,6 @@ export default function LoginScreen({ navigation }) {
       return;
     }
 
-
     try {
       const response = await fetch('http://localhost:3000/api/auth/login', {
         method: 'POST',
@@ -24,18 +23,14 @@ export default function LoginScreen({ navigation }) {
       });
       const data = await response.json();
 
-      console.log('Login response data:', data);
-
       if (response.ok) {
-        await AsyncStorage.setItem('userToken', data.token);
+        await AsyncStorage.setItem('token', data.token);
         await AsyncStorage.setItem('userId', data.user._id);
         await AsyncStorage.setItem('userPoints', data.user.points.toString());
         await AsyncStorage.setItem('username', data.user.username || '');
         await AsyncStorage.setItem('email', data.user.email || '');
         await AsyncStorage.setItem('neighbourhood', data.user.neighbourhood || '');
-
-        navigation.replace('Home'); // Using replace to prevent going back
-
+        navigation.replace('Home');
       } else {
         Alert.alert('Login Failed', data.error || 'Invalid credentials');
       }
@@ -60,6 +55,7 @@ export default function LoginScreen({ navigation }) {
             keyboardType="email-address"
             value={email}
             onChangeText={setEmail}
+            placeholderTextColor={colours.mediumGray}
           />
 
           <TextInput
@@ -68,6 +64,7 @@ export default function LoginScreen({ navigation }) {
             secureTextEntry
             value={password}
             onChangeText={setPassword}
+            placeholderTextColor={colours.mediumGray}
           />
 
           <TouchableOpacity onPress={() => Alert.alert('Forgot Password clicked')}>
@@ -80,7 +77,7 @@ export default function LoginScreen({ navigation }) {
 
           <TouchableOpacity onPress={() => navigation.navigate('Signup')}>
             <Text style={styles.signupText}>
-              Don’t have an account? <Text style={{ fontWeight: 'bold' }}>Sign up</Text>
+              Don’t have an account? <Text style={styles.signupBold}>Sign up</Text>
             </Text>
           </TouchableOpacity>
         </View>
@@ -90,77 +87,74 @@ export default function LoginScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  background: {
-    flex: 1,
-    width: '100%',
-    height: '100%',
-  },
+  background: { flex: 1, width: '100%', height: '100%' },
   container: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(232,245,233,0.5)', // less opaque overlay
+    backgroundColor: 'rgba(248,248,248,0.7)', // softer overlay
     padding: spacing.lg,
   },
   card: {
     width: '90%',
-    backgroundColor: colours.surface,
+    backgroundColor: colours.cardBackground,
     borderRadius: spacing.lg,
     padding: spacing.xl,
-    shadowColor: colours.shadow,
+    shadowColor: colours.black,
     shadowOpacity: 0.1,
     shadowOffset: { width: 0, height: 5 },
     shadowRadius: 10,
-    elevation: 8,
+    elevation: 6,
     alignItems: 'center',
   },
   title: {
-    fontSize: typography.title,
-    fontWeight: '700',
-    color: colours.primary,
+    fontFamily: typography.families.heading,
+    fontSize: typography.sizes.xxxl,
+    fontWeight: typography.weights.bold,
+    color: colours.primaryGreen,
     marginBottom: spacing.lg,
   },
   input: {
     width: '100%',
-    height: spacing.xl,
     borderWidth: 1,
-    borderColor: colours.border,
+    borderColor: colours.borderLight,
     borderRadius: spacing.md,
     paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
     marginBottom: spacing.md,
-    fontSize: typography.body,
-    backgroundColor: colours.inputBackground,
-    color: colours.text,
-    fontWeight: '600',
+    fontSize: typography.sizes.base,
+    fontFamily: typography.families.primary,
+    color: colours.textPrimary,
+    backgroundColor: colours.white,
   },
   linkText: {
-    color: colours.secondary,
+    fontFamily: typography.families.primary,
+    fontSize: typography.sizes.sm,
+    color: colours.primaryOrange,
     alignSelf: 'flex-end',
     marginBottom: spacing.lg,
-    fontWeight: '600',
+    fontWeight: typography.weights.medium,
   },
   loginButton: {
     width: '100%',
-    height: spacing.xl,
-    backgroundColor: colours.primary,
+    backgroundColor: colours.primaryGreen,
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: spacing.md,
+    paddingVertical: spacing.md,
     marginBottom: spacing.md,
-    shadowColor: colours.shadow,
-    shadowOpacity: 0.4,
-    shadowOffset: { width: 0, height: 4 },
-    shadowRadius: 6,
-    elevation: 5,
   },
   loginText: {
-    color: colours.surface,
-    fontSize: typography.button,
-    fontWeight: '700',
+    fontFamily: typography.families.primary,
+    color: colours.textInverted,
+    fontSize: typography.sizes.base,
+    fontWeight: typography.weights.semiBold,
   },
   signupText: {
-    fontSize: typography.caption,
+    fontFamily: typography.families.primary,
+    fontSize: typography.sizes.sm,
     color: colours.textSecondary,
     textAlign: 'center',
   },
+  signupBold: { fontWeight: typography.weights.bold, color: colours.primaryGreen },
 });

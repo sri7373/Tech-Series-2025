@@ -1,74 +1,56 @@
 import React, { useEffect, useState } from 'react';
+import { View, Text, ScrollView, Image, TouchableOpacity, ActivityIndicator, Dimensions, ImageBackground, StyleSheet } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import Confetti from 'react-confetti';
 import { colours, spacing, typography } from '../theme';
-import { ImageBackground } from 'react-native';
+import NavigationBar from './NavigationBar';
 
 export default function ReceiptsPoints({ route, navigation }) {
-  // Expect route.params.items (array) and route.params.totalPoints (number)
   const { items = [], totalPoints = 0 } = route?.params || {};
   const [prevPoints, setPrevPoints] = useState(null);
   const [updatedPoints, setUpdatedPoints] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showConfetti, setShowConfetti] = useState(true);
-  const [windowSize, setWindowSize] = useState({ width: window.innerWidth, height: window.innerHeight });
+  const windowSize = Dimensions.get('window');
 
   useEffect(() => {
     const updateUserPoints = async () => {
       setLoading(true);
       try {
-        // Get token and userId from localStorage (web)
-        const token = localStorage.getItem('userToken');
-        const userId = localStorage.getItem('userId');
+        const token = await AsyncStorage.getItem('userToken');
+        const userId = await AsyncStorage.getItem('userId');
         if (!token || !userId) {
           alert('Not logged in. Please log in first.');
           setLoading(false);
           return;
         }
-        // Get current user points
+
         const response = await fetch(`http://localhost:3000/api/users/${userId}`, {
           method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-auth-token': token,
-          },
+          headers: { 'Content-Type': 'application/json', 'x-auth-token': token },
         });
         const data = await response.json();
-        if (!response.ok) {
-          alert(data.error || 'Failed to fetch user profile');
-          setLoading(false);
-          return;
-        }
+        if (!response.ok) throw new Error(data.error || 'Failed to fetch user profile');
         setPrevPoints(data.points);
-        // Update user points in DB
-        const newPoints = (data.points || 0) + (totalPoints || 0);
+
+        const newPoints = (data.points || 0) + totalPoints;
         setUpdatedPoints(newPoints);
-        const updateRes = await fetch(`http://localhost:3000/api/users/${userId}/points`, {
+
+        await fetch(`http://localhost:3000/api/users/${userId}/points`, {
           method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-auth-token': token,
-          },
+          headers: { 'Content-Type': 'application/json', 'x-auth-token': token },
           body: JSON.stringify({ points: newPoints }),
         });
-        const updateData = await updateRes.json();
-        if (!updateRes.ok) {
-          alert(updateData.error || 'Failed to update points');
-        }
       } catch (err) {
-        alert('Network error');
+        alert(err.message || 'Network error');
       } finally {
         setLoading(false);
       }
     };
-    updateUserPoints();
 
-    const handleResize = () => setWindowSize({ width: window.innerWidth, height: window.innerHeight });
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    updateUserPoints();
   }, [totalPoints]);
 
-
-    // Stop confetti after 5 seconds
   useEffect(() => {
     const timer = setTimeout(() => setShowConfetti(false), 5000);
     return () => clearTimeout(timer);
@@ -81,9 +63,10 @@ export default function ReceiptsPoints({ route, navigation }) {
         style={styles.background}
         resizeMode="cover"
       >
-        <div style={styles.overlay}>
-          <span style={{ color: colours.primary, fontSize: 22 }}>Loading...</span>
-        </div>
+        <View style={styles.overlay}>
+          <ActivityIndicator size="large" color={colours.primary} />
+          <Text style={styles.loadingText}>Updating points...</Text>
+        </View>
       </ImageBackground>
     );
   }
@@ -94,173 +77,142 @@ export default function ReceiptsPoints({ route, navigation }) {
       style={styles.background}
       resizeMode="cover"
     >
-      <div style={styles.overlay}>
+      <View style={styles.overlay}>
         {showConfetti && <Confetti width={windowSize.width} height={windowSize.height} />}
-        {/* Decorative Vines/Trees (CSS animated) */}
-        <button style={styles.returnButton} onClick={() => navigation && navigation.navigate('Home')}>
-          ← Home
-        </button>
-        <h2 style={styles.title}>Receipt Points</h2>
-        <div style={styles.pointsBox}>
-          <span style={styles.pointsText}>Previous Points: {prevPoints}</span><br />
-          <span style={styles.pointsText}>Receipt Points: {totalPoints}</span><br />
-          <span style={styles.pointsText}>Updated Points: {updatedPoints}</span>
-        </div>
-        <div style={styles.itemsList}>
+
+        {/* Navigation bar */}
+        <NavigationBar navigation={navigation} vertical />
+
+        {/* Scrollable content */}
+        <ScrollView contentContainerStyle={styles.contentContainer} showsVerticalScrollIndicator={false}>
+          {/* Points summary in center */}
+          <View style={styles.card}>
+            <Text style={styles.summaryTitle}>Points Update</Text>
+            <Text style={styles.summaryPrevious}>Previous Points: {prevPoints}</Text>
+            <Text style={styles.summaryEarned}>Receipt Points: {totalPoints}</Text>
+            <Text style={styles.summaryUpdated}>
+              Updated Points: <Text style={styles.updatedNumber}>{updatedPoints}</Text>
+            </Text>
+          </View>
+
+          {/* Items list */}
           {items.length === 0 ? (
-            <span style={styles.noItems}>No items scanned.</span>
+            <View style={styles.noItemsBox}>
+              <Text style={styles.noItemsText}>No items scanned.</Text>
+            </View>
           ) : (
             items.map((item, idx) => (
-              <div key={idx} style={styles.itemRow}>
+              <View key={idx} style={styles.itemBox}>
                 {item.imageUrl ? (
-                  <img src={item.imageUrl} alt={item.name} style={styles.itemImage} />
+                  <Image source={{ uri: item.imageUrl }} style={styles.itemImage} />
                 ) : (
-                  <span style={styles.noImage}>No Image</span>
+                  <View style={styles.noImage}>
+                    <Text style={{ fontSize: 12, color: colours.textSecondary }}>No Image</Text>
+                  </View>
                 )}
-                <span style={styles.itemName}>{item.name}</span>
-                <span style={styles.itemQty}>Qty: {item.qty}</span>
-                <span style={styles.itemPoints}>Points: {item.pointsEarned ?? item.points}</span>
-              </div>
+                <View style={styles.itemDetails}>
+                  <Text style={styles.itemName}>{item.name}</Text>
+                  <Text style={styles.itemQty}>Qty: {item.qty}</Text>
+                  <Text style={styles.itemPoints}>Points: {item.pointsEarned ?? item.points}</Text>
+                </View>
+              </View>
             ))
           )}
-        </div>
-      </div>
+        </ScrollView>
+      </View>
     </ImageBackground>
   );
 }
 
-const styles = {
+const styles = StyleSheet.create({
   background: {
-    minHeight: '100vh',
-    width: '100vw',
-    backgroundColor: colours.background,
-    position: 'relative',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
+    flex: 1,
+    width: '100%',
+    height: '100%',
   },
   overlay: {
-    width: '100%',
-    minHeight: '100vh',
-    background: 'rgba(232,245,233,0.5)',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    position: 'relative',
+    flex: 1,
+    backgroundColor: 'rgba(255,255,255,0.85)',
+    flexDirection: 'row',
   },
-  returnButton: {
-    position: 'absolute',
-    top: spacing.lg,
-    left: spacing.lg,
-    background: colours.surface,
-    padding: `${spacing.xs}px 14px`,
-    borderRadius: spacing.md,
-    fontWeight: 'bold',
-    fontSize: typography.button,
-    color: colours.primary,
-    border: 'none',
-    cursor: 'pointer',
-    zIndex: 2,
-    boxShadow: `0 2px 8px ${colours.shadow}`,
-  },
-  title: {
-    marginTop: 80,
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: colours.primary,
-    textAlign: 'center',
-    letterSpacing: 1,
-  },
-  pointsBox: {
-    marginTop: 30,
-    background: colours.primary,
-    padding: '12px 30px',
-    borderRadius: 10,
-    color: colours.surface,
-    fontSize: 22,
-    fontWeight: 600,
-    border: 'none',
-    display: 'inline-block',
-    boxShadow: `0 2px 8px ${colours.shadow}`,
-  },
-  pointsText: {
-    fontSize: 22,
-    fontWeight: 600,
-  },
-  itemsList: {
-    marginTop: 40,
-    width: '80%',
-    maxWidth: 500,
-    background: colours.surface,
-    borderRadius: 12,
-    boxShadow: `0 2px 8px ${colours.shadow}`,
-    padding: 24,
-  },
-  noItems: {
+  loadingText: {
+    marginTop: spacing.md,
     fontSize: 18,
-    color: colours.textSecondary,
-    textAlign: 'center',
+    color: colours.primary,
   },
-  itemRow: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: '10px 0',
-    borderBottom: `1px solid ${colours.border}`,
-    gap: 16,
-  },
-  itemImage: {
-    width: 48,
-    height: 48,
-    objectFit: 'cover',
-    borderRadius: 8,
-    marginRight: 8,
-  },
-  noImage: {
-    width: 48,
-    height: 48,
-    display: 'flex',
+  contentContainer: {
+    flexGrow: 1,
+    padding: spacing.lg,
     alignItems: 'center',
     justifyContent: 'center',
-    background: colours.muted,
-    color: colours.textSecondary,
-    borderRadius: 8,
-    fontSize: 12,
-    marginRight: 8,
+    paddingBottom: spacing.xl,
   },
-  itemName: {
-    fontWeight: 'bold',
-    fontSize: 18,
-    color: colours.primary,
-  },
-  itemQty: {
-    fontSize: 16,
-    color: colours.text,
-    marginLeft: 20,
-  },
-  itemPoints: {
-    fontSize: 16,
-    color: colours.success,
-    marginLeft: 20,
-    fontWeight: 'bold',
-  },
-  vinesContainer: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
+  card: {
+    backgroundColor: colours.white,
     width: '100%',
-    height: 60,
-    zIndex: 1,
-    pointerEvents: 'none',
+    maxWidth: 500,
+    borderRadius: 20,
+    padding: spacing.xl,
+    marginBottom: spacing.lg,
+    shadowColor: colours.shadowDark,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 5,
+    alignItems: 'center',
   },
-  vine: {
-    position: 'absolute',
-    left: '10%',
-    top: 0,
-    width: 120,
-    height: 60,
-    background: 'linear-gradient(90deg, #388E3C 60%, #A5D6A7 100%)',
-    borderRadius: 60,
-    animation: 'vineSwing 3s infinite alternate',
+  summaryTitle: {
+    fontSize: typography.sizes.xxxl,
+    fontWeight: typography.weights.bold,
+    color: colours.primary,
+    marginBottom: spacing.sm,
   },
-};
+  summaryPrevious: { fontSize: 16, color: colours.textSecondary, marginBottom: spacing.xs },
+  summaryEarned: { fontSize: 18, fontWeight: 'bold', color: colours.success, marginBottom: spacing.xs },
+  summaryUpdated: { fontSize: 20, fontWeight: 'bold', marginTop: spacing.sm, color: colours.textPrimary },
+  updatedNumber: { color: colours.primaryOrange },
+  noItemsBox: {
+    backgroundColor: colours.white,
+    width: '100%',
+    maxWidth: 500,
+    borderRadius: 20,
+    padding: spacing.lg,
+    alignItems: 'center',
+    marginTop: spacing.md,
+    shadowColor: colours.shadowDark,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  noItemsText: { fontSize: 16, color: colours.textSecondary },
+  itemBox: {
+    flexDirection: 'row',
+    backgroundColor: colours.white,
+    width: '100%',
+    maxWidth: 500,
+    borderRadius: 16,
+    padding: spacing.md,
+    marginBottom: spacing.md,
+    alignItems: 'center',
+    shadowColor: colours.shadowDark,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  itemImage: { width: 50, height: 50, borderRadius: 8, marginRight: spacing.md },
+  noImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 8,
+    backgroundColor: colours.offWhite,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: spacing.md,
+  },
+  itemDetails: { flex: 1 },
+  itemName: { fontSize: 16, fontWeight: 'bold', color: colours.textPrimary },
+  itemQty: { fontSize: 14, color: colours.textSecondary, marginTop: 2 },
+  itemPoints: { fontSize: 14, fontWeight: 'bold', color: colours.success, marginTop: 2 },
+});

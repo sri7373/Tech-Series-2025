@@ -1,7 +1,7 @@
 // colours.js
 export const colours = {
   // Primary greens
-  primaryGreen: '#2E8B57',      // SeaGreen - main brand color
+  primaryGreen: '#008241',      // SeaGreen - main brand color
   darkGreen: '#1F6B4A',         // Darker green for hover states
   lightGreen: '#3CB371',        // MediumSeaGreen - for highlights
   

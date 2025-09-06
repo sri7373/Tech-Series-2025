@@ -25,7 +25,7 @@ export default function SignupScreen({ navigation }) {
 
       if (response.ok) {
         Alert.alert('Success', 'User created successfully!');
-        navigation.goBack(); // Navigate back to Login screen
+        navigation.goBack();
       } else {
         Alert.alert('Signup Failed', data.error || 'Could not create account.');
       }
@@ -50,6 +50,7 @@ export default function SignupScreen({ navigation }) {
             placeholder="Enter your username"
             value={username}
             onChangeText={setUsername}
+            placeholderTextColor={colours.mediumGray}
           />
 
           <TextInput
@@ -57,6 +58,7 @@ export default function SignupScreen({ navigation }) {
             placeholder="Enter your neighbourhood"
             value={neighbourhood}
             onChangeText={setNeighbourhood}
+            placeholderTextColor={colours.mediumGray}
           />
 
           <TextInput
@@ -65,6 +67,7 @@ export default function SignupScreen({ navigation }) {
             keyboardType="email-address"
             value={email}
             onChangeText={setEmail}
+            placeholderTextColor={colours.mediumGray}
           />
 
           <TextInput
@@ -73,6 +76,7 @@ export default function SignupScreen({ navigation }) {
             secureTextEntry
             value={password}
             onChangeText={setPassword}
+            placeholderTextColor={colours.mediumGray}
           />
 
           <TouchableOpacity style={styles.loginButton} onPress={handleSignup}>
@@ -81,7 +85,7 @@ export default function SignupScreen({ navigation }) {
 
           <TouchableOpacity onPress={() => navigation.goBack()}>
             <Text style={styles.signupText}>
-              Already have an account? <Text style={{ fontWeight: 'bold' }}>Login</Text>
+              Already have an account? <Text style={styles.signupBold}>Login</Text>
             </Text>
           </TouchableOpacity>
         </View>
@@ -90,57 +94,67 @@ export default function SignupScreen({ navigation }) {
   );
 }
 
-
-
 const styles = StyleSheet.create({
   background: { flex: 1, width: '100%', height: '100%' },
   container: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(232,245,233,0.5)',
+    backgroundColor: 'rgba(248,248,248,0.7)',
     padding: spacing.lg,
   },
   card: {
     width: '90%',
-    backgroundColor: colours.surface,
+    backgroundColor: colours.cardBackground,
     borderRadius: spacing.lg,
     padding: spacing.xl,
-    shadowColor: colours.shadow,
+    shadowColor: colours.black,
     shadowOpacity: 0.1,
     shadowOffset: { width: 0, height: 5 },
     shadowRadius: 10,
-    elevation: 8,
+    elevation: 6,
     alignItems: 'center',
   },
-  title: { fontSize: typography.title, fontWeight: '700', color: colours.primary, marginBottom: spacing.lg },
+  title: {
+    fontFamily: typography.families.heading,
+    fontSize: typography.sizes.xxxl,
+    fontWeight: typography.weights.bold,
+    color: colours.primaryGreen,
+    marginBottom: spacing.lg,
+  },
   input: {
     width: '100%',
-    height: spacing.xl,
     borderWidth: 1,
-    borderColor: colours.border,
+    borderColor: colours.borderLight,
     borderRadius: spacing.md,
     paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
     marginBottom: spacing.md,
-    fontSize: typography.body,
-    backgroundColor: colours.inputBackground,
-    color: colours.text,
-    fontWeight: '600',
+    fontSize: typography.sizes.base,
+    fontFamily: typography.families.primary,
+    color: colours.textPrimary,
+    backgroundColor: colours.white,
   },
   loginButton: {
     width: '100%',
-    height: spacing.xl,
-    backgroundColor: colours.primary,
+    backgroundColor: colours.primaryGreen,
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: spacing.md,
+    paddingVertical: spacing.md,
     marginBottom: spacing.md,
-    shadowColor: colours.shadow,
-    shadowOpacity: 0.4,
-    shadowOffset: { width: 0, height: 4 },
-    shadowRadius: 6,
-    elevation: 5,
   },
-  loginText: { color: colours.surface, fontSize: typography.button, fontWeight: '700' },
-  signupText: { fontSize: typography.caption, color: colours.textSecondary, textAlign: 'center' },
+  loginText: {
+    fontFamily: typography.families.primary,
+    color: colours.textInverted,
+    fontSize: typography.sizes.base,
+    fontWeight: typography.weights.semiBold,
+  },
+  signupText: {
+    fontFamily: typography.families.primary,
+    fontSize: typography.sizes.sm,
+    color: colours.textSecondary,
+    textAlign: 'center',
+  },
+  signupBold: { fontWeight: typography.weights.bold, color: colours.primaryGreen },
 });
