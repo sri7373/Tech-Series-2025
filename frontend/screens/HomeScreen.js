@@ -23,7 +23,7 @@ export default function HomeScreen({ navigation }) {
   const [page, setPage] = useState(1);
   const [displayedProducts, setDisplayedProducts] = useState([]);
   const [numColumns, setNumColumns] = useState(calculateColumns());
-  const [itemWidth, setItemWidth] = useState(320); // Fixed width for narrower cards
+  const [itemWidth, setItemWidth] = useState(320);
   const [userPoints, setUserPoints] = useState(1240);
   const bounceAnim = new Animated.Value(0);
 
@@ -33,12 +33,11 @@ export default function HomeScreen({ navigation }) {
     const sidebarWidth = 80;
     const contentWidth = windowWidth - sidebarWidth;
     const padding = spacing.lg * 2;
-
-    // Calculate how many 160px cards can fit with spacing
+    
     const availableWidth = contentWidth - padding;
     const columns = Math.floor(availableWidth / (320 + spacing.sm));
-
-    return Math.max(1, columns); // Ensure at least 1 column
+    
+    return Math.max(1, columns);
   }
 
   // Animation for category selection
@@ -94,18 +93,16 @@ export default function HomeScreen({ navigation }) {
     let filtered = products.filter((product) =>
       product.name.toLowerCase().includes(searchText.toLowerCase())
     );
-    // Category filter (flexible match)
-    if (selectedCategory !== 'All') {
-      const normSelected = normalizeCategory(selectedCategory);
-      filtered = filtered.filter(product =>
-        product.category && normalizeCategory(product.category) === normSelected
-      );
-    }
+        if (selectedCategory !== 'All') {
+          const normSelected = normalizeCategory(selectedCategory);
+          filtered = filtered.filter(product =>
+            product.category && normalizeCategory(product.category) === normSelected
+          );
+        }
     setFilteredProducts(filtered);
     setPage(1);
     setDisplayedProducts(filtered.slice(0, PAGE_SIZE));
   }, [searchText, products, selectedCategory]);
-
 
   // Load more products when scrolling
   const handleLoadMore = () => {
@@ -122,23 +119,23 @@ export default function HomeScreen({ navigation }) {
     animateCategorySelect();
   };
 
-  if (loading) {
-    return (
-      <ImageBackground
-        source={require('../assets/leafy.jpg')}
-        style={styles.background}
-        resizeMode="cover"
-      >
-        <View style={[styles.container, styles.loadingContainer]}>
-          <View style={styles.sidebarPlaceholder} />
-          <View style={styles.loadingContent}>
-            <ActivityIndicator size="large" color={colours.primary} />
-            <Text style={styles.loadingText}>Loading eco-friendly products...</Text>
-          </View>
-        </View>
-      </ImageBackground>
-    );
-  }
+  // if (loading) {
+  //   return (
+  //     <ImageBackground
+  //       source={require('../assets/leafy.jpg')}
+  //       style={styles.background}
+  //       resizeMode="cover"
+  //     >
+  //       <View style={[styles.container, styles.loadingContainer]}>
+  //         <View style={styles.sidebarPlaceholder} />
+  //         <View style={styles.loadingContent}>
+  //           <ActivityIndicator size="large" color={colours.primary} />
+  //           <Text style={styles.loadingText}>Loading eco-friendly products...</Text>
+  //         </View>
+  //       </View>
+  //     </ImageBackground>
+  //   );
+  // }
 
   // Render product item using the new ProductCard component
   const renderProductItem = ({ item }) => (
@@ -164,104 +161,106 @@ export default function HomeScreen({ navigation }) {
 
           {/* Main Content */}
           <View style={styles.mainContent}>
-            {/* Header with user points and search - Reduced padding between them */}
-            <View style={styles.header}>
-              <View style={styles.userPointsContainer}>
+            {/* New Header Bar */}
+            <View style={styles.headerBar}>
+              <Text style={styles.headerTitle}>Home</Text>
+              
+              <View style={styles.headerRight}>
                 <View style={styles.pointsBadge}>
                   <Ionicons name="leaf" size={20} color={colours.primaryGreen} />
                   <Text style={styles.pointsCount}>{userPoints}</Text>
+                  <Text style={styles.pointsLabel}>Eco Points</Text>
                 </View>
-                <Text style={styles.pointsLabel}>Eco Points</Text>
+                
+                <View style={styles.searchContainer}>
+                  <Ionicons name="search" size={20} color={colours.mediumGray} style={styles.searchIcon} />
+                  <TextInput
+                    style={styles.searchInput}
+                    placeholder="Search sustainable products..."
+                    value={searchText}
+                    onChangeText={setSearchText}
+                    placeholderTextColor={colours.mediumGray}
+                  />
+                </View>
               </View>
-
-              <View style={styles.searchContainer}>
-                <Ionicons name="search" size={20} color={colours.mediumGray} style={styles.searchIcon} />
-                <TextInput
-                  style={styles.searchInput}
-                  placeholder="Search sustainable products..."
-                  value={searchText}
-                  onChangeText={setSearchText}
-                  placeholderTextColor={colours.mediumGray}
-                />
-              </View>
             </View>
 
-            {/* Category Selector */}
-            <View style={styles.categorySection}>
-              <Text style={styles.sectionTitle}>Browse Categories</Text>
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                style={styles.categoryBar}
-                contentContainerStyle={styles.categoryBarContent}
-              >
-                {['All', ...categories].map((cat) => (
-                  <TouchableOpacity
-                    key={cat}
-                    style={[
-                      styles.categoryButton,
-                      selectedCategory === cat && styles.categoryButtonSelected
-                    ]}
-                    onPress={() => handleCategorySelect(cat)}
-                  >
-                    <View style={[
-                      styles.iconBox,
-                      selectedCategory === cat && styles.iconBoxSelected
-                    ]}>
-                      <Image
-                        source={{ uri: cat === 'All' ? 'https://cdn-icons-png.flaticon.com/512/1046/1046783.png' : categoryImages[cat] }}
-                        style={styles.categoryIcon}
-                        resizeMode="contain"
-                      />
-                    </View>
-                    <Text style={[
-                      styles.categoryTextItem,
-                      selectedCategory === cat && styles.categoryTextSelected
-                    ]} numberOfLines={1}>
-                      {cat === 'All' ? 'Popular' : cat.replace('_', ' ')}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
-            </View>
-
-            {/* Results Count */}
-            <View style={styles.resultsHeader}>
-              <Text style={styles.resultsCount}>
-                {filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''} found
-                {selectedCategory !== 'All' ? ` in ${selectedCategory.replace('_', ' ')}` : ' in Popular'}
-                {searchText ? ` for "${searchText}"` : ''}
-              </Text>
-
-              <TouchableOpacity style={styles.filterButton}>
-                <Ionicons name="filter" size={16} color={colours.primary} />
-                <Text style={styles.filterText}>Filters</Text>
-              </TouchableOpacity>
-            </View>
-
-            {/* Product Grid */}
-            <View style={styles.productsContainer}>
-              <FlatList
-                data={displayedProducts}
-                keyExtractor={(item) => item.id || item._id || Math.random().toString()}
-                contentContainerStyle={styles.gridContainer}
-                numColumns={numColumns}
-                columnWrapperStyle={numColumns > 1 ? styles.columnWrapper : null}
-                renderItem={renderProductItem}
-                onEndReached={handleLoadMore}
-                onEndReachedThreshold={0.3}
-                key={numColumns}
-                ListEmptyComponent={
-                  <View style={styles.emptyState}>
-                    <Ionicons name="search-outline" size={48} color={colours.mediumGray} />
-                    <Text style={styles.emptyStateText}>No products found</Text>
-                    <Text style={styles.emptyStateSubtext}>
-                      Try adjusting your search or category filters
-                    </Text>
+            {/* Scrollable Content */}
+            <FlatList
+              ListHeaderComponent={
+                <>
+                  {/* Category Selector */}
+                  <View style={styles.categorySection}>
+                    <Text style={styles.sectionTitle}>Browse Categories</Text>
+                    <ScrollView
+                      horizontal
+                      showsHorizontalScrollIndicator={false}
+                      style={styles.categoryBar}
+                      contentContainerStyle={styles.categoryBarContent}
+                    >
+                      {['All', ...categories].map((cat) => (
+                        <TouchableOpacity
+                          key={cat}
+                          style={[
+                            styles.categoryButton,
+                            selectedCategory === cat && styles.categoryButtonSelected
+                          ]}
+                          onPress={() => handleCategorySelect(cat)}
+                        >
+                          <View style={[
+                            styles.iconBox,
+                            selectedCategory === cat && styles.iconBoxSelected
+                          ]}>
+                            <Image
+                              source={{ uri: cat === 'All' ? 'https://cdn-icons-png.flaticon.com/512/1046/1046783.png' : categoryImages[cat] }}
+                              style={styles.categoryIcon}
+                              resizeMode="contain"
+                            />
+                          </View>
+                          <Text style={[
+                            styles.categoryTextItem,
+                            selectedCategory === cat && styles.categoryTextSelected
+                          ]} numberOfLines={1}>
+                            {cat === 'All' ? 'Popular' : cat.replace('_', ' ')}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </ScrollView>
                   </View>
-                }
-              />
-            </View>
+
+                  {/* Results Count */}
+                  <View style={styles.resultsHeader}>
+                    <Text style={styles.resultsCount}>
+                      {filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''} found
+                      {selectedCategory !== 'All' ? ` in ${selectedCategory.replace('_', ' ')}` : ' in Popular'}
+                      {searchText ? ` for "${searchText}"` : ''}
+                    </Text>
+                    
+                    <TouchableOpacity style={styles.filterButton}>
+                      <Ionicons name="filter" size={16} color={colours.primary} />
+                      <Text style={styles.filterText}>Filters</Text>
+                    </TouchableOpacity>
+                  </View>
+                </>
+              }
+              data={displayedProducts}
+              keyExtractor={(item) => item.id || item._id || Math.random().toString()}
+              contentContainerStyle={styles.gridContainer}
+              numColumns={numColumns}
+              columnWrapperStyle={numColumns > 1 ? styles.columnWrapper : null}
+              renderItem={renderProductItem}
+              onEndReached={handleLoadMore}
+              onEndReachedThreshold={0.3}
+              ListEmptyComponent={
+                <View style={styles.emptyState}>
+                  <Ionicons name="search-outline" size={48} color={colours.mediumGray} />
+                  <Text style={styles.emptyStateText}>No products found</Text>
+                  <Text style={styles.emptyStateSubtext}>
+                    Try adjusting your search or category filters
+                  </Text>
+                </View>
+              }
+            />
           </View>
         </View>
       </View>
@@ -301,70 +300,78 @@ const styles = StyleSheet.create({
     color: colours.textSecondary,
     fontSize: typography.sizes.base,
   },
-  mainContent: {
+  mainContent: { 
     flex: 1,
-    padding: spacing.md,
   },
-  header: {
+  // New Header Bar Styles
+  headerBar: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: spacing.lg,
-    paddingHorizontal: 0, // Reduced horizontal padding
-  },
-  userPointsContainer: {
-    alignItems: 'center',
-    flex: 1,
-    marginRight: spacing.md, // Reduced space between points and search
-  },
-  pointsBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
     backgroundColor: colours.white,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs,
-    borderRadius: 20,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: colours.borderLight,
     shadowColor: colours.shadowDark,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    elevation: 2,
+    elevation: 3,
+    height: 100,
+  },
+  headerTitle: {
+    fontSize: typography.sizes.xl,
+    fontWeight: typography.weights.bold,
+    color: colours.primary,
+  },
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.lg,
+  },
+  pointsBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colours.offWhite,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    borderRadius: 20,
+    gap: spacing.xs,
   },
   pointsCount: {
     fontSize: typography.sizes.lg,
     fontWeight: typography.weights.bold,
     color: colours.primaryGreen,
-    marginLeft: spacing.xs,
   },
   pointsLabel: {
     fontSize: typography.sizes.xs,
     color: colours.textSecondary,
-    marginTop: spacing.xs,
   },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    flex: 2,
     backgroundColor: colours.white,
     borderRadius: 25,
     paddingHorizontal: spacing.md,
-    shadowColor: colours.shadowDark,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
+    borderWidth: 1,
+    borderColor: colours.borderLight,
+    flex: 1,
   },
   searchIcon: {
     marginRight: spacing.xs,
   },
   searchInput: {
     flex: 1,
-    height: 45,
+    height: 40,
     color: colours.textPrimary,
     fontSize: typography.sizes.base,
   },
+  scrollContent: {
+    flex: 1,
+  },
   categorySection: {
-    marginBottom: spacing.lg,
+    margin: spacing.lg,
     backgroundColor: colours.white,
     borderRadius: 16,
     padding: spacing.md,
@@ -443,8 +450,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    marginHorizontal: spacing.lg,
     marginBottom: spacing.md,
-    paddingHorizontal: spacing.lg,
   },
   resultsCount: {
     fontSize: typography.sizes.base,

@@ -62,7 +62,7 @@ const NavigationBar = ({ navigation }) => {
 const styles = StyleSheet.create({
   sidebar: {
     width: 80,
-    backgroundColor: colours.surface,
+    backgroundColor: colours.white,
     paddingTop: spacing.xl,
     alignItems: 'center',
     flexDirection: 'column',
