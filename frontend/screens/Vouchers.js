@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Alert, ImageBackground, StyleSheet } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import { colours, spacing, typography } from '../theme';
@@ -15,7 +15,7 @@ export default function VoucherPage({ navigation }) {
     const fetchData = async () => { 
       setLoading(true);
       try {
-        const token = await AsyncStorage.getItem('userToken');
+        const token = await AsyncStorage.getItem('token');
         console.log('User token:', token);
 
         if (!token) {
@@ -91,60 +91,149 @@ export default function VoucherPage({ navigation }) {
     }
   };
 
-  if (loading) return <ActivityIndicator size="large" color={colours.primary} style={{ marginTop: spacing.xl }} />;
+  if (loading) return (
+    <ImageBackground
+      source={require('../assets/leafy.jpg')}
+      style={styles.background}
+      resizeMode="cover"
+    >
+      <View style={styles.overlay}>
+        <View style={styles.container}>
+          <ActivityIndicator size="large" color={colours.primary} style={{ marginTop: spacing.xl }} />
+        </View>
+      </View>
+    </ImageBackground>
+  );
 
   return (
-    <ScrollView style={{ padding: spacing.lg, backgroundColor: colours.background }}>
-      {/* Return/Home Button */}
-      <TouchableOpacity onPress={() => navigation.navigate('Home')} style={{ marginBottom: spacing.md }}>
-        <Text style={{ color: colours.primary, fontWeight: 'bold', fontSize: typography.button }}>← Home</Text>
-      </TouchableOpacity>
+    <ImageBackground
+      source={require('../assets/leafy.jpg')}
+      style={styles.background}
+      resizeMode="cover"
+    >
+      <View style={styles.overlay}>
+        <View style={styles.container}>
+          <Text style={styles.title}>Vouchers</Text>
+          {/* Return/Home Button */}
+          <TouchableOpacity onPress={() => navigation.navigate('Home')} style={{ marginBottom: spacing.md }}>
+            <Text style={{ color: colours.primary, fontWeight: 'bold', fontSize: typography.button }}>← Home</Text>
+          </TouchableOpacity>
 
-      {/* Points */}
-      <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: spacing.lg }}>
-        <Ionicons name="star" size={24} color={colours.accent} />
-        <Text style={{ marginLeft: spacing.sm, fontSize: typography.body, fontWeight: 'bold', color: colours.text }}>
-          {user?.points ?? 0} Points
-        </Text>
-      </View>
-
-      {/* Claim Voucher */}
-      <TouchableOpacity
-        onPress={handleClaimVoucher}
-        disabled={!canClaim}
-        style={{
-          padding: spacing.md,
-          borderRadius: spacing.md,
-          marginBottom: spacing.lg,
-          backgroundColor: canClaim ? colours.accent : colours.muted,
-        }}
-      >
-        <Text style={{ color: colours.onAccent, fontWeight: 'bold', textAlign: 'center', fontSize: typography.button }}>
-          {canClaim ? `Claim Voucher (${requiredPoints} Points)` : 'Not enough points'}
-        </Text>
-      </TouchableOpacity>
-
-      {/* Claimed Vouchers */}
-      <Text style={{ fontSize: typography.body, fontWeight: 'bold', marginBottom: spacing.sm, color: colours.primary }}>Your Vouchers</Text>
-      {myVouchers.length === 0 ? (
-        <Text style={{ color: colours.textSecondary }}>You don’t own any vouchers yet.</Text>
-      ) : (
-        myVouchers.map((v, idx) => (
-          <View key={idx} style={{
-            padding: spacing.md,
-            borderWidth: 1,
-            borderColor: colours.border,
-            borderRadius: spacing.md,
-            marginBottom: spacing.sm,
-            backgroundColor: colours.surface,
-          }}>
-            <Text style={{ color: colours.text }}>Code: {v.code}</Text>
-            <Text style={{ color: colours.textSecondary }}>Discount: {v.discount}%</Text>
-            <Text style={{ color: colours.textSecondary }}>Expires: {new Date(v.expires).toLocaleDateString()}</Text>
-            <Text style={{ color: v.used ? colours.danger : colours.success }}>Used: {v.used ? 'Yes' : 'No'}</Text>
+          {/* Points */}
+          <View style={styles.pointsContainer}>
+            <Ionicons name="star" size={24} color={colours.accent} />
+            <Text style={styles.pointsText}>
+              {user?.points ?? 0} Points
+            </Text>
           </View>
-        ))
-      )}
-    </ScrollView>
+
+          {/* Claim Voucher */}
+          <TouchableOpacity
+            onPress={handleClaimVoucher}
+            disabled={!canClaim}
+            style={styles.claimButton}
+          >
+            <Text style={styles.claimButtonText}>
+              {canClaim ? `Claim Voucher (${requiredPoints} Points)` : 'Not enough points'}
+            </Text>
+          </TouchableOpacity>
+
+          {/* Claimed Vouchers */}
+          <Text style={styles.sectionTitle}>Your Vouchers</Text>
+          {myVouchers.length === 0 ? (
+            <Text style={styles.noVoucherText}>You don’t own any vouchers yet.</Text>
+          ) : (
+            myVouchers.map((v, idx) => (
+              <View key={idx} style={styles.voucherCard}>
+                <Text style={styles.voucherCode}>Code: {v.code}</Text>
+                <Text style={styles.voucherDetail}>Discount: {v.discount}%</Text>
+                <Text style={styles.voucherDetail}>Expires: {new Date(v.expires).toLocaleDateString()}</Text>
+                <Text style={[styles.voucherDetail, { color: v.used ? colours.danger : colours.success }]}>Used: {v.used ? 'Yes' : 'No'}</Text>
+              </View>
+            ))
+          )}
+        </View>
+      </View>
+    </ImageBackground>
   );
 }
+
+const styles = StyleSheet.create({
+  background: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
+  },
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(232,245,233,0.5)', // semi-transparent overlay
+  },
+  container: {
+    flex: 1,
+    padding: spacing.lg,
+  },
+  title: {
+    fontSize: typography.title,
+    fontWeight: 'bold',
+    marginBottom: spacing.sm,
+    textAlign: 'center',
+    color: colours.primary,
+  },
+  pointsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing.lg,
+    padding: spacing.md,
+    backgroundColor: colours.inputBackground,
+    borderRadius: spacing.md,
+  },
+  pointsText: {
+    marginLeft: spacing.sm,
+    fontSize: typography.body,
+    fontWeight: 'bold',
+    color: colours.text,
+  },
+  claimButton: {
+    padding: spacing.md,
+    borderRadius: spacing.md,
+    marginBottom: spacing.lg,
+    backgroundColor: colours.accent,
+    alignItems: 'center',
+  },
+  claimButtonText: {
+    color: colours.onAccent,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    fontSize: typography.button,
+  },
+  sectionTitle: {
+    fontSize: typography.body,
+    fontWeight: 'bold',
+    marginBottom: spacing.sm,
+    color: colours.primary,
+    textAlign: 'center',
+  },
+  noVoucherText: {
+    color: colours.textSecondary,
+    textAlign: 'center',
+    marginBottom: spacing.md,
+  },
+  voucherCard: {
+    padding: spacing.md,
+    borderWidth: 1,
+    borderColor: colours.border,
+    borderRadius: spacing.md,
+    marginBottom: spacing.sm,
+    backgroundColor: colours.surface,
+  },
+  voucherCode: {
+    color: colours.text,
+    fontWeight: 'bold',
+    marginBottom: 2,
+  },
+  voucherDetail: {
+    color: colours.textSecondary,
+    marginBottom: 2,
+  },
+});

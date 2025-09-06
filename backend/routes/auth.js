@@ -82,6 +82,29 @@ router.post('/logout', auth, async (req, res) => {
   }
 });
 
+router.get('/verify-token', auth, async (req, res) => {
+  try {
+    // If we reach here, the auth middleware has validated the token
+    const user = await User.findById(req.user._id).select('-password');
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    
+    res.json({
+      valid: true,
+      user: {
+        _id: user._id,
+        username: user.username,
+        email: user.email,
+        isAdmin: user.isAdmin,
+      }
+    });
+  } catch (error) {
+    console.error('Token verification error:', error);
+    res.status(401).json({ error: 'Invalid token' });
+  }
+});
+
 function validateUser(user) {
   const schema = Joi.object({
     email: Joi.string().min(5).max(255).required().email(),

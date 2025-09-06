@@ -1,13 +1,21 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ImageBackground } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colours, spacing, typography } from '../theme';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const { login } = useAuth();
 
   const handleLogin = async () => {
+    if (!email || !password) {
+      Alert.alert('Error', 'Please enter both email and password');
+      return;
+    }
+
+
     try {
       const response = await fetch('http://localhost:3000/api/auth/login', {
         method: 'POST',
@@ -19,15 +27,11 @@ export default function LoginScreen({ navigation }) {
       console.log('Login response data:', data);
 
       if (response.ok) {
-        // Store all user data
-        await AsyncStorage.setItem('userToken', data.token);
-        await AsyncStorage.setItem('userId', data.user._id);
-        await AsyncStorage.setItem('userPoints', data.user.points.toString());
-        await AsyncStorage.setItem('username', data.user.username || '');
-        await AsyncStorage.setItem('email', data.user.email || '');
-        await AsyncStorage.setItem('neighbourhood', data.user.neighbourhood || '');
+        // Use AuthContext login method
+        await login(data.user, data.token);
 
-        navigation.replace('Home'); // Using replace to prevent going back
+        console.log('Login successful');
+
       } else {
         Alert.alert('Login Failed', data.error || 'Invalid credentials');
       }
@@ -37,50 +41,61 @@ export default function LoginScreen({ navigation }) {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.card}>
-        <Text style={styles.title}>CyberMonkeys</Text>
+    <ImageBackground
+      source={require('../assets/leafy.jpg')}
+      style={styles.background}
+      resizeMode="cover"
+    >
+      <View style={styles.container}>
+        <View style={styles.card}>
+          <Text style={styles.title}>ECOmmerce</Text>
 
-        <TextInput
-          style={styles.input}
-          placeholder="Enter your email"
-          keyboardType="email-address"
-          value={email}
-          onChangeText={setEmail}
-        />
+          <TextInput
+            style={styles.input}
+            placeholder="Enter your email"
+            keyboardType="email-address"
+            value={email}
+            onChangeText={setEmail}
+          />
 
-        <TextInput
-          style={styles.input}
-          placeholder="Enter your password"
-          secureTextEntry
-          value={password}
-          onChangeText={setPassword}
-        />
+          <TextInput
+            style={styles.input}
+            placeholder="Enter your password"
+            secureTextEntry
+            value={password}
+            onChangeText={setPassword}
+          />
 
-        <TouchableOpacity onPress={() => Alert.alert('Forgot Password clicked')}>
-          <Text style={styles.linkText}>Forgot password?</Text>
-        </TouchableOpacity>
+          <TouchableOpacity onPress={() => Alert.alert('Forgot Password clicked')}>
+            <Text style={styles.linkText}>Forgot password?</Text>
+          </TouchableOpacity>
 
-        <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
-          <Text style={styles.loginText}>Login</Text>
-        </TouchableOpacity>
+          <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
+            <Text style={styles.loginText}>Login</Text>
+          </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => Alert.alert('Sign Up clicked')}>
-          <Text style={styles.signupText}>
-            Don’t have an account? <Text style={{ fontWeight: 'bold' }}>Sign up</Text>
-          </Text>
-        </TouchableOpacity>
+          <TouchableOpacity onPress={() => Alert.alert('Sign Up clicked')}>
+            <Text style={styles.signupText}>
+              Don’t have an account? <Text style={{ fontWeight: 'bold' }}>Sign up</Text>
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
-    </View>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
+  background: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
+  },
   container: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: colours.background,
+    backgroundColor: 'rgba(232,245,233,0.5)', // less opaque overlay
     padding: spacing.lg,
   },
   card: {
