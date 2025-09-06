@@ -40,6 +40,9 @@ app.use(cors({
   credentials: true
 }));
 
+// Serve static files from public/
+app.use(express.static(path.join(__dirname, 'public')));
+
 // JWT Private Key Check
 if (!process.env.JWT_PRIVATE_KEY) {
   console.error("FATAL ERROR: jwtPrivateKey is not defined.");
