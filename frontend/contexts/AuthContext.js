@@ -31,6 +31,27 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const verifyTokenWithBackend = async (storedToken) => {
+    try {
+      const response = await fetch('http://localhost:3000/api/auth/verify-token', {
+        method: 'GET',
+        headers: {
+          'x-auth-token': storedToken,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        return { valid: true, user: data.user };
+      } else {
+        return { valid: false };
+      }
+    } catch (error) {
+      console.error('Token verification failed:', error);
+      return { valid: false };
+    }
+  };
+
   const checkAuthState = async () => {
     try {
       console.log('Checking auth state...');
@@ -38,11 +59,26 @@ export const AuthProvider = ({ children }) => {
       const storedUser = await AsyncStorage.getItem('userData');
       
       if (storedToken && storedUser) {
-        console.log('Found stored credentials');
-        // For now, just trust stored data - you can add verification later
-        setToken(storedToken);
-        setUser(JSON.parse(storedUser));
-        setIsAuthenticated(true);
+        console.log('Found stored credentials, verifying with backend...');
+        
+        // Verify token with backend
+        const verification = await verifyTokenWithBackend(storedToken);
+        
+        if (verification.valid) {
+          console.log('Token is valid');
+          setToken(storedToken);
+          setUser(JSON.parse(storedUser));
+          setIsAuthenticated(true);
+        } else {
+          console.log('Token is invalid, clearing stored data');
+          await clearAuthData();
+          setToken(null);
+          setUser(null);
+          setIsAuthenticated(false);
+        }
+      } else {
+        console.log('No stored credentials found');
+        setIsAuthenticated(false);
       }
     } catch (error) {
       console.error('Error checking auth state:', error);
@@ -55,6 +91,7 @@ export const AuthProvider = ({ children }) => {
     try {
       await AsyncStorage.setItem('token', authToken);
       await AsyncStorage.setItem('userData', JSON.stringify(userData));
+      await AsyncStorage.setItem('userId', userData._id);
       
       setToken(authToken);
       setUser(userData);

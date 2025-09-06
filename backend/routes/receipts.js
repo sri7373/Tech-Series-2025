@@ -3,6 +3,7 @@ const router = express.Router();
 const upload = require("../middleware/upload"); // multer config
 const { extractItems } = require("../services/mindeeService");
 const { matchItemsAndCalculatePoints } = require("../services/matchService");
+const auth = require("../middleware/auth");
 // const { Product } = require("../db/models");
 
 // POST /api/receipts/scan
@@ -11,7 +12,7 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 
-router.post("/scan", async (req, res, next) => {
+router.post("/scan", auth, async (req, res, next) => {
   try {
     let imagePath;
     let tempPath;
@@ -78,11 +79,22 @@ router.post("/scan", async (req, res, next) => {
 const { Receipt } = require('../db/models');
 
 // POST /api/receipts
-router.post('/', async (req, res) => {
+router.post('/', auth, async (req, res) => {
   console.log('Receipt payload:', req.body);
 
   try {
-    const { userId, items, points, carbonEmissions, plasticUsage, uploadedAt } = req.body;
+
+    if (!req.user || !req.user._id) {
+      return res.status(401).json({ error: 'User not authenticated' });
+    }
+
+    const { 
+      items,
+      points, 
+      carbonEmissions, 
+      plasticUsage 
+    } = req.body;
+
     // Defensive: products should be array of ObjectIds, fallback to empty array if not present
     const products = Array.isArray(items)
       ? items.map(item => item.productId).filter(id => !!id)
@@ -91,12 +103,11 @@ router.post('/', async (req, res) => {
     console.log('products:', products);
 
     const receipt = new Receipt({
-      user: userId,
+      user: req.user._id,
       products,
       points,
       carbonEmissions,
       plasticUsage,
-      uploadedAt: uploadedAt || new Date()
     });
     await receipt.save();
     res.status(201).json(receipt);

@@ -1,4 +1,5 @@
 import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const API_BASE_URL = 'http://localhost:3000/api';
 
@@ -52,7 +53,9 @@ export const getLeaderboard = async () => {
 // Scan a receipt image and get extracted items (use FormData for image upload)
 export const scanReceipt = async (formData) => {
   const response = await axios.post(`${API_BASE_URL}/receipts/scan`, formData, {
-    headers: { 'Content-Type': 'multipart/form-data' }
+    headers: { 
+      'Content-Type': 'multipart/form-data', 
+      'x-auth-token': await AsyncStorage.getItem('token') }
   });
   return response.data;
 };

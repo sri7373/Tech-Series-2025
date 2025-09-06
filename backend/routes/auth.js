@@ -82,7 +82,6 @@ router.post('/logout', auth, async (req, res) => {
   }
 });
 
-// Add this route to your existing auth.js file
 router.get('/verify-token', auth, async (req, res) => {
   try {
     // If we reach here, the auth middleware has validated the token

@@ -21,7 +21,7 @@ export default function ProfileScreen() {
       setLoading(true);
       try {
         // Get the token saved during login
-        const token = await AsyncStorage.getItem('userToken');
+        const token = await AsyncStorage.getItem('token');
         const userId = await AsyncStorage.getItem('userId');
 
         if (!token || !userId) {

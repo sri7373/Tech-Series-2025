@@ -27,23 +27,38 @@ export default function Upload({ navigation }) {
     }
     setLoading(true);
     try {
+      // Get auth token
+      const token = await AsyncStorage.getItem('token');
+      if (!token) {
+        alert('Authentication required. Please log in again.');
+        return;
+      }
+
       const response = await fetch('http://localhost:3000/api/products/scan-barcode', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'x-auth-token': token // Add auth token
+        },
         body: JSON.stringify({ image: image.uri }),
       });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Scan failed');
+      }
+
       const result = await response.json();
       if (result && result.product) {
-      
-          if (navigation) {
-            navigation.navigate('Recommendations', { product: result.product });
-          }
-      
+        if (navigation) {
+          navigation.navigate('Recommendations', { product: result.product });
+        }
       } else {
         alert(result.error || 'Scan failed. No barcode detected or product not found.');
       }
     } catch (err) {
-      alert('Error: Failed to scan barcode. Please try again.');
+      console.error('Barcode scan error:', err);
+      alert(`Error: ${err.message || 'Failed to scan barcode. Please try again.'}`);
     } finally {
       setLoading(false);
     }
@@ -57,11 +72,29 @@ export default function Upload({ navigation }) {
     }
     setLoading(true);
     try {
+      // Get auth token
+      const token = await AsyncStorage.getItem('token');
+      console.log('Auth token:', token);
+      if (!token) {
+        alert('Authentication required. Please log in again.');
+        return;
+      }
+
+      console.log('Starting receipt scan...');
+
       const response = await fetch('http://localhost:3000/api/receipts/scan', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'x-auth-token': token // Add auth token
+        },
         body: JSON.stringify({ image: image.uri }),
       });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Receipt scan failed');
+      }
 
       const result = await response.json();
 
@@ -72,25 +105,24 @@ export default function Upload({ navigation }) {
         console.log('Total points:', result.totalPoints);
         console.log('Total carbon emissions:', result.carbonEmissions);
         console.log('Total plastic usage:', result.plasticUsage);
+        
         // Save receipt to DB
-        const userId = await AsyncStorage.getItem('userId');
-        const token = await AsyncStorage.getItem('userToken');
         const itemsWithProductId = result.items.map(item => ({
           ...item,
           productId: item.productId // ensure productId is present if available
         }));
+        
         const receiptPayload = {
-          userId,
           items: itemsWithProductId,
-          points: result.totalPoints,
-          carbonEmissions: result.carbonEmissions,
-          plasticUsage: result.plasticUsage,
-          uploadedAt: new Date().toISOString()
+          products: result.items.map(item => item.productId).filter(id => id), // Array of product IDs
+          points: result.totalPoints || 0, // Points earned
+          carbonEmissions: result.carbonEmissions || 0, // Carbon emissions
+          plasticUsage: result.plasticUsage || 0 // Plastic usage
         };
 
         console.log('Saving receipt:', receiptPayload);
 
-        await fetch('http://localhost:3000/api/receipts', {
+        const saveResponse = await fetch('http://localhost:3000/api/receipts', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -98,6 +130,14 @@ export default function Upload({ navigation }) {
           },
           body: JSON.stringify(receiptPayload)
         });
+
+        if (!saveResponse.ok) {
+          const saveErrorData = await saveResponse.json();
+          throw new Error(saveErrorData.error || 'Failed to save receipt');
+        }
+
+        const saveResult = await saveResponse.json();
+        console.log('Receipt saved successfully:', saveResult);
 
         // Navigate to ReceiptsPoints screen with items and totalPoints
         if (navigation) {
@@ -110,7 +150,8 @@ export default function Upload({ navigation }) {
         alert(result.error || 'Scan failed. No items detected.');
       }
     } catch (err) {
-      alert('Error: Failed to scan receipt. Please try again.');
+      console.error('Receipt scan error:', err);
+      alert(`Error: ${err.message || 'Failed to scan receipt. Please try again.'}`);
     } finally {
       setLoading(false);
     }

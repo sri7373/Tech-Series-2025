@@ -15,7 +15,7 @@ export default function VoucherPage({ navigation }) {
     const fetchData = async () => { 
       setLoading(true);
       try {
-        const token = await AsyncStorage.getItem('userToken');
+        const token = await AsyncStorage.getItem('token');
         console.log('User token:', token);
 
         if (!token) {
