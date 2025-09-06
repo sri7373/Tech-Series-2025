@@ -6,6 +6,7 @@ if (!process.env.MINDEE_API_KEY) {
 
 
 const express = require('express');
+const path = require('path');
 const cors = require('cors');
 const connectDB = require('./db/config');   // MongoDB connection
 const config = require('config');   // Environmnent variables
