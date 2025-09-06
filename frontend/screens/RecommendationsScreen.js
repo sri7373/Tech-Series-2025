@@ -24,9 +24,9 @@ export default function RecommendationsScreen({ route, navigation }) {
   const [numColumns, setNumColumns] = useState(2);
 
   useEffect(() => {
-    loadRecommendations();
+    loadRecommendations(product);
     calculateColumns();
-  }, []);
+  }, [product]);
 
   const calculateColumns = () => {
     const screenWidth = Dimensions.get('window').width;
@@ -41,7 +41,7 @@ export default function RecommendationsScreen({ route, navigation }) {
     try {
       setLoading(true);
       const response = await getSustainableAlternativesForProduct(product, 5);
-      
+
       if (response.success) {
         setOriginalProduct(response.original);
         setAlternatives(response.alternatives);
@@ -66,7 +66,7 @@ export default function RecommendationsScreen({ route, navigation }) {
 
   const MainProductCard = ({ product }) => {
     const scoreColor = getScoreColor(product.sustainabilityScore);
-    
+
     // Fun fact: convert CO2 g to approximate car distance in km
     const funFact = () => {
       const distanceKm = (product.carbonEmissions / 120).toFixed(1);
@@ -99,13 +99,13 @@ export default function RecommendationsScreen({ route, navigation }) {
               <Text style={styles.ecoLabel}>CO₂:</Text>
               <Text style={styles.ecoValue}>{product.carbonEmissions}g</Text>
             </View>
-            
+
             <View style={styles.ecoStat}>
               <Ionicons name="bag-outline" size={16} color={colours.textSecondary} />
               <Text style={styles.ecoLabel}>Plastic:</Text>
               <Text style={styles.ecoValue}>{product.plasticUsage}g</Text>
             </View>
-            
+
             <View style={styles.ecoStat}>
               <Ionicons name="leaf" size={16} color={colours.primaryGreen} />
               <Text style={styles.ecoLabel}>Points:</Text>
@@ -170,19 +170,14 @@ export default function RecommendationsScreen({ route, navigation }) {
           {/* Alternatives */}
           {alternatives.length > 0 ? (
             <>
-              <View style={styles.alternativesHeader}>
-                <Text style={styles.sectionTitle}>
-                  Better Alternatives ({alternatives.length} found)
-                </Text>
-                <View style={styles.improvementBadge}>
-                  <Ionicons name="trending-up" size={16} color={colours.white} />
-                  <Text style={styles.improvementText}>More Sustainable</Text>
-                </View>
-              </View>
-              
               <View style={styles.alternativesGrid}>
                 {alternatives.map((alternative, index) => (
-                  <View key={alternative._id || index} style={[styles.alternativeCard, { width: `${100 / numColumns}%` }]}>
+                  <TouchableOpacity
+                    key={alternative._id || index}
+                    style={[styles.alternativeCard, { width: `${100 / numColumns}%` }]}
+                    activeOpacity={0.8}
+                    onPress={() => navigation.push('Recommendations', { product: alternative })}
+                  >
                     {alternative.improvement && (
                       <View style={styles.improvementIndicator}>
                         <Ionicons name="arrow-up" size={16} color={colours.white} />
@@ -213,9 +208,10 @@ export default function RecommendationsScreen({ route, navigation }) {
                         )}
                       </View>
                     )}
-                  </View>
+                  </TouchableOpacity>
                 ))}
               </View>
+
             </>
           ) : (
             <View style={styles.noAlternativesContainer}>
