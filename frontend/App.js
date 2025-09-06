@@ -118,7 +118,11 @@ function AuthNavigator() {
           options={{ title: 'Smart Products', headerShown: false }}
           
         />
-        <Stack.Screen name="Profile" component={ProfileScreen} />
+        <Stack.Screen
+          name="Profile"
+          component={ProfileScreen}
+          options={{ headerShown: false }}
+        />
         <Stack.Screen
           name="Recommendations"
           component={RecommendationsScreen}

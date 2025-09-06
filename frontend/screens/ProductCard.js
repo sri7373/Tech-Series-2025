@@ -67,11 +67,13 @@ const ProductCard = ({ item, width, animation }) => {
           </View>
         </View>
         
-        <View style={styles.scoreContainer}>
-          <View style={[styles.scoreBadge, { backgroundColor: scoreColor }]}>
-            <Text style={styles.scoreText}>Eco Score: {item.sustainabilityScore}</Text>
+        {item.sustainabilityScore > 0 && (
+          <View style={styles.scoreContainer}>
+            <View style={[styles.scoreBadge, { backgroundColor: scoreColor }]}>
+              <Text style={styles.scoreText}>Eco Score: {item.sustainabilityScore}</Text>
+            </View>
           </View>
-        </View>
+        )}
         
         <TouchableOpacity style={styles.viewButton}>
           <Text style={styles.viewButtonText}>View Details</Text>
