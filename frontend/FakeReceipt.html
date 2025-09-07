@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Fake Receipt Generator</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f8f9fa; padding: 40px; }
+    .container { max-width: 400px; margin: auto; background: #fff; border-radius: 12px; padding: 24px; box-shadow: 0 2px 8px #ccc; }
+    h2 { text-align: center; color: #007AFF; }
+    label { display: block; margin-top: 16px; font-weight: bold; }
+    input { width: 100%; padding: 8px; margin-top: 4px; border-radius: 6px; border: 1px solid #ddd; }
+    button { margin-top: 24px; width: 100%; padding: 12px; background: #43a047; color: #fff; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; }
+    .success { color: #43a047; margin-top: 16px; text-align: center; }
+    .error { color: #d32f2f; margin-top: 16px; text-align: center; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Fake Receipt Generator</h2>
+    <form id="fakeReceiptForm">
+      <label for="userId">User ID</label>
+      <input type="text" id="userId" required />
+
+      <label for="date">Date</label>
+      <input type="date" id="date" required />
+
+      <label for="points">Eco Points</label>
+      <input type="number" id="points" required />
+
+      <label for="carbonEmissions">Carbon Emissions (kg)</label>
+      <input type="number" id="carbonEmissions" step="0.01" required />
+
+      <label for="plasticUsage">Plastic Usage (g)</label>
+      <input type="number" id="plasticUsage" step="0.01" required />
+
+      <button type="submit">Create Fake Receipt</button>
+    </form>
+    <div id="result"></div>
+  </div>
+  <script>
+    document.getElementById('fakeReceiptForm').onsubmit = async function(e) {
+      e.preventDefault();
+      const userId = document.getElementById('userId').value;
+      const date = document.getElementById('date').value;
+      const points = document.getElementById('points').value;
+      const carbonEmissions = document.getElementById('carbonEmissions').value;
+      const plasticUsage = document.getElementById('plasticUsage').value;
+
+      const payload = {
+        userId: userId, // use 'user' field for backend
+        items: [],
+        points: Number(points),
+        carbonEmissions: Number(carbonEmissions),
+        plasticUsage: Number(plasticUsage),
+        uploadedAt: new Date(date).toISOString()
+      };
+
+      try {
+        const res = await fetch('http://localhost:3000/api/receipts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (res.ok) {
+          document.getElementById('result').innerHTML = '<div class="success">Fake receipt created!</div>';
+        } else {
+          document.getElementById('result').innerHTML = '<div class="error">Error: ' + (data.error || 'Unknown error') + '</div>';
+        }
+      } catch (err) {
+        document.getElementById('result').innerHTML = '<div class="error">Network error</div>';
+      }
+    };
+  </script>
+</body>
+</html>

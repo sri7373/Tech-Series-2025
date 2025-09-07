@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Get Product IDs</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+        }
+        button {
+            background-color: #27ae60;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+        button:hover {
+            background-color: #219a52;
+        }
+        .product-item {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            background: #f9f9f9;
+        }
+        .product-id {
+            font-family: monospace;
+            background: #e8e8e8;
+            padding: 5px;
+            border-radius: 3px;
+            font-size: 12px;
+            word-break: break-all;
+        }
+        .copy-btn {
+            background-color: #3498db;
+            padding: 5px 10px;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+        .score {
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        .score.high { color: #27ae60; }
+        .score.medium { color: #f39c12; }
+        .score.low { color: #e74c3c; }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #ecf0f1;
+            border-radius: 4px;
+        }
+        .highlight {
+            background-color: #fff3cd;
+            border: 2px solid #856404;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🆔 Get Product IDs for Testing</h1>
+        <button onclick="loadProducts()">Load All Product IDs</button>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:3000/api';
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert('ID copied to clipboard!');
+            });
+        }
+
+        function calculateSustainabilityScore(carbonEmissions, plasticUsage, points) {
+            // Simply use the points field as the sustainability score
+            return points || 0;
+        }
+
+        function getScoreClass(score) {
+            if (score >= 70) return 'high';
+            if (score >= 40) return 'medium';
+            return 'low';
+        }
+
+        function getCategory(productName) {
+            const name = productName.toLowerCase();
+            if (name.includes('cola') || name.includes('pepsi') || name.includes('juice') || 
+                name.includes('tea') || name.includes('coffee') || name.includes('water') ||
+                name.includes('drink') || name.includes('soda')) {
+                return 'beverages';
+            }
+            if (name.includes('chips') || name.includes('nuts') || name.includes('bar') ||
+                name.includes('snack') || name.includes('cookie') || name.includes('cracker')) {
+                return 'snacks';
+            }
+            if (name.includes('shampoo') || name.includes('soap') || name.includes('cream') ||
+                name.includes('lotion') || name.includes('toothpaste')) {
+                return 'personal care';
+            }
+            return 'other';
+        }
+
+        async function loadProducts() {
+            try {
+                // Use the recommendations API that includes sustainability scores
+                const response = await fetch(`${API_BASE}/recommendations/sustainability-scores`);
+                const data = await response.json();
+                
+                if (response.ok && data.products && data.products.length > 0) {
+                    // Calculate sustainability scores and categorize
+                    const productsWithScores = data.products.map(product => ({
+                        ...product,
+                        sustainabilityScore: product.sustainabilityScore, // Already calculated by API
+                        category: getCategory(product.name)
+                    }));
+
+                    // Group by category
+                    const categories = {};
+                    productsWithScores.forEach(product => {
+                        if (!categories[product.category]) categories[product.category] = [];
+                        categories[product.category].push(product);
+                    });
+
+                    let html = `<h2>📦 Found ${data.products.length} Products</h2>`;
+                    
+                    // Show products with guaranteed alternatives
+                    let hasAlternatives = false;
+                    html += '<div class="highlight"><h3>🎯 PRODUCTS GUARANTEED TO HAVE ALTERNATIVES:</h3>';
+                    
+                    Object.keys(categories).forEach(category => {
+                        const categoryProducts = categories[category];
+                        if (categoryProducts.length > 1) {
+                            categoryProducts.sort((a, b) => a.sustainabilityScore - b.sustainabilityScore);
+                            const worstProduct = categoryProducts[0];
+                            const alternatives = categoryProducts.slice(1).filter(p => 
+                                p.sustainabilityScore > worstProduct.sustainabilityScore // Higher score = better
+                            );
+
+                            if (alternatives.length > 0) {
+                                hasAlternatives = true;
+                                html += `<div style="margin: 15px 0; padding: 10px; border: 1px solid #007bff; border-radius: 5px;">`;
+                                html += `<strong>📱 ${category.toUpperCase()} Category:</strong><br>`;
+                                html += `<strong>USE THIS ID:</strong> `;
+                                html += `<span class="product-id">${worstProduct.id}</span>`;
+                                html += `<button class="copy-btn" onclick="copyToClipboard('${worstProduct.id}')">Copy ID</button><br>`;
+                                html += `<strong>Product:</strong> ${worstProduct.name} (Score: ${worstProduct.sustainabilityScore}/100)<br>`;
+                                html += `<strong>Will find ${alternatives.length} alternative(s):</strong> `;
+                                html += alternatives.map(alt => `${alt.name} (${alt.sustainabilityScore}/100)`).join(', ');
+                                html += `</div>`;
+                            }
+                        }
+                    });
+
+                    if (!hasAlternatives) {
+                        html += '<p>❌ No products with alternatives found. All products are in different categories.</p>';
+                    }
+                    html += '</div>';
+
+                    // Show all products
+                    html += '<h3>📋 All Products:</h3>';
+                    productsWithScores.forEach(product => {
+                        const scoreClass = getScoreClass(product.sustainabilityScore);
+                        html += `
+                            <div class="product-item">
+                                <h4>${product.name}</h4>
+                                <p><strong>ID:</strong> <span class="product-id">${product.id}</span>
+                                <button class="copy-btn" onclick="copyToClipboard('${product.id}')">Copy</button></p>
+                                <p><strong>Category:</strong> ${product.category}</p>
+                                <p><strong>Carbon:</strong> ${product.carbonEmissions || 0} kg CO2</p>
+                                <p><strong>Plastic:</strong> ${product.plasticUsage || 0} g</p>
+                                <p class="score ${scoreClass}">Sustainability Score: ${product.sustainabilityScore}/100</p>
+                            </div>
+                        `;
+                    });
+                    
+                    document.getElementById('result').innerHTML = html;
+                } else {
+                    document.getElementById('result').innerHTML = `
+                        <div class="result">
+                            <h3>❌ No Products Found</h3>
+                            <p>You need to create some products first!</p>
+                            <p>Go to your upload interface and create at least 2 products in the same category with different carbon/plastic values.</p>
+                            <p><strong>Quick Test:</strong></p>
+                            <ul>
+                                <li>Product 1: "Regular Soda" - Carbon: 150, Plastic: 25</li>
+                                <li>Product 2: "Green Tea" - Carbon: 30, Plastic: 5</li>
+                            </ul>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                document.getElementById('result').innerHTML = `
+                    <div class="result" style="border-left-color: #e74c3c; background-color: #fdf2f2;">
+                        <h3>❌ Error Loading Products</h3>
+                        <p>Make sure your server is running on http://localhost:3000</p>
+                        <p>Error: ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Auto-load on page load
+        window.onload = () => {
+            loadProducts();
+        };
+    </script>
+</body>
+</html>

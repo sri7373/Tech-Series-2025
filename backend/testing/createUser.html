@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Create User</title>
+</head>
+<body>
+  <h2>Create User</h2>
+  <form id="userForm" action="http://localhost:3000/api/users" method="POST">
+    <label>
+      Username:
+      <input type="text" name="username" required>
+    </label><br>
+    <label>
+      Email:
+      <input type="email" name="email" required>
+    </label><br>
+    <label>
+      Password:
+      <input type="password" name="password" required>
+    </label><br>
+    <label>
+      Points:
+      <input type="number" name="points" value="0">
+    </label><br>
+    <label>
+      Neighbourhood:
+      <input type="text" name="neighbourhood">
+    </label><br>
+    <button type="submit">Create User</button>
+  </form>
+</body>
+</html>

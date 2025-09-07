@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Recommendations API</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+        }
+        h2 {
+            color: #27ae60;
+            border-bottom: 2px solid #27ae60;
+            padding-bottom: 10px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #34495e;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #27ae60;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #219a52;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #ecf0f1;
+            border-radius: 4px;
+            border-left: 4px solid #27ae60;
+        }
+        .error {
+            border-left-color: #e74c3c;
+            background-color: #fdf2f2;
+        }
+        .product-card {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            background: #f9f9f9;
+        }
+        .score {
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+        .score.high { color: #27ae60; }
+        .score.medium { color: #f39c12; }
+        .score.low { color: #e74c3c; }
+        .products-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        pre {
+            background: #2c3e50;
+            color: white;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🌱 Sustainability Recommendations Test Interface</h1>
+
+    <!-- Get Product Alternatives -->
+    <div class="container">
+        <h2>Find Sustainable Alternatives</h2>
+        <div class="form-group">
+            <label for="productId">Product ID:</label>
+            <input type="text" id="productId" placeholder="Enter product ID to find alternatives">
+        </div>
+        <button onclick="getAlternatives()">Get Alternatives</button>
+        <div id="alternativesResult"></div>
+    </div>
+
+    <!-- Get Personalized Recommendations -->
+    <div class="container">
+        <h2>Personalized Recommendations</h2>
+        <div class="form-group">
+            <label for="userId">User ID (Optional):</label>
+            <input type="text" id="userId" placeholder="Enter user ID for personalized recommendations">
+        </div>
+        <div class="form-group">
+            <label for="limit">Number of Recommendations:</label>
+            <input type="number" id="limit" value="5" min="1" max="20">
+        </div>
+        <button onclick="getPersonalizedRecommendations()">Get Recommendations</button>
+        <div id="personalizedResult"></div>
+    </div>
+
+    <!-- Get Sustainability Scores -->
+    <div class="container">
+        <h2>Sustainability Scores</h2>
+        <button onclick="getSustainabilityScores()">Get All Sustainability Scores</button>
+        <div id="scoresResult"></div>
+    </div>
+
+    <!-- Compare Products -->
+    <div class="container">
+        <h2>Compare Products</h2>
+        <div class="form-group">
+            <label for="productIds">Product IDs (comma-separated):</label>
+            <input type="text" id="productIds" placeholder="Enter 2 or more product IDs separated by commas">
+        </div>
+        <button onclick="compareProducts()">Compare Products</button>
+        <div id="compareResult"></div>
+    </div>
+
+    <!-- Current Products Display -->
+    <div class="container">
+        <h2>Current Products in Database</h2>
+        <button onclick="loadProducts()">Load Products</button>
+        <div id="productsResult"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:3000/api';
+
+        function displayResult(elementId, data, isError = false) {
+            const element = document.getElementById(elementId);
+            element.className = isError ? 'result error' : 'result';
+            
+            if (typeof data === 'object') {
+                element.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+            } else {
+                element.innerHTML = data;
+            }
+        }
+
+        function getScoreClass(score) {
+            if (score >= 70) return 'high';
+            if (score >= 40) return 'medium';
+            return 'low';
+        }
+
+        function formatProductCard(product) {
+            const scoreClass = getScoreClass(product.sustainabilityScore || 0);
+            return `
+                <div class="product-card">
+                    <h4>${product.name}</h4>
+                    <p><strong>Category:</strong> ${product.category || 'Unknown'}</p>
+                    <p><strong>Carbon Emissions:</strong> ${product.carbonEmissions || 'N/A'} kg CO2</p>
+                    <p><strong>Plastic Usage:</strong> ${product.plasticUsage || 'N/A'} g</p>
+                    <p><strong>Points:</strong> ${product.points || 0}</p>
+                    <p class="score ${scoreClass}">Sustainability Score: ${product.sustainabilityScore || 0}/100</p>
+                    <p><strong>ID:</strong> ${product._id}</p>
+                </div>
+            `;
+        }
+
+        async function getAlternatives() {
+            const productId = document.getElementById('productId').value.trim();
+            if (!productId) {
+                displayResult('alternativesResult', 'Please enter a product ID', true);
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/recommendations/alternatives/${productId}`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    if (data.alternatives && data.alternatives.length > 0) {
+                        let html = `<h3>Original Product:</h3>${formatProductCard(data.original)}`;
+                        html += `<h3>Sustainable Alternatives:</h3>`;
+                        html += '<div class="products-list">';
+                        data.alternatives.forEach(alt => {
+                            html += formatProductCard(alt);
+                        });
+                        html += '</div>';
+                        document.getElementById('alternativesResult').innerHTML = html;
+                    } else {
+                        displayResult('alternativesResult', 'No alternatives found for this product');
+                    }
+                } else {
+                    displayResult('alternativesResult', data.error || 'Error fetching alternatives', true);
+                }
+            } catch (error) {
+                displayResult('alternativesResult', `Network error: ${error.message}`, true);
+            }
+        }
+
+        async function getPersonalizedRecommendations() {
+            const userId = document.getElementById('userId').value.trim();
+            const limit = document.getElementById('limit').value || 5;
+
+            try {
+                let url = `${API_BASE}/recommendations/personalized?limit=${limit}`;
+                if (userId) url += `&userId=${userId}`;
+
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    if (data.recommendations && data.recommendations.length > 0) {
+                        let html = `<h3>Personalized Recommendations:</h3>`;
+                        html += '<div class="products-list">';
+                        data.recommendations.forEach(product => {
+                            html += formatProductCard(product);
+                        });
+                        html += '</div>';
+                        document.getElementById('personalizedResult').innerHTML = html;
+                    } else {
+                        displayResult('personalizedResult', 'No recommendations found');
+                    }
+                } else {
+                    displayResult('personalizedResult', data.error || 'Error fetching recommendations', true);
+                }
+            } catch (error) {
+                displayResult('personalizedResult', `Network error: ${error.message}`, true);
+            }
+        }
+
+        async function getSustainabilityScores() {
+            try {
+                const response = await fetch(`${API_BASE}/recommendations/sustainability-scores`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    if (data.products && data.products.length > 0) {
+                        let html = '<div class="products-list">';
+                        data.products.forEach(product => {
+                            html += formatProductCard(product);
+                        });
+                        html += '</div>';
+                        document.getElementById('scoresResult').innerHTML = html;
+                    } else {
+                        displayResult('scoresResult', 'No products found');
+                    }
+                } else {
+                    displayResult('scoresResult', data.error || 'Error fetching scores', true);
+                }
+            } catch (error) {
+                displayResult('scoresResult', `Network error: ${error.message}`, true);
+            }
+        }
+
+        async function compareProducts() {
+            const productIds = document.getElementById('productIds').value.trim();
+            if (!productIds) {
+                displayResult('compareResult', 'Please enter product IDs', true);
+                return;
+            }
+
+            const ids = productIds.split(',').map(id => id.trim()).filter(id => id);
+            if (ids.length < 2) {
+                displayResult('compareResult', 'Please enter at least 2 product IDs', true);
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/recommendations/compare`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ productIds: ids })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    if (data.comparison && data.comparison.length > 0) {
+                        let html = '<h3>Product Comparison:</h3>';
+                        html += '<div class="products-list">';
+                        data.comparison.forEach(product => {
+                            html += formatProductCard(product);
+                        });
+                        html += '</div>';
+                        
+                        if (data.mostSustainable) {
+                            html += `<h3>🏆 Most Sustainable Option:</h3>`;
+                            html += formatProductCard(data.mostSustainable);
+                        }
+                        
+                        document.getElementById('compareResult').innerHTML = html;
+                    } else {
+                        displayResult('compareResult', 'No products found for comparison');
+                    }
+                } else {
+                    displayResult('compareResult', data.error || 'Error comparing products', true);
+                }
+            } catch (error) {
+                displayResult('compareResult', `Network error: ${error.message}`, true);
+            }
+        }
+
+        async function loadProducts() {
+            try {
+                // Use the recommendations API that includes sustainability scores
+                const response = await fetch(`${API_BASE}/recommendations/sustainability-scores`);
+                const data = await response.json();
+                
+                if (response.ok && data.products && data.products.length > 0) {
+                    let html = '<div class="products-list">';
+                    data.products.forEach(product => {
+                        html += formatProductCard(product);
+                    });
+                    html += '</div>';
+                    document.getElementById('productsResult').innerHTML = html;
+                } else {
+                    displayResult('productsResult', 'No products found in database');
+                }
+            } catch (error) {
+                displayResult('productsResult', `Network error: ${error.message}`, true);
+            }
+        }
+
+        // Load products on page load
+        window.onload = () => {
+            loadProducts();
+        };
+    </script>
+</body>
+</html>

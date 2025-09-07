@@ -1,0 +1,13 @@
+ 
+//- filepath: views/scan-receipt.pug
+doctype html
+html
+  head
+    title Scan Receipt
+  body
+    h2 Scan Receipt
+    form(action="http://localhost:3000/api/receipts/scan" method="POST" enctype="multipart/form-data")
+      label(for="image") Upload Receipt Image:
+      input(type="file" name="image" accept="image/*" required)
+      br
+      button(type="submit") Scan Receipt
