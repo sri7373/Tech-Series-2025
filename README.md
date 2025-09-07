@@ -1,5 +1,5 @@
 # Tech-Series-2025
-This is a group project done by 6 Singapore Management University (SMU) students (insert names) for the Tech Series 2025 hosted by SMU Elipsis.
+This is a group project done by 6 Singapore Management University (SMU) students (Kay Wee, Sri, Min Yi, Lynus, Jordan, Ashley) for the Tech Series 2025 hosted by SMU Elipsis.
 Demo video: https://youtu.be/mV-3L2xEX10
 
 # EcoCommerce App
@@ -64,7 +64,7 @@ npm install
 
 #### Backend
 ```sh
-npm nodemon server.js
+npx nodemon server.js
 ```
 
 #### Frontend (Expo)
@@ -131,3 +131,4 @@ Tech-Series-2025/
 - For web, some React Native features (e.g., ImageBackground) may need polyfills or adjustments.
 
 ---
+
