@@ -1,11 +1,11 @@
+# Tech-Series-2025
+This is a group project done by 6 Singapore Management University (SMU) students (Kay Wee, Sri, Min Yi, Lynus, Jordan, Ashley) for the Tech Series 2025 hosted by SMU Elipsis.
+Demo video: https://youtu.be/mV-3L2xEX10
+
+---
 # EcoCommerce App
 EcoCommerce is a full-stack web and mobile application focused on sustainability, eco-friendly shopping, and gamified rewards.  
 It features barcode/receipt scanning, product recommendations, leaderboards, vouchers, and a user profile dashboard.
-Demo video: https://youtu.be/mV-3L2xEX10
----
-
-# Tech-Series-2025
-This is a group project done by 6 Singapore Management University (SMU) students (Kay Wee, Sri, Min Yi, Lynus, Jordan, Ashley) for the Tech Series 2025 hosted by SMU Elipsis.
 
 ## Features
 
